@@ -56,7 +56,7 @@ setup(
     # scripts=["vindta_reCAlk/__main__.py"],
 
     # Details
-    url="https://gitlab.com/socco/PhytoPhotoUtils",
+    url="https://gitlab.com/tjryankeogh/phytophotoutils",
 
     license="MIT License",
     description='Tools and utilities for photophysiology data processing. ',

@@ -64,7 +64,7 @@ This work was funded by the CSIR and Curtin University.
 Please use the guidlines given on https://integrity.mit.edu/handbook/writing-code to cite this code.
 
 **Example citation:**
-Source: phyto_photo_utils [https://gitlab.com/socco/BuoyancyGliderUtils](https://gitlab.com/socco/PhytoPhotoUtils) retrieved on 18 December 2018.
+Source: phyto_photo_utils [https://gitlab.com/socco/BuoyancyGliderUtils](https://gitlab.com/tjryankeogh/phytophotoutils) retrieved on 18 December 2018.
 
 
 CHANGE LOG
@@ -79,9 +79,7 @@ PACKAGE STRUCTURE
 NOTE: This package structure is defined by the `__init__.py` file
 - load
 	- load_FIRe_files
-	- load_isFIRe_files
 	- load_FastTrackaI_files
-	- load_FastTrackaII_files
 	- load_FastOcean_files
 - saturation
 	- calc_fixedpmodel
@@ -93,12 +91,14 @@ NOTE: This package structure is defined by the `__init__.py` file
 - tools
 	- outlier_bounds_time_average
 	- fire_bias_correction
+	- calc_blank_FastOcean
+	_ calc_blank_FIRe
 - spectral_correction
-	- calc_phyto_absorption
+	- calc_chl_specific_absorption
 	- instrument_led_correction
 - flc
-	- e_dependent
-	- e_independent
+	- e_dependent_etr
+	- e_independent_etr
 
 
 ACKNOWLEDGEMENTS

@@ -134,7 +134,7 @@ def fire_bias_correction(df, sat=True, pos=1, sat_len=100):
     
     return df
 
-def calc_blank_frrf(file_, seq_len=100):
+def calc_blank_FastOcean(file_, seq_len=100):
      
     """
     Calculates the blank by averaging the fluorescence yield for the saturation phase.
@@ -158,7 +158,7 @@ def calc_blank_frrf(file_, seq_len=100):
 
     return res
 
-def calc_blank_fire(file_):
+def calc_blank_FIRe(file_):
 
     """
     Calculates the blank by averaging the fluorescence yield for the saturation phase.
