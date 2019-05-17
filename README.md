@@ -69,9 +69,14 @@ Source: phyto_photo_utils [https://gitlab.com/socco/BuoyancyGliderUtils](https:/
 
 CHANGE LOG
 ----------
+**v0.3** (2019-05-17)
+
+- restructured package to avoid nested functions
+- added outlier removal tool to FLC function
+
 **v0.2** (2018-12-07)
 
-- first bug report here
+- added functionality for FLCs
 
 
 PACKAGE STRUCTURE

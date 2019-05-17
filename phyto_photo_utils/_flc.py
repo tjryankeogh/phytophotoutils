@@ -7,7 +7,7 @@
 Note: See example csv file for the correct dataframe formatting
 """
 
-def e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=12, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], fit_method='trf', loss_method='soft_l1', fscale=0.1, n_iter=1000, xtol=1e-9):
+def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=12, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 	"""
 
 	Process the fluorescence light curve data under the e dependent model.
@@ -21,7 +21,7 @@ def e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=1
 		The minimum fluorescence data.
 	fm: numpy.ndarray
 		The maximum fluorescence data.
-	fvfm:: numpy.ndarray
+	fvfm: numpy.ndarray
 		The fvfm data.
 	sigma: numpy.ndarray
 		The sigmaPSII data in A^2.
@@ -31,22 +31,24 @@ def e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=1
 		If True, will use mean of sigmaPSII under 0 actinic light for calculation. If False, will use sigmaPSII and sigmaPSII' for calculation.
 	light_step_size: int
 		The number of measurements for initial light step.
+	outlier_multiplier: int
+		The multiplier for creating upper and lower limits when meaning data per light level.
 	bounds: bool
 		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
 	alpha_lims: [int, int]
 	 	the lower and upper limit bounds for fitting alpha
 	etrmax_lims: [int, int]
 	 	the lower and upper limit bounds for fitting ETRmax	 
-	fit_method: str
+	method: str
 		The algorithm to perform minimization. 
 		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	loss_method: str
+	loss: str
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
 		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	fscale: float
+	f_scale: float
 	 	The soft margin value between inlier and outlier residuals.
 	 	See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	n_iter: int			
+	max_nfev: int			
 		The number of iterations to perform fitting routine.
 	xtol: float			
 		The tolerance for termination by the change of the independent variables.
@@ -69,10 +71,10 @@ def e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=1
 		The fit error of alpha
 	   
 	"""
-	from numpy import array, isnan, exp, sum, mean, sqrt, diag, linalg, inf
-	from scipy.optimize import least_squares 
-	from sklearn.metrics import mean_squared_error
+	from ._equations import __calculate_Webb_model__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
+	from numpy import mean, array, isnan, inf, repeat, nan, concatenate
 	from pandas import DataFrame
+	from scipy.optimize import least_squares 
 
 	fvfm = array(fvfm)
 	sigma = array(sigma)
@@ -92,8 +94,32 @@ def e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=1
 	df = df.T
 	df.columns = ['par', 'etr']
 
+	# exclude outliers if more than mean ± (stdev * multiplier)
+	grp = df.groupby(by='par')
+	mn = grp.mean()
+	std = grp.std()
+	c = grp.count()
+	ulim = repeat((mn.etr.values + std.etr.values * outlier_multiplier), c.etr.values)
+	llim = repeat((mn.etr.values - std.etr.values * outlier_multiplier), c.etr.values)
+	idx = []
+	for i, items in enumerate(grp.indices.items()):
+		idx.append(items[-1])
+
+	idx = concatenate(idx, axis=0)
+
+	# Create pandas DataFrame of upper and lower using original indexes of data
+	mask = DataFrame([ulim, llim, idx]).T
+	mask.columns = ['ulim','llim','index']
+	mask = mask.set_index('index').sort_index()
+
+	m = (df.etr.values > mask.ulim) | (df.etr.values < mask.llim)
+
+	# Where condition is True, set values of value to NaN
+	df.loc[m.values,'etr'] = nan
+
 	# Create means per light step
 	df = df.groupby('par').mean().reset_index()
+	#TO DO apply function of excluding outliers from means
 
 	# Define data for fitting and estimates of ETRmax and alpha
 	P = array(df.etr)
@@ -105,48 +131,35 @@ def e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=1
 	mask = isnan(P)
 	E = E[~mask]
 	P = P[~mask]
-	
-	# Webb et al. (1974) model
-	def PI_fit(E, P, a):
-			model = P * (1 - exp(-a * E/P))
-			return model
-	
+		
 	def residual(p, E, P):
-		return P - PI_fit(E, *p)
+		return P - __calculate_Webb_model__(E, *p)
 	
 	bds = [-inf, inf]
 	if bounds:
 			bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
 
 	# See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options
-	opts = {'method':fit_method,'loss':loss_method, 'f_scale':fscale, 'max_nfev':n_iter, 'xtol':xtol} 
+	opts = {'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
-	try:
-		popt = least_squares(residual, p0, args=(E, P), bounds=(bds), **opts)
-	    
-		etr_max = popt.x[0]
-		alpha = popt.x[1]
-		ek = etr_max / alpha
+	popt = least_squares(residual, p0, args=(E, P), bounds=(bds), **opts)
+    
+	etr_max = popt.x[0]
+	alpha = popt.x[1]
+	ek = etr_max / alpha
 
-		# Calculate curve fitting statistical metrics
-		res = P - PI_fit(E, popt.x[0], popt.x[1])
-		rsq = 1 - (sum(res**2)/sum((P - mean(P))**2))
-		bias = sum((1-res)/P) / (len(P)*100)
-		rms = sqrt(mean_squared_error(P, PI_fit(E, etr_max, alpha)))		
-		J = popt.jac
-		pcov = linalg.inv(J.T.dot(J)) * mean(res**2)
-		perr = sqrt(diag(pcov))
-		etr_max_err = perr[0]
-		alpha_err = perr[1]
+	res = P - __calculate_Webb_model__(E, *popt.x)
+	rsq = __calculate_rsquared__(res, P)
+	bias = __calculate_bias__(res[1:], P[1:])
+	chi = __calculate_chisquared__(res[1:], P[1:])		
+	perr = __calculate_fit_errors__(popt, res)
+	etr_max_err = perr[0]
+	alpha_err = perr[1]
 
-		return etr_max, alpha, ek, rsq, bias, etr_max_err, alpha_err
-
-	except Exception:
-		print('Optimization was unable to be performed, parameters set to NaN.')
-		pass    
+	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
 
 
-def e_independent_etr(fvfm, sigma, par, light_step_size=12, PE_model='Webb', bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], fit_method='trf', loss_method='soft_l1', fscale=0.1, n_iter=1000, xtol=1e-9):
+def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=12, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 	"""
 	   
 	INFORMATION
@@ -160,33 +173,31 @@ def e_independent_etr(fvfm, sigma, par, light_step_size=12, PE_model='Webb', bou
 	----------
 
 	fvfm:: numpy.ndarray
-		The fvfm data.
+		the fvfm data
 	sigma: numpy.ndarray
-		The sigmaPSII data in A^2.
+		the sigmaPSII data in A^2
 	par: np.ndarray 
-		The actinic light levels of the fluorescence light curve.
-	dark_sigma: bool
-		If True, will use mean of sigmaPSII under 0 actinic light for calculation. If False, will use sigmaPSII and sigmaPSII' for calculation.
+		the actinic light levels of the fluorescence light curve
 	light_step_size: int
 		The number of measurements for initial light step.
-	PE_model: str
-		The photosynthesis-irradiance model to use for the fitting routine. Options inlude Webb (see Webb et al., 1974) or Platt (see Platt et al., 1980).
+	outlier_multiplier: int
+		The multiplier for creating upper and lower limits when meaning data per light level.
 	bounds: bool
 		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
 	alpha_lims: [int, int]
 	 	the lower and upper limit bounds for fitting alpha
 	etrmax_lims: [int, int]
 	 	the lower and upper limit bounds for fitting ETRmax	 
-	fit_method: str
+	method: str
 		The algorithm to perform minimization. 
 		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	loss_method: str
+	loss: str
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
 		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	fscale: float
+	f_scale: float
 	 	The soft margin value between inlier and outlier residuals.
 	 	See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	n_iter: int			
+	max_nfev: int			
 		The number of iterations to perform fitting routine.
 	xtol: float			
 		The tolerance for termination by the change of the independent variables.
@@ -209,12 +220,12 @@ def e_independent_etr(fvfm, sigma, par, light_step_size=12, PE_model='Webb', bou
 		The fit error of alpha
 	   
 	"""
-	from numpy import array, isnan, exp, sum, mean, sqrt, diag, inf, linalg
+	from ._equations import __calculate_modified_Webb_model__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
+	from numpy import mean, array, isnan, inf, repeat, nan, concatenate
 	from pandas import DataFrame
 	from scipy.optimize import least_squares 
-	from sklearn.metrics import mean_squared_error
 
-	lss = light_step_size - 1 # Python starts at 0
+	lss = light_step_size - 1
 	sigma = mean(sigma[0:lss])
 
 	phi = fvfm / mean(fvfm[0:lss])
@@ -223,8 +234,33 @@ def e_independent_etr(fvfm, sigma, par, light_step_size=12, PE_model='Webb', bou
 	df = DataFrame([phi, par])
 	df = df.T
 	df.columns = ['phi', 'par']
+	df[df.phi < 0] = nan
+	df = df.dropna()
 
-	# Create means per light step
+	# exclude outliers if more than mean ± (stdev * multiplier)
+	grp = df.groupby(by='par')
+	mn = grp.mean()
+	std = grp.std()
+	c = grp.count()
+	ulim = repeat((mn.phi.values + std.phi.values * outlier_multiplier), c.phi.values)
+	llim = repeat((mn.phi.values - std.phi.values * outlier_multiplier), c.phi.values)
+	idx = []
+	for i, items in enumerate(grp.indices.items()):
+		idx.append(items[-1])
+
+	idx = concatenate(idx, axis=0)
+
+	# Create pandas DataFrame of upper and lower using original indexes of data
+	mask = DataFrame([ulim, llim, idx]).T
+	mask.columns = ['ulim','llim','index']
+	mask = mask.set_index('index').sort_index()
+
+	m = (df.phi.values > mask.ulim) | (df.phi.values < mask.llim)
+
+	# Where condition is True, set values of value to NaN
+	df.loc[m.values,'phi'] = nan
+
+	# Create means per light step on QC data
 	df = df.groupby('par').mean().reset_index()
 
 	# Define data for fitting and estimates of ETRmax and alpha
@@ -237,46 +273,32 @@ def e_independent_etr(fvfm, sigma, par, light_step_size=12, PE_model='Webb', bou
 	mask = isnan(P) | (P < 0) | (E == 0)
 	E = E[~mask]
 	P = P[~mask]
-	
-	# Modified Webb et al. (1974) model - see Silsbe & Kromkamp (2012)
-	def PI_fit(E, P, a):
-		return P * (1 - exp(-a * E/P)) * (E**-1)
-	
+		
 	def residual(p, E, P):
-		return P - PI_fit(E, *p)
+		return P - __calculate_modified_Webb_model__(E, *p)
 	
 	bds = [-inf, inf]
 	if bounds:
-		#if PE_model == 'Platt':
-		#	bds = [etrmax_lims[0], alpha_lims[0], 0],[etrmax_lims[1], alpha_lims[1], 1]
-		#else:
-			bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
+		bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
 
-	# See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options
-	opts = {'method':fit_method,'loss':loss_method, 'f_scale':fscale, 'max_nfev':n_iter, 'xtol':xtol} 
+	opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 	
-	try:
-		popt = least_squares(residual, p0, args=(E, P), bounds=(bds), **opts)
-	    
-		etr_max = popt.x[0]
-		alpha = popt.x[1]
-		etr_max *= sigma * 6.022e-3
-		alpha *= sigma * 6.022e-3
-		ek = etr_max / alpha
-		# Calculate curve fitting statistical metrics
-		res = P - PI_fit(E, popt.x[0], popt.x[1])
-		rsq = (1 - (sum(res**2)/sum((P - mean(P))**2)))
-		bias = sum((1-res)/P) / (len(P)*100)
-		rms = sqrt(mean_squared_error(P, PI_fit(E, etr_max, alpha)))		
-		J = popt.jac
-		pcov = linalg.inv(J.T.dot(J)) * mean(res**2)
-		perr = sqrt(diag(pcov))
-		etr_max_err = perr[0]
-		alpha_err = perr[1]
-		
+	popt = least_squares(residual, p0, args=(E, P), bounds=(bds), **opts)
+    
+	etr_max = popt.x[0]
+	alpha = popt.x[1]
+	etr_max *= sigma * 6.022e-3
+	alpha *= sigma * 6.022e-3
+	ek = etr_max / alpha
 
-		return etr_max, alpha, ek, rsq, bias, etr_max_err, alpha_err
+	res = P - __calculate_modified_Webb_model__(E, *popt.x)
+	rsq = __calculate_rsquared__(res, P)
+	bias = __calculate_bias__(res, P)
+	chi = __calculate_chisquared__(res, P)		
+	perr = __calculate_fit_errors__(popt, res)
+	etr_max_err = perr[0]
+	alpha_err = perr[1]
+	
 
-	except Exception:
-		#print('Optimization was unable to be performed, parameters set to NaN.')
-		pass
+	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
+

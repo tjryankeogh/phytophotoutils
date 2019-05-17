@@ -49,15 +49,8 @@ setup(
     # Include additional files into the package
     include_package_data=True,
 
-    # this creates a command line thingy
-    #entry_points={
-    #    'console_scripts': ['vindta_reCAlk = vindta_reCAlk.__main__:main']
-    #},
-    # scripts=["vindta_reCAlk/__main__.py"],
-
     # Details
     url="https://gitlab.com/tjryankeogh/phytophotoutils",
-
     license="MIT License",
     description='Tools and utilities for photophysiology data processing. ',
     organisation='Council for Scientific and Industrial Research',
@@ -69,7 +62,6 @@ setup(
         "tqdm",
         "scipy",
         "numpy",
-        "pandas"
-        "sklearn",
+        "pandas",
     ],
 )

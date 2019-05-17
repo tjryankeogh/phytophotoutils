@@ -5,7 +5,8 @@
 @author Thomas Ryan-Keogh
 @brief module containing the tool functions for photophysiology data
 """
-def outlier_bounds_time_average(df, time=4, multiplier=1):
+
+def remove_outlier_from_time_average(df, time=4, multiplier=1):
     """
     
     Remove outliers when averaging transients before performing the fitting routines, used to improve the signal to noise ratio in low biomass systems.
@@ -73,7 +74,7 @@ def outlier_bounds_time_average(df, time=4, multiplier=1):
     
     return df
 
-def fire_bias_correction(df, sat=True, pos=1, sat_len=100):
+def correct_fire_bias_correction(df, sat=True, pos=1, sat_len=100):
     
     """
     
@@ -134,7 +135,7 @@ def fire_bias_correction(df, sat=True, pos=1, sat_len=100):
     
     return df
 
-def calc_blank_FastOcean(file_, seq_len=100):
+def calculate_blank_FastOcean(file_, seq_len=100):
      
     """
     Calculates the blank by averaging the fluorescence yield for the saturation phase.
@@ -155,10 +156,10 @@ def calc_blank_FastOcean(file_, seq_len=100):
     res = read_csv(file_, skiprows=43, nrows=seq_len, header=None)
     res = res.iloc[:,2:]
     res = res.mean()
-
+    # TO DO: return date & time stamp
     return res
 
-def calc_blank_FIRe(file_):
+def calculate_blank_FIRe(file_):
 
     """
     Calculates the blank by averaging the fluorescence yield for the saturation phase.

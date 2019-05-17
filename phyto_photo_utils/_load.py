@@ -10,7 +10,7 @@ NOTE: Current configuration is set up to read from FIRe (benchtop), FastTracka I
 """
 
 def load_FIRe_files(file_, append=True, save_files=True, res_path='path', 
-                   seq_len=160, flen=1e-6, sigscale=1e-20, irrad=47248):
+                   seq_len=160, flen=1e-6, irrad=47248):
     """
 
     Process the raw data file (.000 format) and convert to a csv with standard formatting.
@@ -18,21 +18,19 @@ def load_FIRe_files(file_, append=True, save_files=True, res_path='path',
     Parameters
     ----------
     file_: dir
-        The path directory to the .000 data file from benchtop SAtlantic FIRe.
+        the path directory to the .000 data file from benchtop SAtlantic FIRe.
     append: bool
-        If True, multiple files will be concatenated together.
+        if True, multiple files will be concatenated together.
     save_files: bool
-        If True, files will be saved as .csv.
+        if True, files will be saved as .csv.
     res_path: dir               
-        The path directory where to save files, only required if save_files = True.
+        the path directory where to save files, only required if save_files = True.
     seq_len: int                 
-        The number of flashlets in the protocol.
+        the number of flashlets in the protocol.
     flen: float
-        Flashlet length in seconds.
-    sigscale: float
-        The onversion factor from m^^2 to A^^2.
+        flashlet length in seconds.
     irrad: int                   
-        The LED output in ???.
+        the LED output in ???.
 
     Returns
     -------
@@ -104,14 +102,17 @@ def load_FIRe_files(file_, append=True, save_files=True, res_path='path',
     datetime = repeat(index, data.shape[1])
     data = Series(squeeze(reshape(data, (1, (data.shape[0]*data.shape[1])))))
     
-    df = DataFrame(data=[datetime, data, time, flashlet])
+    df = DataFrame(data=[flashlet, data, datetime, time])
     df = df.T
-    df.columns = ['datetime', 'fyield', 'seq_time', 'flashlet_number']
+    df.columns = ['flashlet_number', 'fyield', 'datetime', 'seq_time']
     df['seq'] = repeat(arange(0,(int(df.shape[0] / seq_len)),1), seq_len)
+    sigscale = 1e-20
     df['pfd'] = (irrad * 1e-6 * 6.02e23) * flen * sigscale
     df['fyield'] = df.fyield.astype('float')
     df['seq_time'] = df.seq_time.astype('int')
     
+    df = df[['flashlet_number','fyield','datetime','seq','seq_time','pfd']]
+
     list_ = []
 
     # If True, multiple files will be concatenated together
@@ -122,14 +123,13 @@ def load_FIRe_files(file_, append=True, save_files=True, res_path='path',
     
     # If True, files will be saved as .csv in path directory specified by res_path
     if save_files:
-        chdir(res_path)
-        df.to_csv(str(name)+'.csv')
+        df.to_csv(res_path+str(name)+'.csv')
         
     return df
 
 
 def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_file='file', res_path='path', 
-                   seq_len=120, sigscale=1e-20, irrad=545.62e10):
+                   seq_len=120, irrad=545.62e10):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
@@ -150,8 +150,6 @@ def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_fi
         The path directory where to save files, only required if save_files = True.
     seq_len: int                 
         The number of flashlets in the protocol.
-    sigscale: float
-        The onversion factor from m^^2 to A^^2.
     irrad: int                   
         The LED output in ???.
 
@@ -172,7 +170,7 @@ def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_fi
        
     """
 
-    from numpy import arange, repeat, r_
+    from numpy import arange, repeat, r_, array
     from csv import reader
     from pandas import to_datetime, read_csv, Series, concat, DataFrame
     from os import chdir
@@ -231,21 +229,21 @@ def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_fi
     df['channel'] = repeat(md.channel.values, seq_len)
 
     # Calculation of photon flux density
+    sigscale = 1e-20
     df['pfd'] = (df.ex * irrad) * sigscale
     df['gain'] = repeat(md.gain.values, seq_len) # won't be need if gain correction implemented here
     df = df.drop(['ex','em'], axis=1)
-    ##TO DO##
-    #add if statements to handle the gain settings
+    idx = int(df.seq.max()) + 1
+    df.loc[:,'flashlet_number'] = array(list(arange(0,120,1)) * idx)
     
-   # if irf:
-
+    ##TO DO##
+    #add if statements to handle the gain settings   
+    #if irf:
     #    if df.channel == 'A':
     #        if df.gain == 1:
     #            df.fyield /= irf.
 
-
-
-    #IRF = np.ones([120,])
+    df = df[['flashlet_number','fyield','datetime','seq','seq_time','pfd','channel','gain']]
     
     list_ = []
     # If True, multiple files will be concatenated together
@@ -256,13 +254,12 @@ def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_fi
     
     # If True, files will be saved as .csv in path directory specified by res_path
     if save_files:
-        chdir(res_path)
-        df.to_csv(str(name)+'.csv')
+        df.to_csv(res_path+str(name)+'.csv')
         
     return df
 
 def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True, res_path='path', 
-                   seq_len=140, flen=2e-6, sigscale=1e-20):
+                   seq_len=140, flen=2e-6):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
@@ -270,21 +267,19 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
     Parameters
     ----------
     file_: dir
-        The path directory to the .000 data file from benchtop SAtlantic FIRe.
+        the path directory to the .000 data file from benchtop SAtlantic FIRe.
     append: bool
-        If True, multiple files will be concatenated together.
+        if True, multiple files will be concatenated together.
     save_files: bool
-        If True, files will be saved as .csv.
+        if True, files will be saved as .csv.
     led_separate: bool
-        If True, the protocols will be separated dependent upon the LED sequence.
+        if True, the protocols will be separated dependent upon the LED sequence.
     res_path: dir               
-        The path directory where to save files, only required if save_files = True.
+        the path directory where to save files, only required if save_files = True.
     seq_len: int                 
-        The number of flashlets in the protocol.
+        the number of flashlets in the protocol.
     flen: float
-        Flashlet length in seconds.
-    sigscale: float
-        The onversion factor from m^^2 to A^^2.
+        flashlet length in seconds.
 
     Returns
     -------
@@ -348,7 +343,9 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
     for i in range(df.shape[1]):
         data = df.iloc[:,i]
         dfm.append(data)
-        
+    
+    sigscale=1e-20  
+
     df = DataFrame(concat(dfm, axis=0)).reset_index(drop=True)
     df.columns = ['fyield']
     df['pfd'] = repeat((pfd.values*1e22), seq_len) * flen * sigscale
@@ -359,6 +356,8 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
     df['datetime'] = to_datetime(repeat((md.date.values+' '+md.time.values), seq_len), dayfirst=True)
     df['led_sequence'] = repeat(array(led_idx), seq_len)
     
+    df = df[['flashlet_number','fyield','datetime','seq','seq_time','pfd','led_sequence']]
+
     list_ = []
     if append:
         list_.append(df)
@@ -366,8 +365,7 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
         df['seq'] = repeat(arange(0, (df.shape[0] / seq_len), 1), seq_len)
     
     if save_files:
-        chdir(res_path)
-        df.to_csv(str(name)+'.csv')
+        df.to_csv(res_path+str(name)+'.csv')
         
         if led_separate:
             i = df.led_sequence == 1
