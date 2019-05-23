@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-"""
-@package phyto_photo_utils.saturation
-@file phyto_photo_utils/saturation.py
-@author Thomas Ryan-Keogh
-@brief module containing the functions for fitting the saturation and relaxation phase of an induction curve.
-"""
 
 def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 
@@ -200,7 +194,7 @@ def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='
 		return  fo_r, fm_r, tau, rsq, bias, chi, fo_err, fm_err, tau_err, nfl
 	except linalg.LinAlgError as err:
 		if str(err) == 'Singular matrix':
-			print('Unable to calculate fitting errors, skipping sequence.')
+			print('Unable to calculate fitting errors, skipping sequence.', end="\r"),
 			pass
 
 
@@ -268,7 +262,7 @@ def __fit_triple_decay__(seq_time, fyield, bounds=False, tau1_lims=None, tau2_li
 		return  fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, fo_err, fm_err, a1_err, t1_err, a2_err, t2_err, a3_err, t3_err, nfl
 	except linalg.LinAlgError as err:
 		if str(err) == 'Singular matrix':
-			print('Unable to calculate fitting errors, skipping sequence.')
+			print('Unable to calculate fitting errors, skipping sequence.', end="\r"),
 			pass
 
 

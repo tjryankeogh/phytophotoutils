@@ -1,12 +1,6 @@
 #!/usr/bin/env python
-"""
-@package phyto_photo_utils.tools
-@file phyto_photo_utils/tools.py
-@author Thomas Ryan-Keogh
-@brief module containing the tool functions for photophysiology data
-"""
 
-def remove_outlier_from_time_average(df, time=4, multiplier=1):
+def remove_outlier_from_time_average(df, time=4, multiplier=3):
     """
     
     Remove outliers when averaging transients before performing the fitting routines, used to improve the signal to noise ratio in low biomass systems.
@@ -18,17 +12,17 @@ def remove_outlier_from_time_average(df, time=4, multiplier=1):
     Parameters
     ----------
 
-    df: pandas.DataFrame
+    df : pandas.DataFrame
         A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load
-    time: int
-     	The time window to average over, e.g. 4 = 4 minute averages.
-    multiplier: int	
+    time : int, default=4
+     	The time window to average over, e.g. 4 = 4 minute averages
+    multiplier : int, default=3	
         The multiplier to apply to the standard deviation for determining the upper and lower limits.
 
     Returns
     -------
 
-    df: pandas.DataFrame 
+    df : pandas.DataFrame 
         A dataframe of the time averaged data with outliers excluded.
 
     """
@@ -74,7 +68,7 @@ def remove_outlier_from_time_average(df, time=4, multiplier=1):
     
     return df
 
-def correct_fire_bias_correction(df, sat=True, pos=1, sat_len=100):
+def correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100):
     
     """
     
@@ -84,19 +78,19 @@ def correct_fire_bias_correction(df, sat=True, pos=1, sat_len=100):
     Parameters
     ----------
 
-    df: pandas.DataFrame 
+    df : pandas.DataFrame 
         A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load
-    sat: bool
+    sat : bool, default=False
      	If True, correct using bias of saturation phase. If False correct using bias of relaxation phase.
-    pos: int
+    pos : int, default=1
      	The flashlet number after the start of the phase, either saturation or relaxation, to calculate difference between.
-    sat_len: int
+    sat_len : int, default=100
      	The length of saturation measurements.
 
     Returns
     -------
 
-    df: pandas.DataFrame 
+    df : pandas.DataFrame 
         A dataframe of FIRe data corrected for the instrument bias.
 
     """
@@ -142,21 +136,31 @@ def calculate_blank_FastOcean(file_, seq_len=100):
 
     Parameters
     ----------
-    file_: dir
+    file_ : str
         The path directory to the raw blank file in csv format.
-
+    seq_len : int, default=100
+        The length of the measurement sequence.
     Returns
     -------
-    res: pandas.DataFrame
+    res : pandas.DataFrame
         The blank results.
     """
 
-    from pandas import read_csv
+    from pandas import read_csv, DataFrame, to_datetime
+
+    df = read_csv(file_, skiprows=26, nrows=2, header=None)
+    df = df.iloc[:,2:].T
+    df.columns = ['date', 'time']
+    df['datetime'] = to_datetime(df.date.values+' '+df.time.values)
+    df = df.drop(columns=['date','time'])
 
     res = read_csv(file_, skiprows=43, nrows=seq_len, header=None)
     res = res.iloc[:,2:]
-    res = res.mean()
-    # TO DO: return date & time stamp
+    res = res.agg(['mean','std']).T
+
+    res = DataFrame(res)
+    res['datetime'] = df.datetime
+
     return res
 
 def calculate_blank_FIRe(file_):
@@ -166,16 +170,13 @@ def calculate_blank_FIRe(file_):
 
     Parameters
     ----------
-    file_: dir
+    file_ : str
         The path directory to the raw blank file.
 
     Returns
     -------
-    res: pandas.DataFrame
+    res : pandas.DataFrame
         The blank results: blank, datetime
-
-        blank: mean of the fluorescence yield in the saturation phase
-        datetime: the date and time of the blank measurement
 
     """
 
@@ -200,10 +201,11 @@ def calculate_blank_FIRe(file_):
     df = read_csv(file_, index_col=0, skiprows=20, header=None, delim_whitespace=True)
     df.columns = ['time', 'ex', 'fyield']
     blank = df.fyield[:sat_len].mean(axis=0)
-    data = array([blank, dt]).T
+    stdev = df.fyield[:sat_len].std(axis=0)
+    data = array([blank, stdev, dt]).T
     res = DataFrame(data)
     res = res.T
-    res.columns = ['blank', 'datetime']
+    res.columns = ['blank_mean', 'blank_stdev','datetime']
 
     return res
 

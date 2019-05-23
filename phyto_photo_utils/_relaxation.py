@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-"""
-@package phyto_photo_utils.relaxation
-@file phyto_photo_utils/relaxation.py
-@author Thomas Ryan-Keogh
-@brief module containing the processing functions for calculating the relaxation of fluorescence transients
-"""
 
 def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=0, bounds=True, tau_lims=[100,50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 	"""
@@ -13,57 +7,72 @@ def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 
 	Parameters
 	----------
-	seq_time: numpy.ndarray 
-		the sequence time of the flashlets
-	fyield: numpy.ndarray 
-		the fluorescence yield of the instrument
-	seq: numpy.ndarray 
-		the measurement number
-	datetime: numpy.ndarray (datetime64)
-		the date & time of each measurement in the numpy datetime64 format
-	blank: float, int or numpy.ndarray
-		the blank value, if np.ndarray must be the same length as fyield
-	sat_len: int
-		the number of flashlets in the saturation sequence
-	rel_len: int
-		the number of flashlets in the relaxation sequence
-	sat_flashlets: int
-		the number of saturation flashlets to include at the start
-	bounds: bool
+	seq_time : np.array, dtype=float, shape=[n,] 
+		The sequence time of the flashlets.
+	fyield : np.array, dtype=float, shape=[n,] 
+		The fluorescence yield of the instrument.
+	seq : np.array, dtype=int, shape=[n,] 
+		The measurement number.
+	datetime : np.array, dtype=datetime64, shape=[n,]
+		The date & time of each measurement in the numpy datetime64 format.
+	blank : np.array, dtype=float, shape=[n,]
+		The blank value, must be the same length as fyield.
+	sat_len : int, default=100
+		The number of flashlets in the saturation sequence
+	rel_len : int, default=60
+		The number of flashlets in the relaxation sequence
+	sat_flashlets : int, default=0
+		The number of saturation flashlets to include at the start
+	bounds : bool, default=True
 		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
-	tau_lims: [int, int]
-	 	the lower and upper limit bounds for fitting tau 
-	fit_method: str
-		The algorithm to perform minimization. Default: 'trf'.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	loss_method: str
+	tau_lims : [int, int], default=[100, 50000]
+	 	the lower and upper limit bounds for fitting τ. 
+	fit_method : str, default='trf'
+		The algorithm to perform minimization. 
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	loss_method : str, default='soft_l1'
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	fscale: float
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals.
-	 	See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	n_iter: int			
+	 	See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	max_nfev : int, default=100			
 		The number of iterations to perform fitting routine.
-	xtol: float			
+	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
 	Returns
 	-------
+	res: pandas.DataFrame, shape=[n,11]
+		The results of the fitting routine with columns as below:
+	fo_r : np.array, dtype=float, shape=[n,]
+		The minimum fluorescence of relaxation phase.
+	fm_r : np.array, dtype=float, shape=[n,]
+		The maximum fluorescence of relaxation phase
+	tau : np.array, dtype=float, shape=[n,]
+		The rate of QA- reoxidation in microseconds.
+	rsq: np.array, dtype=float, shape=[n,]
+		The r-squared value of the fit.
+	bias : np.array, dtype=float, shape=[n,]
+		The bias of fit.
+	chi : np.array, dtype=float, shape=[n,]
+		The chi-squared goodness of fit.
+	fo_err : np.array, dtype=float, shape=[n,]
+		The fit error of Fo_relax.
+	fm_err : np.array, dtype=float, shape=[n,]
+		The fit error of Fm_relax.
+	tau_err : np.array, dtype=float, shape=[n,]
+		The fit error of τ.
+	nfl : np.array, dtype=float, shape=[n,]
+		The number of flashlets used for fitting.
 
-	res: pandas.DataFrame
-		The results of the fitting routine with columns: fo_r, fm_r, tau, rsq, bias, rms, fo_err, fm_err, tau_err, nfl
-
-		fo_r: minimum fluorescence of relaxation phase
-		fm_r: maximum fluorescence of relaxation phase
-		tau: rate of QA- reoxidation (microseconds)
-		rsq: r^^2 value
-		bias: bias of fit
-		chi: chi-squared goodness of fit
-		fo_err: fit error of Fo_relax
-		fm_err: fit error of Fm_relax
-		tau_err: fit error of tau
-		nfl: number of flashlets used for fitting
+	Example
+	-------
+	>>> df = pd.read_csv('./data/raw/ppu/fastocean/FastOcean_example.csv', index_col=0)
+	>>> rel = ppu.calculate_single_relaxation(df.fyield, df.seq_time, df.seq, df.datetime, blank=0, sat_len=100, rel_len=40, bounds=True, tau_lims=[100, 50000])
+	>>> output = './data/output/relaxation/single/'
+	>>> rel.to_csv(output+'FastOcean_rel_single.csv')
 
 	"""
 	from ._fitting import __fit_single_decay__
@@ -131,54 +140,75 @@ def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 	bounds: bool
 		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
 	tau1_lims: [int, int]
-	 	the lower and upper limit bounds for fitting tau_1
+	 	the lower and upper limit bounds for fitting τ1
 	tau2_lims: [int, int]
-	 	the lower and upper limit bounds for fitting tau_2
+	 	the lower and upper limit bounds for fitting τ2
 	tau3_lims: [int, int]
-	 	the lower and upper limit bounds for fitting tau_3
-	fit_method: str
+	 	the lower and upper limit bounds for fitting τ3
+	fit_method : str, default='trf'
 		The algorithm to perform minimization. 
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	loss_method: str
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	loss_method : str, default='soft_l1'
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	fscale: float
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals.
-	 	See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	n_iter: int			
+	 	See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	max_nfev : int, default=100			
 		The number of iterations to perform fitting routine.
-	xtol: float			
+	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	
 	Returns
 	-------
+	res: pandas.DataFrame, shape=[n,20]
+		The results of the fitting routine with columns as below:
+	fo_r : np.array, dtype=float, shape=[n,]
+		The minimum fluorescence of relaxation phase.
+	fm_r : np.array, dtype=float, shape=[n,]
+		The maximum fluorescence of relaxation phase
+	alpha1 : np.array, dtype=float, shape=[n,]
+	tau1 : np.array, dtype=float, shape=[n,]
+		The rate of ? reoxidation in microseconds.
+	alpha2 : np.array, dtype=float, shape=[n,]
+	tau2 : np.array, dtype=float, shape=[n,]
+		The rate of ? reoxidation in microseconds.
+	alpha3 : np.array, dtype=float, shape=[n,]
+	tau3 : np.array, dtype=float, shape=[n,]
+		The rate of ? reoxidation in microseconds.
+	rsq: np.array, dtype=float, shape=[n,]
+		The r-squared value of the fit.
+	bias : np.array, dtype=float, shape=[n,]
+		The bias of fit.
+	chi : np.array, dtype=float, shape=[n,]
+		The chi-squared goodness of fit.
+	fo_err : np.array, dtype=float, shape=[n,]
+		The fit error of Fo_relax.
+	fm_err : np.array, dtype=float, shape=[n,]
+		The fit error of Fm_relax.
+	alpha1_err : np.array, dtype=float, shape=[n,]
+		The fit error of α1.
+	tau1_err : np.array, dtype=float, shape=[n,]
+		The fit error of τ1.
+	alpha2_err : np.array, dtype=float, shape=[n,]
+		The fit error of α2.
+	tau2_err : np.array, dtype=float, shape=[n,]
+		The fit error of τ2.
+	alpha3_err : np.array, dtype=float, shape=[n,]
+		The fit error of α3.
+	tau3_err : np.array, dtype=float, shape=[n,]
+		The fit error of τ3.
+	nfl : np.array, dtype=float, shape=[n,]
+		The number of flashlets used for fitting.
 
-	res: pandas.DataFrame
-		The results of the fitting routine with columns: 
-		fo_r, fm_r, alpha_1 tau_1, alpha_2 tau_2, alpha_3 tau_3, rsq, bias, rms, fo_err, fm_err, alpha1_err, tau1_err, alpha2_err, tau2_err, alpha3_err, tau3_err, nfl
+	Example
+	-------
+	>>> df = pd.read_csv('./data/raw/ppu/fire/FIRe_example.csv', index_col=0)
+	>>> rel = ppu.calculate_triple_relaxation(df.fyield, df.seq_time, df.seq, df.datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=1, bounds=True, tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000])
+	>>> output = './data/output/relaxation/triple/'
+	>>> rel.to_csv(output+'FIRe_rel_triple.csv')
 
-		fo_r: minimum fluorescence of relaxation phase
-		fm_r: maximum fluorescence of relaxation phase
-		alpha_1
-		tau_1:  (microseconds)
-		alpha_2:
-		tau_2:
-		alpha_3:
-		tau_3:
-		rsq: r^^2 value
-		bias: bias of fit
-		chi: chi-squared goodness of fit
-		fo_err: fit error of Fo_relax
-		fm_err: fit error of Fm_relax
-		alpha1_err: fit error of alpha_1
-		tau1_err: fit error of tau_1
-		alpha2_err: fit error of alpha_2
-		tau2_err: fit error of tau_2
-		alpha3_err: fit error of alpha_3
-		tau3_err: fit error of tau_3
-		nfl: number of flashlets used for fitting
-	   
 	"""
 
 	from ._fitting import __fit_triple_decay__

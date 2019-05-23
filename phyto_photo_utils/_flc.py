@@ -1,13 +1,6 @@
-"""
-@package phyto_photo_utils.flc
-@file phyto_photo_utils/flc.py
-@author Thomas Ryan-Keogh
-@brief module containing the processing functions for fluorescence light curves
+#!/usr/bin/env python
 
-Note: See example csv file for the correct dataframe formatting
-"""
-
-def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=12, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 	"""
 
 	Process the fluorescence light curve data under the e dependent model.
@@ -17,42 +10,42 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	Parameters
 	----------
 	
-	fo: numpy.ndarray
+	fo: np.array, dtype=float, shape=[n,]
 		The minimum fluorescence data.
-	fm: numpy.ndarray
+	fm: np.array, dtype=float, shape=[n,]
 		The maximum fluorescence data.
-	fvfm: numpy.ndarray
+	fvfm: np.array, dtype=float, shape=[n,]
 		The fvfm data.
-	sigma: numpy.ndarray
+	sigma: np.array, dtype=float, shape=[n,]
 		The sigmaPSII data in A^2.
-	par: np.ndarray 
+	par: np.array, dtype=float, shape=[n,] 
 		The actinic light levels of the fluorescence light curve.
-	dark_sigma: bool
+	dark_sigma: bool, default=True
 		If True, will use mean of sigmaPSII under 0 actinic light for calculation. If False, will use sigmaPSII and sigmaPSII' for calculation.
 	light_step_size: int
 		The number of measurements for initial light step.
-	outlier_multiplier: int
+	outlier_multiplier: int, default=3
 		The multiplier for creating upper and lower limits when meaning data per light level.
-	bounds: bool
+	bounds: bool, default=True
 		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
-	alpha_lims: [int, int]
+	alpha_lims: [int, int], default=[0,4]
 	 	the lower and upper limit bounds for fitting alpha
-	etrmax_lims: [int, int]
+	etrmax_lims: [int, int], default=[0,2000]
 	 	the lower and upper limit bounds for fitting ETRmax	 
-	method: str
+	method : str, default='trf'
 		The algorithm to perform minimization. 
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	loss: str
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	loss : str, default='soft_l1'
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	f_scale: float
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	f_scale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals.
-	 	See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	max_nfev: int			
+	 	See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	max_nfev : int, default=100			
 		The number of iterations to perform fitting routine.
-	xtol: float			
+	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
 	Returns
 	-------
@@ -156,10 +149,10 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	etr_max_err = perr[0]
 	alpha_err = perr[1]
 
-	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
+	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
 
 
-def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=12, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 	"""
 	   
 	INFORMATION
@@ -172,36 +165,36 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=12, outlier_mu
 	Parameters
 	----------
 
-	fvfm:: numpy.ndarray
+	fvfm : np.array, dtype=float, shape=[n,]
 		the fvfm data
-	sigma: numpy.ndarray
+	sigma : np.array, dtype=float, shape=[n,]
 		the sigmaPSII data in A^2
-	par: np.ndarray 
+	par : np.array, dtype=float, shape=[n,] 
 		the actinic light levels of the fluorescence light curve
-	light_step_size: int
+	light_step_size : int
 		The number of measurements for initial light step.
-	outlier_multiplier: int
+	outlier_multiplier : int, default=3
 		The multiplier for creating upper and lower limits when meaning data per light level.
-	bounds: bool
+	bounds : bool, default=True
 		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
-	alpha_lims: [int, int]
+	alpha_lims: [int, int], default=[0,4]
 	 	the lower and upper limit bounds for fitting alpha
-	etrmax_lims: [int, int]
+	etrmax_lims : [int, int], default=[0,2000]
 	 	the lower and upper limit bounds for fitting ETRmax	 
-	method: str
+	method : str, default='trf'
 		The algorithm to perform minimization. 
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	loss: str
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	loss : str, default='soft_l1'
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	f_scale: float
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	f_scale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals.
-	 	See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
-	max_nfev: int			
+	 	See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	max_nfev : int, default=100			
 		The number of iterations to perform fitting routine.
-	xtol: float			
+	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables.
-		See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options.
+		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
 	Returns
 	-------
@@ -300,5 +293,5 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=12, outlier_mu
 	alpha_err = perr[1]
 	
 
-	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
+	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
 

@@ -1,15 +1,5 @@
 #!/usr/bin/env python
-"""
-@package phyto_photo_utils.load
-@file phyto_photo_utils/load.py
-@author Thomas Ryan-Keogh
-@brief module containing the processing functions for reading in raw data from different instruments.
-
-NOTE: Current configuration is set up to read from FIRe (benchtop), FastTracka I, FastTracka II, FastOcean.
-
-"""
-
-def load_FIRe_files(file_, append=True, save_files=True, res_path='path', 
+def load_FIRe_files(file_, append=False, save_files=False, res_path=None, 
                    seq_len=160, flen=1e-6, irrad=47248):
     """
 
@@ -17,34 +7,43 @@ def load_FIRe_files(file_, append=True, save_files=True, res_path='path',
 
     Parameters
     ----------
-    file_: dir
-        the path directory to the .000 data file from benchtop SAtlantic FIRe.
-    append: bool
-        if True, multiple files will be concatenated together.
-    save_files: bool
-        if True, files will be saved as .csv.
-    res_path: dir               
-        the path directory where to save files, only required if save_files = True.
-    seq_len: int                 
-        the number of flashlets in the protocol.
-    flen: float
-        flashlet length in seconds.
-    irrad: int                   
-        the LED output in ???.
+    file_ : str
+        The path directory to the .000 data file from benchtop SAtlantic FIRe.
+    append : bool, default=False
+        If True, multiple files will be concatenated together.
+    save_files : bool, default=False
+        If True, files will be saved as .csv.
+    res_path : str, default=None           
+        The path directory where to save files, only required if save_files = True.
+    seq_len : int , default=160               
+        The number of flashlets in the protocol.
+    flen : float, default=1e-6
+        The flashlet length in seconds.
+    irrad : int, default=47248                  
+        The LED output in ???.
 
     Returns
     -------
+    df : pandas.DataFrame, shape=[n,6]
+        A dataframe of the raw fluorescence data with columns as below:
+    flashlet_number : np.array, dtype=int, shape=[n,]
+        A sequential number from 1 to ``seq_len``
+    fyield : np.array, dtype=float, shape=[n,]
+        The raw fluorescence yield data.
+    datetime : np.array, dtype=datetime64, shape=[n,]
+        The date and time of measurement.
+    seq : np.array, dtype=int, shape=[n,]
+        The sample measurement number.
+    seq_time : np.array, dtype=float, shape=[n,]
+        The measurement sequence time in microseconds.
+    pfd : np.array, dype=float, shape=[n,]
+        The photon flux density.
 
-    df: pandas.DataFrame
-        A dataframe of the raw fluorescence data with columns:
-        datetime, flashlet_number, fyield, seq_time, pfd, seq
-        
-        datetime: date and time of measurement, DD/MM/YYYY hh:mm:ss
-        flashlet_number: sequential number from 1 to seq_len
-        fyield: the fluorescence yield
-        seq_time: the sequence time in microseconds
-        pfd: the photon flux density
-        seq: the sample measurement number 
+    Example
+    -------
+    >>> fname = './data/raw/instrument/fire/FIRe_example.000'
+    >>> output = './data/raw/ppu/fire/'
+    >>> df = ppu.load_FIRe_files(fname, append=False, save_files=True, res_path=output, seq_len=160, flen=1e-6, irrad=47248)
        
     """
     from pandas import read_csv, to_datetime, DataFrame, concat, Series
@@ -123,57 +122,66 @@ def load_FIRe_files(file_, append=True, save_files=True, res_path='path',
     
     # If True, files will be saved as .csv in path directory specified by res_path
     if save_files:
-        df.to_csv(res_path+str(name)+'.csv')
+        if res_path is None:
+            print('WARNING: Files not saved. No output directory specified.')
+        else:
+            df.to_csv(res_path+str(name)+'.csv')
         
     return df
 
 
-def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_file='file', res_path='path', 
-                   seq_len=120, irrad=545.62e10):
+def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None, seq_len=120, irrad=545.62e10):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
 
     Parameters
     ----------
-    file_: dir
+    file_ : str
         The path directory to the .000 data file from benchtop SAtlantic FIRe.
-    append: bool
+    append : bool, default=False
         If True, multiple files will be concatenated together.
-    save_files: bool
+    save_files : bool, default=False
         If True, files will be saved as .csv.
-    irf: bool
-        If True, perform the instrument response factor correction for the gain settings
-    irf_file: dir
-        Path to the IRF file to perform the correction.
-    res_path: dir               
+    res_path : dir, default=None             
         The path directory where to save files, only required if save_files = True.
-    seq_len: int                 
+    seq_len : int, default=120         
         The number of flashlets in the protocol.
-    irrad: int                   
-        The LED output in ???.
+    irrad : int, default=545.62e10              
+        The light/dark chamber photons per count from the calibration file.
 
     Returns
     -------
-
-    df: pandas.DataFrame
-        A dataframe of the raw fluorescence data with columns:
-        datetime, flashlet_number, fyield, seq_time, pfd, seq, gain
-        
-        datetime: date and time of measurement, DD/MM/YYYY hh:mm:ss
-        flashlet_number: sequential number from 1 to seq_len
-        fyield: the fluorescence yield
-        seq_time: the sequence time in microseconds
-        pfd: the photon flux density
-        seq: the sample measurement number 
-        gain: the sample measurement PMT gain
+    df : pandas.DataFrame, shape=[n,8]
+        A dataframe of the raw fluorescence data with columns as below:
+    flashlet_number : np.array, dtype=int, shape=[n,]
+        A sequential number from 1 to ``seq_len``
+    fyield : np.array, dtype=float, shape=[n,]
+        The raw fluorescence yield data.
+    datetime : np.array, dtype=datetime64, shape=[n,]
+        The date and time of measurement.
+    seq : np.array, dtype=int, shape=[n,]
+        The sample measurement number.
+    seq_time : np.array, dtype=float, shape=[n,]
+        The measurement sequence time in microseconds.
+    pfd : np.array, dype=float, shape=[n,]
+        The photon flux density.
+    channel : np.array, dtype=str, shape=[n,]
+        The chamber used for measurements, A = light chamber, B = dark chamber.
+    gain : np.array, dtype=int, shape=[n,]
+        The gain settings of the instrument.
+    
+    Example
+    -------
+    >>> fname = './data/raw/instrument/fasttrackai/FASTTrackaI_example.csv'
+    >>> output = './data/raw/ppu/fasttrackai/'
+    >>> df = ppu.load_FASTTrackaI_files(fname, append=False, save_files=True, res_path=output, seq_len=120, irrad=545.62e10)
        
     """
 
     from numpy import arange, repeat, r_, array
     from csv import reader
     from pandas import to_datetime, read_csv, Series, concat, DataFrame
-    from os import chdir
     
     df = read_csv(file_, header=0)
     name = file_.split('/')[-1].split('.')[0]
@@ -254,11 +262,14 @@ def load_FASTTrackaI_files(file_, append=True, save_files=True, irf=True, irf_fi
     
     # If True, files will be saved as .csv in path directory specified by res_path
     if save_files:
-        df.to_csv(res_path+str(name)+'.csv')
+        if res_path is None:
+            print('WARNING: Files not saved. No output directory specified.')
+        else:
+            df.to_csv(res_path+str(name)+'.csv')
         
     return df
 
-def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True, res_path='path', 
+def load_FastOcean_files(file_, append=False, save_files=False, led_separate=False, res_path=None, 
                    seq_len=140, flen=2e-6):
     """
 
@@ -266,43 +277,58 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
 
     Parameters
     ----------
-    file_: dir
+    file_ : dir
         the path directory to the .000 data file from benchtop SAtlantic FIRe.
-    append: bool
+    append : bool, default=False
         if True, multiple files will be concatenated together.
-    save_files: bool
+    save_files : bool, default=False
         if True, files will be saved as .csv.
-    led_separate: bool
+    led_separate : bool, default=False
         if True, the protocols will be separated dependent upon the LED sequence.
-    res_path: dir               
+    res_path : dir               
         the path directory where to save files, only required if save_files = True.
-    seq_len: int                 
+    seq_len : int, default=140                 
         the number of flashlets in the protocol.
-    flen: float
+    flen : float, default=2e-6
         flashlet length in seconds.
 
     Returns
     -------
 
-    df: pandas.DataFrame
+    df : pandas.DataFrame, shape=[n,7]
         A dataframe of the raw fluorescence data with columns:
-        datetime, flashlet_number, fyield, seq_time, pfd, seq, nled, led_sequence
-        
-        datetime: date and time of measurement, DD/MM/YYYY hh:mm:ss
-        flashlet_number: sequential number from 1 to seq_len
-        fyield: the fluorescence yield
-        seq_time: the sequence time in microseconds
-        pfd: the photon flux density
-        seq: the sample measurement number 
-        nled: the number of LEDs switched on during measurement (1 - 3)
-        led_sequence: the LED combination used during measurement (1 - 7)
-    
+        flashlet_number, fyield, datetime, seq, seq_time, pfd,  led_sequence
+    flashlet_number : np.array, dtype=int, shape=[n,]
+        A sequential number from 1 to ``seq_len``
+    fyield : np.array, dtype=float, shape=[n,]
+        The raw fluorescence yield data.
+    datetime : np.array, dtype=datetime64, shape=[n,]
+        The date and time of measurement.
+    seq : np.array, dtype=int, shape=[n,]
+        The sample measurement number.
+    seq_time : np.array, dtype=float, shape=[n,]
+        The measurement sequence time in microseconds.
+    pfd : np.array, dype=float, shape=[n,]
+        The photon flux density.
+    led_sequence : np.array, dtype=int, shape=[n,]
+        The LED combination using during the measurement, see example below.
 
+    Example
+    -------
+    >>> fname = './data/raw/instrument/fire/FastOcean_example.000'
+    >>> output = './data/raw/ppu/fastocean/'
+    >>> df = ppu.load_FastOcean_files(fname, append=False, save_files=True, led_separate=False, res_path=output, seq_len=140, flen=2e-6)
+    >>> led_sequence == 1, LED 450 nm
+    >>> led_sequence == 2, LED 450 nm + LED 530 nm
+    >>> led_sequence == 3, LED 450 nm + LED 624 nm
+    >>> led_sequence == 4, LED 530 nm + LED 624 nm
+    >>> led_sequence == 5, LED 450 nm + LED 530 nm + LED 624 nm
+    >>> led_sequence == 6, LED 530 nm
+    >>> led_sequence == 7, LED 624 nm
     """
 
     from pandas import read_csv, DataFrame, to_datetime, concat
     from numpy import nansum, array, repeat, arange
-    from os import chdir
     
     name = file_.split('/')[-1].split('.')[0]
     
@@ -349,7 +375,7 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
     df = DataFrame(concat(dfm, axis=0)).reset_index(drop=True)
     df.columns = ['fyield']
     df['pfd'] = repeat((pfd.values*1e22), seq_len) * flen * sigscale
-    df['nled'] = repeat(nled.values, seq_len)
+    #df['nled'] = repeat(nled.values, seq_len)
     df['seq'] = repeat(md.seq.values, seq_len)
     df['seq_time'] = array(list(seq_time) * len(md.seq))
     df['flashlet_number'] = array(list(flashlet_number) * len(md.seq))
@@ -365,36 +391,39 @@ def load_FastOcean_files(file_, append=True, save_files=True, led_separate=True,
         df['seq'] = repeat(arange(0, (df.shape[0] / seq_len), 1), seq_len)
     
     if save_files:
-        df.to_csv(res_path+str(name)+'.csv')
-        
-        if led_separate:
-            i = df.led_sequence == 1
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L1.csv')
-            i = df.led_sequence == 2
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L12.csv')
-            i = df.led_sequence == 3
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L13.csv')
-            i = df.led_sequence == 4
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L23.csv')
-            i = df.led_sequence == 5
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L123.csv')
-            i = df.led_sequence == 6
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L2.csv')
-            i = df.led_sequence == 7
-            dfi = df[i]
-            if len(dfi) > 0:
-                dfi.to_csv(str(name)+'_L3.csv')
+        if res_path is None:
+            print('WARNING: Files not saved. No output directory specified.')
+        else:
+            df.to_csv(res_path+str(name)+'.csv')
+            
+            if led_separate:
+                i = df.led_sequence == 1
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L1.csv')
+                i = df.led_sequence == 2
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L12.csv')
+                i = df.led_sequence == 3
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L13.csv')
+                i = df.led_sequence == 4
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L23.csv')
+                i = df.led_sequence == 5
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L123.csv')
+                i = df.led_sequence == 6
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L2.csv')
+                i = df.led_sequence == 7
+                dfi = df[i]
+                if len(dfi) > 0:
+                    dfi.to_csv(res_path+str(name)+'_L3.csv')
     
     return df

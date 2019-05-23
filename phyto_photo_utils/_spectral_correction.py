@@ -1,15 +1,6 @@
 #!/usr/bin/env python
-"""
-@package phyto_photo_utils.spectral_correction
-@file phyto_photo_utils/spectral_correction.py
-@author Thomas Ryan-Keogh
-@brief module containing the processing functions reading raw absorption data and calculating spectral correction
 
-NOTE: Standard manufacturer LED spectra are used for determining the spectral correction.
-
-"""
-
-def calc_chl_specific_absorption(aptot, depig, blank, ap_lambda, chl=1.0, vol=2000, beta=2, diam=15.0, bricaud_slope=True):
+def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, beta=None, diam=None, bricaud_slope=True):
 	"""
 
 	Process the raw absorbance data to produce chlorophyll specific phytoplankton absorption.
@@ -17,23 +8,23 @@ def calc_chl_specific_absorption(aptot, depig, blank, ap_lambda, chl=1.0, vol=20
 	Parameters
 	----------
 
-	aptot: numpy.ndarray
+	aptot : np.array, dtype=float, shape=[n,]
 		The raw absorbance data.
-	depig: numpy.ndarray 
-		The raw depigmented absorbance data.
-	blank: numpy.ndarray
+	blank : np.array, dtype=float, shape=[n,]
 	 	The blank absorbance data.
-	ap_lambda: np.ndarray
-		The wavelengths corresponding to measurements.
-	chl: float
+	ap_lambda : np.array, dtype=float, shape=[n,]
+		The wavelengths corresponding to the measurements.
+	depig : np.array, dtype=float, shape=[n,] 
+		The raw depigmented absorbance data.
+	chl : float
 		The chlorophyll concentration associated with the measurement.
-	vol: numpy.ndarray
+	vol : int
 		The volume of water filtered in mL.
-	beta: int
+	beta : int
 		The pathlength amplification factor (see Roesler et al. 1998).
-	diam: float			
+	diam : float			
 		The diameter of filtrate in mm.
-	bricaud_slope: bool
+	bricaud_slope: bool, default=True
 	 	If True, will theoretically calculate detrital slope (see Bricaud & Stramski 1990). If False, will subtract depigmented absorption from total absorption.
 
 
@@ -63,11 +54,11 @@ def calc_chl_specific_absorption(aptot, depig, blank, ap_lambda, chl=1.0, vol=20
 	if bricaud_slope: # See Bricaud & Stramski 1990 for more details
 	    
 	    # Find unique indices based upon wavelengths measured
-	    idx380 = argmin(abs(ap_lambda - 380))
-	    idx505 = argmin(abs(ap_lambda - 505))
-	    idx580 = argmin(abs(ap_lambda - 580))
-	    idx692 = argmin(abs(ap_lambda - 692))
-	    idx750 = argmin(abs(ap_lambda - 750))
+	    idx380 = abs(ap_lambda - 380).idxmin()
+	    idx505 = abs(ap_lambda - 505).idxmin()
+	    idx580 = abs(ap_lambda - 580).idxmin()
+	    idx692 = abs(ap_lambda - 692).idxmin()
+	    idx750 = abs(ap_lambda - 750).idxmin()
 	    
 	    ap750 = aptot[idx750]
 	    R1 = (0.99 * aptot[idx380]) - aptot[idx505]
@@ -119,38 +110,64 @@ def calc_chl_specific_absorption(aptot, depig, blank, ap_lambda, chl=1.0, vol=20
 
 	return aphy
 
-def instrument_led_correction(e_insitu, e_led, aphy):
+def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=None):
 	"""
 
 	Calculate the spectral correction factor
-	NOTE: All arrays must be the same length and resolution for calculation
+	TO DO: Create method to convert all arrays to same length and resolution
 
 	Parameters
 	----------
 
-	e_led: numpy.ndarray 
-		The excitation spectra of the instrument.
-	e_insitu: numpy.ndarray 
-		The in situ irradiance field.
-	aphy: numpy.ndarray
+	aphy : np.array, dtype=float, shape=[n,]
 		The chlorophyll specific phytoplankton absorption.
+	ap_lambda : np.array, dtype=int, shape=[n,]
+		The wavelengths associated with the aphy.
+	e_insitu : np.array, dtype=int, shape=[n,]
+		The in situ irradiance field, if None is passed then will theoretically calculated in situ light field.
+	e_led : {'fire','fasttracka_ii'}
+		The excitation spectra of the instrument.
 
 	Returns
 	-------
 
-	scf: float
+	scf : float
 		The spectral correction factor.
 	   
 	"""
-	from numpy import max, sum
+	from numpy import nanmax, nansum, exp, array
+	from pandas import read_csv
 
-	# Normalise spectra
-	e_insitu = e_insitu / max(e_insitu) 
-	e_led = e_led / max(e_led)
-	aphy = aphy / max(aphy)
+	idx400 = abs(ap_lambda - 400).idxmin()
+	idx700 = abs(ap_lambda - 700).idxmin()+1
+	aphy = array(aphy[idx400:idx700])
+
+
+	if e_insitu is None:
+		
+		df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
+		kd = df.a_W + df.a_gt + aphy
+		Ez = df.Ezero * exp(-kd * 5)
+		Erange = Ez.max() - Ez.min()
+		e_insitu = (Ez - Ez.min())/Erange
+
+	else:
+		e_insitu = e_insitu / max(e_insitu) 
+
+	if e_led is None:
+		print('No instrument selected. Unable to calculate spectral correction factor.')
+
+	elif e_led == 'fire':
+		e_led = df.fire.values
+		e_led = e_led / nanmax(e_led)
+	elif e_led == 'fasttracka_ii':
+		e_led = df.fasttracka_ii.values
+		e_led = e_led / nanmax(e_led)
+
+	aphy = aphy / nanmax(aphy)	
 
 	# Perform SCF calculation
-	scf = (sum(aphy * e_insitu) * sum(e_led)) / (sum(aphy * e_led) * sum(e_insitu))
+	scf = (nansum(aphy * e_insitu) * nansum(e_led)) / (nansum(aphy * e_led) * nansum(e_insitu))
 
 	return scf
 
