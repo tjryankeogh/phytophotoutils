@@ -1,0 +1,326 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>phyto_photo_utils._tools &#8212; PhytoPhotoUtils 20-05-2019 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for phyto_photo_utils._tools</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">@package phyto_photo_utils.tools</span>
+<span class="sd">@file phyto_photo_utils/tools.py</span>
+<span class="sd">@author Thomas Ryan-Keogh</span>
+<span class="sd">@brief module containing the tool functions for photophysiology data</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="remove_outlier_from_time_average"><a class="viewcode-back" href="../../api.html#phyto_photo_utils._tools.remove_outlier_from_time_average">[docs]</a><span class="k">def</span> <span class="nf">remove_outlier_from_time_average</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Remove outliers when averaging transients before performing the fitting routines, used to improve the signal to noise ratio in low biomass systems.</span>
+
+<span class="sd">    The function sets a time window to average over, using upper and lower limits for outlier detection.</span>
+<span class="sd">    The upper and lower limits are determined by mean ± std * [1].</span>
+<span class="sd">    The multiplier [1] can be adjusted by the user.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    df : pandas.DataFrame</span>
+<span class="sd">        A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load</span>
+<span class="sd">    time : int, default=4</span>
+<span class="sd">     	The time window to average over, e.g. 4 = 4 minute averages</span>
+<span class="sd">    multiplier : int, default=3	</span>
+<span class="sd">        The multiplier to apply to the standard deviation for determining the upper and lower limits.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    df: pandas.DataFrame </span>
+<span class="sd">        A dataframe of the time averaged data with outliers excluded.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">nan</span><span class="p">,</span> <span class="n">repeat</span><span class="p">,</span> <span class="n">concatenate</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">Grouper</span><span class="p">,</span> <span class="n">DataFrame</span>
+    
+    <span class="c1"># Convert time window to string</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;T&#39;</span>
+    <span class="c1"># Group data by time window and flashlet number</span>
+    <span class="n">grp</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">Grouper</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">dt</span><span class="p">),</span> <span class="s1">&#39;flashlet_number&#39;</span><span class="p">])</span>
+    <span class="c1"># Calculate means, standard deviations and counts of the groups</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="c1"># Calculate upper and lower limits of each group, and repeat each value by its count</span>
+    <span class="n">ulim</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">((</span><span class="n">mean</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span> <span class="o">+</span> <span class="n">std</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">),</span> <span class="n">c</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">llim</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">((</span><span class="n">mean</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span> <span class="o">-</span> <span class="n">std</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span> <span class="o">*</span> <span class="n">multiplier</span><span class="p">),</span> <span class="n">c</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># Get indexes of data used to create each group</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">items</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">grp</span><span class="o">.</span><span class="n">indices</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># Create pandas DataFrame of upper and lower using original indexes of data</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">([</span><span class="n">ulim</span><span class="p">,</span> <span class="n">llim</span><span class="p">,</span> <span class="n">idx</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">mask</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ulim&#39;</span><span class="p">,</span><span class="s1">&#39;llim&#39;</span><span class="p">,</span><span class="s1">&#39;index&#39;</span><span class="p">]</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+    <span class="c1"># Create boolean array using mask DataFrame</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span> <span class="o">&gt;</span> <span class="n">mask</span><span class="o">.</span><span class="n">ulim</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span> <span class="o">&lt;</span> <span class="n">mask</span><span class="o">.</span><span class="n">llim</span><span class="p">)</span>
+    
+    <span class="c1"># Where condition is True, set values of fluorescence yield to NaN</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">values</span><span class="p">,</span><span class="s1">&#39;fyield&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nan</span>
+
+    <span class="c1"># Group data that is now corrected</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">Grouper</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s1">&#39;datetime&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">dt</span><span class="p">),</span> <span class="s1">&#39;flashlet_number&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+    
+    <span class="c1"># Return number of measurements that is used to create each average</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;nseq&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">fyield</span><span class="o">.</span><span class="n">values</span>
+    
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="correct_fire_bias_correction"><a class="viewcode-back" href="../../api.html#phyto_photo_utils._tools.correct_fire_bias_correction">[docs]</a><span class="k">def</span> <span class="nf">correct_fire_bias_correction</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">sat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    Corrects for instrumentation bias by calculating difference between flashlet 0 &amp; flashlet[pos].</span>
+<span class="sd">    This bias is then added to the relaxation phase.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    df : pandas.DataFrame </span>
+<span class="sd">        A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load</span>
+<span class="sd">    sat : bool, default=False</span>
+<span class="sd">     	If True, correct using bias of saturation phase. If False correct using bias of relaxation phase.</span>
+<span class="sd">    pos : int, default=1</span>
+<span class="sd">     	The flashlet number after the start of the phase, either saturation or relaxation, to calculate difference between.</span>
+<span class="sd">    sat_len : int, default=100</span>
+<span class="sd">     	The length of saturation measurements.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    df : pandas.DataFrame </span>
+<span class="sd">        A dataframe of FIRe data corrected for the instrument bias.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">unique</span><span class="p">,</span> <span class="n">reshape</span>
+    
+    <span class="n">fyield</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="p">)</span>
+    <span class="n">seq</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">seq</span><span class="p">)</span>
+    
+    <span class="n">ycorr</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># Loop through data using unique measurement (seq) number</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">seq</span><span class="p">)):</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="n">seq</span> <span class="o">==</span> <span class="n">s</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">fyield</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># If sat is True will use bias of saturation phase</span>
+        <span class="k">if</span> <span class="n">sat</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span><span class="p">[</span><span class="n">sat_len</span><span class="p">:]</span> <span class="o">+=</span> <span class="n">d</span>
+        
+        <span class="c1"># If sat is False will use bias of relaxation phase</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">sat_len</span> <span class="o">-</span> <span class="n">pos</span><span class="p">]</span> <span class="o">-</span> <span class="n">y</span><span class="p">[</span><span class="n">sat_len</span><span class="p">]</span>
+            <span class="n">y</span><span class="p">[</span><span class="n">sat_len</span><span class="p">:]</span> <span class="o">+=</span> <span class="n">d</span>
+        
+        <span class="n">ycorr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        
+    <span class="n">fyield_corr</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">ycorr</span><span class="p">)</span>
+    <span class="n">fyield_corr</span> <span class="o">=</span> <span class="n">reshape</span><span class="p">(</span><span class="n">fyield_corr</span><span class="p">,</span> <span class="p">(</span><span class="n">fyield_corr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">fyield_corr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    
+    <span class="c1"># Replace fluorescence yield in DataFrame with bias corrected data </span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;fyield&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fyield_corr</span>
+    
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="calculate_blank_FastOcean"><a class="viewcode-back" href="../../api.html#phyto_photo_utils._tools.calculate_blank_FastOcean">[docs]</a><span class="k">def</span> <span class="nf">calculate_blank_FastOcean</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">seq_len</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+     
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the blank by averaging the fluorescence yield for the saturation phase.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_ : dir</span>
+<span class="sd">        The path directory to the raw blank file in csv format.</span>
+<span class="sd">    seq_len : int, default=100</span>
+<span class="sd">        The length of the measurement sequence.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    res : pandas.DataFrame</span>
+<span class="sd">        The blank results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">read_csv</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">43</span><span class="p">,</span> <span class="n">nrows</span><span class="o">=</span><span class="n">seq_len</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:]</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="c1"># TO DO: return date &amp; time stamp</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+<div class="viewcode-block" id="calculate_blank_FIRe"><a class="viewcode-back" href="../../api.html#phyto_photo_utils._tools.calculate_blank_FIRe">[docs]</a><span class="k">def</span> <span class="nf">calculate_blank_FIRe</span><span class="p">(</span><span class="n">file_</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Grids the input variable to bins for depth/dens (y) and time/dive (x).</span>
+<span class="sd">    The bins can be specified to be non-uniform to adapt to variable sampling</span>
+<span class="sd">    intervals of the profile. It is useful to use the ``gt.plot.bin_size``</span>
+<span class="sd">    function to identify the sampling intervals. The bins are averaged (mean) by</span>
+<span class="sd">    default but can also be the ``median, std, count``,</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : np.array, dtype=float, shape=[n, ]</span>
+<span class="sd">        The horizontal values by which to bin need to be in a psudeo discrete</span>
+<span class="sd">        format already. Dive number or ``time_average_per_dive`` are the</span>
+<span class="sd">        standard inputs for this variable. Has ``p`` unique values.</span>
+<span class="sd">    y : np.array, dtype=float, shape=[n, ]</span>
+<span class="sd">        The vertical values that will be binned; typically depth, but can also</span>
+<span class="sd">        be density or any other variable.</span>
+<span class="sd">    bins : np.array, dtype=float; shape=[q, ], default=[0 : 1 : max_depth ]</span>
+<span class="sd">        Define the bin edges for y with this function. If not defined, defaults</span>
+<span class="sd">        to one meter bins.</span>
+<span class="sd">    how : str, defualt=&#39;mean&#39;</span>
+<span class="sd">        the string form of a function that can be applied to pandas.Groupby</span>
+<span class="sd">        objects. These include ``mean, median, std, count``.</span>
+<span class="sd">    interp_lim : int, default=6</span>
+<span class="sd">        sets the maximum extent to which NaNs will be filled.</span>
+<span class="sd">    as_xarray : bool, default=False</span>
+<span class="sd">        if True, will return an ``xarray.DataArray`` section of the data</span>
+<span class="sd">        if False, will return ``pandas.DataFrame`` section of the data</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    glider_section : pandas.DataArray / xarray.DataArray, shape=[p, q]</span>
+<span class="sd">        A 2D section in the format specified by ``ax_xarray`` input.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    Userwarning</span>
+<span class="sd">        Triggers when ``x`` does not have discrete values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">array</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="k">import</span> <span class="n">read_csv</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">to_datetime</span>
+    <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+    <span class="c1"># Get date and time data</span>
+    <span class="n">dt</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">)</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">dt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="n">dt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">)))</span>
+    <span class="n">datetime</span> <span class="o">=</span> <span class="n">date</span><span class="o">+</span><span class="s1">&#39; &#39;</span><span class="o">+</span><span class="n">time</span>
+    <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;%m/</span><span class="si">%d</span><span class="s1">/%Y %H:%M:%S&#39;</span>
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">to_datetime</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">)</span>
+
+    <span class="c1"># Get saturation phase length</span>
+    <span class="n">sat_len</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">5</span><span class="p">,:]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+
+    <span class="c1"># Read in the actual data and calculate the mean</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">read_csv</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delim_whitespace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;ex&#39;</span><span class="p">,</span> <span class="s1">&#39;fyield&#39;</span><span class="p">]</span>
+    <span class="n">blank</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="p">[:</span><span class="n">sat_len</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span><span class="n">blank</span><span class="p">,</span> <span class="n">dt</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;blank&#39;</span><span class="p">,</span> <span class="s1">&#39;datetime&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PhytoPhotoUtils</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Thomas Ryan-Keogh.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.9</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

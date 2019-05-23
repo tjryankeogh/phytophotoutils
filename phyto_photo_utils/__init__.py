@@ -9,3 +9,4 @@ from ._flc import *
 from ._spectral_correction import *
 from ._equations import *
 from ._fitting import *
+from ._plot import *
