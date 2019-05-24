@@ -1,8 +1,6 @@
 API Documentation
 =================
 
-This is where automatically generated documentation is stored
-
 Loading
 -------
 .. automodule:: phyto_photo_utils._load
@@ -23,4 +21,22 @@ Saturation
 Relaxation
 ----------
 .. automodule:: phyto_photo_utils._relaxation
+    :members:
+
+
+Spectral Correction
+-------------------
+.. automodule:: phyto_photo_utils._spectral_correction
+    :members:
+
+
+Fluorescence Light Curves
+-------------------------
+.. automodule:: phyto_photo_utils._flc
+    :members:
+
+
+Plotting
+--------
+.. automodule:: phyto_photo_utils._plot
     :members:

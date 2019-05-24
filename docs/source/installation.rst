@@ -2,6 +2,8 @@
 Installation
 ============
 
-Install the package with pip::
+Download and install with the latest updates:
 
-    $ pip install read-the-docs-template
+   | $ git clone git@gitlab.com:tjryankeogh/phytophotoutils.git  
+   | $ cd PhytoPhotoUtils  
+   | $ python setup.py install  

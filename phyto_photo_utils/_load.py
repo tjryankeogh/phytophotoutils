@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 def load_FIRe_files(file_, append=False, save_files=False, res_path=None, 
-                   seq_len=160, flen=1e-6, irrad=47248):
+                   seq_len=160, flen=1e-6, irrad=None):
     """
 
     Process the raw data file (.000 format) and convert to a csv with standard formatting.
@@ -19,8 +19,8 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
         The number of flashlets in the protocol.
     flen : float, default=1e-6
         The flashlet length in seconds.
-    irrad : int, default=47248                  
-        The LED output in ???.
+    irrad : int, default=None                 
+        The LED output in μE m\ :sup:`2` s\ :sup:`-1`.
 
     Returns
     -------
@@ -130,7 +130,7 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
     return df
 
 
-def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None, seq_len=120, irrad=545.62e10):
+def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None, seq_len=120, irrad=None):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
@@ -147,7 +147,7 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
         The path directory where to save files, only required if save_files = True.
     seq_len : int, default=120         
         The number of flashlets in the protocol.
-    irrad : int, default=545.62e10              
+    irrad : int, default=None            
         The light/dark chamber photons per count from the calibration file.
 
     Returns
@@ -278,26 +278,25 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     Parameters
     ----------
     file_ : dir
-        the path directory to the .000 data file from benchtop SAtlantic FIRe.
+        The path directory to the .000 data file from benchtop SAtlantic FIRe.
     append : bool, default=False
-        if True, multiple files will be concatenated together.
+        If True, multiple files will be concatenated together.
     save_files : bool, default=False
-        if True, files will be saved as .csv.
+        If True, files will be saved as .csv.
     led_separate : bool, default=False
-        if True, the protocols will be separated dependent upon the LED sequence.
+        If True, the protocols will be separated dependent upon the LED sequence.
     res_path : dir               
-        the path directory where to save files, only required if save_files = True.
+        The path directory where to save files, only required if save_files = True.
     seq_len : int, default=140                 
-        the number of flashlets in the protocol.
+        The number of flashlets in the protocol.
     flen : float, default=2e-6
-        flashlet length in seconds.
+        The flashlet length in seconds.
 
     Returns
     -------
 
     df : pandas.DataFrame, shape=[n,7]
-        A dataframe of the raw fluorescence data with columns:
-        flashlet_number, fyield, datetime, seq, seq_time, pfd,  led_sequence
+        A dataframe of the raw fluorescence data with columns as below:
     flashlet_number : np.array, dtype=int, shape=[n,]
         A sequential number from 1 to ``seq_len``
     fyield : np.array, dtype=float, shape=[n,]

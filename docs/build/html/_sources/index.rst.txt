@@ -3,18 +3,33 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PhytoPhotoUtils's documentation!
+Phytoplankton Photophysiology Utilities
 ===========================================
 
 .. toctree::
    :maxdepth: 2
+   :caption: Getting started
+
+   installation
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples and SOP
+
+   loading
+   saturation
+   relaxation
+   tools
+   flc
+   spectral
+   plot
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Help and Reference
 
    api
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   citing
+   history
+   contributing

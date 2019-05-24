@@ -32,6 +32,10 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 
 	ax : object
 		a matplotlib figure object
+
+	Example
+	-------
+	>>> plot_saturation_data(fyield, pfd, fo=fo, fm=fm, sigma=sigma, ro=None, rsq=rsq)
 	"""
 
 
@@ -85,6 +89,10 @@ def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=Non
 
 	ax : object
 		a matplotlib figure object
+	
+	Example
+	-------
+	>>> ppu.plot_relaxation_data(fyield, seq_time, fo_relax=fo_r, fm_relax=fm_r, tau=(tau1, tau2, tau3), alpha=(alpha1, alpha2, alpha3), rsq=rsq)
 	"""
 	from ._equations import __fit_single_relaxation__, __fit_triple_relaxation__
 	from matplotlib.pyplot import subplots
@@ -145,6 +153,10 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 
 	ax : object
 		a matplotlib figure object
+
+	Example
+	-------
+	>>> ppu.plot_fluorescence_light_curve(par, etr, etrmax=etr_max, alpha=alpha, rsq=rsq, sigma=sigma, phi=True)
 	"""
 
 	from ._equations import __calculate_Webb_model__, __calculate_modified_Webb_model__

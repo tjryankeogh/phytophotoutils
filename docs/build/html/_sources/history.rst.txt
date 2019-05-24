@@ -1,0 +1,19 @@
+Change Log
+----------
+**v0.5** (2019-05-23)
+
+- various bug fixes
+- spectral LED correction now estimates in situ light field
+
+**v0.4** (2019-05-21)
+
+- added plot function
+
+**v0.3** (2019-05-17)
+
+- restructured package to avoid nested functions
+- added outlier removal tool to FLC function
+
+**v0.2** (2018-12-07)
+
+- added functionality for FLCs

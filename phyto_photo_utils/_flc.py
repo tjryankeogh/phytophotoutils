@@ -1,68 +1,74 @@
 #!/usr/bin/env python
 
-def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+      
 	"""
-
-	Process the fluorescence light curve data under the e dependent model.
-
-	The function uses the E-dependent model to calculate rETR and then fit to Webb et al. (1974) model for the determination of PE parameters, alpha and ETRmax.
+	
+	Process the raw transient data and perform the no connectivity saturation model.
 
 	Parameters
 	----------
-	
-	fo: np.array, dtype=float, shape=[n,]
-		The minimum fluorescence data.
-	fm: np.array, dtype=float, shape=[n,]
-		The maximum fluorescence data.
-	fvfm: np.array, dtype=float, shape=[n,]
-		The fvfm data.
-	sigma: np.array, dtype=float, shape=[n,]
-		The sigmaPSII data in A^2.
-	par: np.array, dtype=float, shape=[n,] 
-		The actinic light levels of the fluorescence light curve.
-	dark_sigma: bool, default=True
-		If True, will use mean of sigmaPSII under 0 actinic light for calculation. If False, will use sigmaPSII and sigmaPSII' for calculation.
-	light_step_size: int
-		The number of measurements for initial light step.
-	outlier_multiplier: int, default=3
-		The multiplier for creating upper and lower limits when meaning data per light level.
-	bounds: bool, default=True
-		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
-	alpha_lims: [int, int], default=[0,4]
-	 	the lower and upper limit bounds for fitting alpha
-	etrmax_lims: [int, int], default=[0,2000]
-	 	the lower and upper limit bounds for fitting ETRmax	 
-	method : str, default='trf'
-		The algorithm to perform minimization. 
-		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	loss : str, default='soft_l1'
-		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	f_scale : float, default=0.1
-	 	The soft margin value between inlier and outlier residuals.
-	 	See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	fo : np.array, dtype=float, shape=[n,]
+		The minimum fluorescence yield
+	fm : np.array, dtype=float, shape=[n,] 
+		The maximum fluorescence yield
+	fvfm : np.array, dtype=float, shape=[n,]
+		The photosynthetic efficiency
+	sigma : np.array, dtype=float, shape=[n,] 
+		The effective absorption cross-section of PSII in Å\ :sup:`2`
+	par : np.array, dtype=float, shape=[n,]
+		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`
+	dark_sigma : bool
+		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation
+	light_step_size : int
+		The number of measurements for initial light step
+	outlier_multiplier : int, default=3
+		The multiplier to apply to the standard deviation for determining the upper and lower limits
+	return_data : bool, default=False
+		If True, will return the final data used for the fit
+	bounds : bool, default=True
+		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
+	alpha_lims : [int, int], default=[0,4]
+		The lower and upper limit bounds for fitting α\ :sup:`ETR`
+	etrmax_lims : [int, int], default=[0,2000]
+	 	The lower and upper limit bounds for fitting ETR\ :sub:`max`
+	fit_method : str, default='trf'
+		The algorithm to perform minimization. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	loss_method : str, default='soft_l1'
+		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	fscale : float, default=0.1
+	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	max_nfev : int, default=100			
 		The number of iterations to perform fitting routine.
 	xtol : float, default=1e-9			
-		The tolerance for termination by the change of the independent variables.
-		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
 	Returns
 	-------
+	
+	etr_max : float
+		The maximum electron transport rate
+	alpha : float
+		The light limited slope of electron transport
+	ek : float
+		The photoacclimation of ETR
+	rsq : float
+		The r\ :sup:`2` value
+	bias : float
+		The bias of the fit
+	chi : float
+		The chi-squared goodness of the fit
+	etrmax_err : float
+		The fit error of ETR\ :sup:`max`
+	alpha_err : float
+		The fit error of α\ :sub:`ETR`
+	data : [np.array, np.array]
+		Optional, the final data used for the fitting procedure
 
-	etr_max: float
-		The maximum electron transport rate.
-	alpha: float
-		The light limited slope.
-	rsq: float
-		The correlation coefficient, the r^^2 value.
-	bias: float
-		The bias of the final fit.
-	etrmax_err: float
-		The fit error of ETRmax
-	alpha_err: float
-		The fit error of alpha
-	   
+
+	Example
+	-------
+	>>> etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err = ppu.calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, return_data=False)
 	"""
 	from ._equations import __calculate_Webb_model__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
 	from numpy import mean, array, isnan, inf, repeat, nan, concatenate
@@ -152,66 +158,71 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
 
 
-def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+      
 	"""
-	   
-	INFORMATION
-	-----------
-
-	Process the fluorescence light curve data using the e independent model (see Silsbe & Kromkamp 2012)
-
-	The function uses the E-independent model to calculate phi and then fit to Webb et al. (1974) model for the determination of PE parameters, alpha and ETRmax.
+	
+	Process the raw transient data and perform the no connectivity saturation model.
 
 	Parameters
 	----------
-
-	fvfm : np.array, dtype=float, shape=[n,]
-		the fvfm data
-	sigma : np.array, dtype=float, shape=[n,]
-		the sigmaPSII data in A^2
-	par : np.array, dtype=float, shape=[n,] 
-		the actinic light levels of the fluorescence light curve
+	fvfm : np.array, dtype=float, shape=[n,] 
+		The photosynthetic efficiency
+	sigma : np.array, dtype=float, shape=[n,] 
+		The effective absorption cross-section of PSII in Å\ :sup:`2`
+	par : np.array, dtype=float, shape=[n,]
+		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`
+	dark_sigma : bool
+		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation
 	light_step_size : int
-		The number of measurements for initial light step.
+		The number of measurements for initial light step
 	outlier_multiplier : int, default=3
-		The multiplier for creating upper and lower limits when meaning data per light level.
-	bounds : bool, default=True
-		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
+		The multiplier to apply to the standard deviation for determining the upper and lower limits
+	return_data: bool, default=False
+		If True, will return the final data used for the fit
+	bounds: bool, default=True
+		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
 	alpha_lims: [int, int], default=[0,4]
-	 	the lower and upper limit bounds for fitting alpha
-	etrmax_lims : [int, int], default=[0,2000]
-	 	the lower and upper limit bounds for fitting ETRmax	 
-	method : str, default='trf'
-		The algorithm to perform minimization. 
-		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	loss : str, default='soft_l1'
-		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	f_scale : float, default=0.1
-	 	The soft margin value between inlier and outlier residuals.
-	 	See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+		The lower and upper limit bounds for fitting α\ :sup:`ETR`
+	etrmax_lims: [int, int], default=[0,2000]
+	 	The lower and upper limit bounds for fitting ETR\ :sub:`max`
+	fit_method : str, default='trf'
+		The algorithm to perform minimization. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	loss_method : str, default='soft_l1'
+		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+	fscale : float, default=0.1
+	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	max_nfev : int, default=100			
 		The number of iterations to perform fitting routine.
 	xtol : float, default=1e-9			
-		The tolerance for termination by the change of the independent variables.
-		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
+		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
 	Returns
 	-------
+	
+	etr_max : float
+		The maximum electron transport rate
+	alpha : float
+		The light limited slope of electron transport
+	ek : float
+		The photoacclimation of ETR
+	rsq : float
+		The r\ :sup:`2` value
+	bias : float
+		The bias of the fit
+	chi : float
+		The chi-squared goodness of the fit
+	etrmax_err : float
+		The fit error of ETR\ :sup:`max`
+	alpha_err : float
+		The fit error of α\ :sub:`ETR`
+	data : [np.array, np.array]
+		Optional, the final data used for the fitting procedure
 
-	etr_max: float
-		The maximum electron transport rate.
-	alpha: float
-		The light limited slope.
-	rsq: float
-		The correlation coefficient, the r^^2 value.
-	bias: float
-		The bias of the final fit.
-	etrmax_err: float
-		The fit error of ETRmax
-	alpha_err: float
-		The fit error of alpha
-	   
+
+	Example
+	-------
+	>>> etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err = ppu.calculate_e_independent_etr(fvfm, sigma, par, return_data=False)
 	"""
 	from ._equations import __calculate_modified_Webb_model__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
 	from numpy import mean, array, isnan, inf, repeat, nan, concatenate

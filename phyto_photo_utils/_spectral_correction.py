@@ -32,8 +32,12 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	Returns
 	-------
 
-	aphy: numpy.ndarray
+	aphy : np.array, dtype=float, shape=[n,]
 		The chlorophyll specific phytoplankton absorption data.
+
+	Example
+	-------
+	>>> aphy = ppu.calculate_chl_specific_absorption(pa_data, blank, wavelength, chl=0.19, vol=2000, beta=2, diam=15, bricaud_slope=True)
 	   
 	"""
 	from numpy import exp, argmin, abs, min
@@ -125,7 +129,7 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=No
 		The wavelengths associated with the aphy.
 	e_insitu : np.array, dtype=int, shape=[n,]
 		The in situ irradiance field, if None is passed then will theoretically calculated in situ light field.
-	e_led : {'fire','fasttracka_ii'}
+	e_led : 'fire','fasttracka_ii'
 		The excitation spectra of the instrument.
 
 	Returns
@@ -133,6 +137,10 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=No
 
 	scf : float
 		The spectral correction factor.
+
+	Example
+	-------
+	>>> ppu.calculate_instrument_led_correction(aphy, wavelength, e_led='fire')
 	   
 	"""
 	from numpy import nanmax, nansum, exp, array

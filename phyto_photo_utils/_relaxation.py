@@ -44,7 +44,7 @@ def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 
 	Returns
 	-------
-	res: pandas.DataFrame, shape=[n,11]
+	res: pandas.DataFrame, shape=[n,10]
 		The results of the fitting routine with columns as below:
 	fo_r : np.array, dtype=float, shape=[n,]
 		The minimum fluorescence of relaxation phase.
@@ -69,11 +69,7 @@ def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 
 	Example
 	-------
-	>>> df = pd.read_csv('./data/raw/ppu/fastocean/FastOcean_example.csv', index_col=0)
-	>>> rel = ppu.calculate_single_relaxation(df.fyield, df.seq_time, df.seq, df.datetime, blank=0, sat_len=100, rel_len=40, bounds=True, tau_lims=[100, 50000])
-	>>> output = './data/output/relaxation/single/'
-	>>> rel.to_csv(output+'FastOcean_rel_single.csv')
-
+	>>> rel = ppu.calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, bounds=True, tau_lims=[100, 50000])
 	"""
 	from ._fitting import __fit_single_decay__
 	from numpy import array, unique
@@ -122,29 +118,29 @@ def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 	Parameters
 	----------
 	seq_time: numpy.ndarray 
-		the sequence time of the flashlets
+		The sequence time of the flashlets
 	fyield: numpy.ndarray 
-		the fluorescence yield of the instrument
+		The fluorescence yield of the instrument
 	seq: numpy.ndarray 
-		the measurement number
+		The measurement number
 	datetime: numpy.ndarray (datetime64)
-		the date & time of each measurement in the numpy datetime64 format
+		The date & time of each measurement in the numpy datetime64 format
 	blank: float, int or numpy.ndarray
-		the blank value, if np.ndarray must be the same length as fyield
+		The blank value, if np.ndarray must be the same length as fyield
 	sat_len: int
-		the number of flashlets in the saturation sequence
+		The number of flashlets in the saturation sequence
 	rel_len: int
-		the number of flashlets in the relaxation sequence
+		The number of flashlets in the relaxation sequence
 	sat_flashlets: int
-		the number of saturation flashlets to include at the start
+		The number of saturation flashlets to include at the start
 	bounds: bool
-		if True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
+		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
 	tau1_lims: [int, int]
-	 	the lower and upper limit bounds for fitting τ1
+	 	The lower and upper limit bounds for fitting τ1
 	tau2_lims: [int, int]
-	 	the lower and upper limit bounds for fitting τ2
+	 	The lower and upper limit bounds for fitting τ2
 	tau3_lims: [int, int]
-	 	the lower and upper limit bounds for fitting τ3
+	 	The lower and upper limit bounds for fitting τ3
 	fit_method : str, default='trf'
 		The algorithm to perform minimization. 
 		See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
@@ -204,11 +200,7 @@ def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 
 	Example
 	-------
-	>>> df = pd.read_csv('./data/raw/ppu/fire/FIRe_example.csv', index_col=0)
-	>>> rel = ppu.calculate_triple_relaxation(df.fyield, df.seq_time, df.seq, df.datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=1, bounds=True, tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000])
-	>>> output = './data/output/relaxation/triple/'
-	>>> rel.to_csv(output+'FIRe_rel_triple.csv')
-
+	>>> rel = ppu.calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=1, bounds=True, tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000])
 	"""
 
 	from ._fitting import __fit_triple_decay__
@@ -245,7 +237,7 @@ def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 		pass
 	
 	else:
-		res.columns = ['fo_r', 'fm_r', 'alpha1', 'tau1', 'alpha2', 'tau2', 'alpha3', 'tau3', 'rsq', 'bias', 'chi','for_err', 'fmr_err', 'alpha1_err', 'tau1_err', 'alpha2_err', 'tau2_err', 'alpha3_err', 'tau3_err', 'nfl']
+		res.columns = ['fo_r', 'fm_r', 'alpha1', 'tau1', 'alpha2', 'tau2', 'alpha3', 'tau3', 'rsq', 'bias', 'chi', 'for_err', 'fmr_err', 'alpha1_err', 'tau1_err', 'alpha2_err', 'tau2_err', 'alpha3_err', 'tau3_err', 'nfl']
 		res['datetime'] = unique(dt)
 
 	return res

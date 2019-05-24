@@ -25,6 +25,11 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
     df : pandas.DataFrame 
         A dataframe of the time averaged data with outliers excluded.
 
+    Example
+    -------
+
+    >>> ppu.remove_outlier_from_time_average(df, time=2, multiplier=3)
+
     """
         
     from numpy import nan, repeat, concatenate
@@ -93,6 +98,11 @@ def correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100):
     df : pandas.DataFrame 
         A dataframe of FIRe data corrected for the instrument bias.
 
+    Example
+    -------
+
+    >>> ppu.correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100)
+
     """
 
     from tqdm import tqdm
@@ -144,6 +154,11 @@ def calculate_blank_FastOcean(file_, seq_len=100):
     -------
     res : pandas.DataFrame
         The blank results.
+
+    Example
+    -------
+
+    >>> ppu.calculate_blank_FastOcean(file_, seq_len=100)
     """
 
     from pandas import read_csv, DataFrame, to_datetime
@@ -177,6 +192,11 @@ def calculate_blank_FIRe(file_):
     -------
     res : pandas.DataFrame
         The blank results: blank, datetime
+
+    Example
+    -------
+
+    >>> ppu.calculate_blank_FIRe(file_)
 
     """
 

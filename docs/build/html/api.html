@@ -44,7 +44,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Welcome to PhytoPhotoUtils’s documentation!" href="index.html" /> 
+    <link rel="next" title="Citing and Referencing" href="citing.html" />
+    <link rel="prev" title="Plotting" href="plot.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -88,14 +89,35 @@
               
             
             
-              <ul class="current">
+              <p class="caption"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Examples and SOP</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="loading.html">Loading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="saturation.html">Saturation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relaxation.html">Relaxation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">General Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flc.html">Fluorescence Light Curves</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spectral.html">Spectral Correction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html">Plotting</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Help and Reference</span></p>
+<ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._load">Loading</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._tools">General Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._saturation">Saturation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._relaxation">Relaxation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._spectral_correction">Spectral Correction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._flc">Fluorescence Light Curves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-phyto_photo_utils._plot">Plotting</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="citing.html">Citing and Referencing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="history.html">Change Log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 </ul>
 
             
@@ -162,12 +184,11 @@
             
   <div class="section" id="api-documentation">
 <h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This is where automatically generated documentation is stored</p>
 <div class="section" id="module-phyto_photo_utils._load">
 <span id="loading"></span><h2>Loading<a class="headerlink" href="#module-phyto_photo_utils._load" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="phyto_photo_utils._load.load_FASTTrackaI_files">
-<code class="descclassname">phyto_photo_utils._load.</code><code class="descname">load_FASTTrackaI_files</code><span class="sig-paren">(</span><em>file_</em>, <em>append=False</em>, <em>save_files=False</em>, <em>res_path=None</em>, <em>seq_len=120</em>, <em>irrad=5456200000000.0</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._load.load_FASTTrackaI_files" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">phyto_photo_utils._load.</code><code class="descname">load_FASTTrackaI_files</code><span class="sig-paren">(</span><em>file_</em>, <em>append=False</em>, <em>save_files=False</em>, <em>res_path=None</em>, <em>seq_len=120</em>, <em>irrad=None</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._load.load_FASTTrackaI_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the raw data file and convert to a csv with standard formatting.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -179,7 +200,7 @@
 <li><strong>save_files</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, files will be saved as .csv.</li>
 <li><strong>res_path</strong> (<em>dir</em><em>, </em><em>default=None</em>) – The path directory where to save files, only required if save_files = True.</li>
 <li><strong>seq_len</strong> (<em>int</em><em>, </em><em>default=120</em>) – The number of flashlets in the protocol.</li>
-<li><strong>irrad</strong> (<em>int</em><em>, </em><em>default=545.62e10</em>) – The light/dark chamber photons per count from the calibration file.</li>
+<li><strong>irrad</strong> (<em>int</em><em>, </em><em>default=None</em>) – The light/dark chamber photons per count from the calibration file.</li>
 </ul>
 </td>
 </tr>
@@ -209,7 +230,7 @@
 
 <dl class="function">
 <dt id="phyto_photo_utils._load.load_FIRe_files">
-<code class="descclassname">phyto_photo_utils._load.</code><code class="descname">load_FIRe_files</code><span class="sig-paren">(</span><em>file_</em>, <em>append=False</em>, <em>save_files=False</em>, <em>res_path=None</em>, <em>seq_len=160</em>, <em>flen=1e-06</em>, <em>irrad=47248</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._load.load_FIRe_files" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">phyto_photo_utils._load.</code><code class="descname">load_FIRe_files</code><span class="sig-paren">(</span><em>file_</em>, <em>append=False</em>, <em>save_files=False</em>, <em>res_path=None</em>, <em>seq_len=160</em>, <em>flen=1e-06</em>, <em>irrad=None</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._load.load_FIRe_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the raw data file (.000 format) and convert to a csv with standard formatting.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -222,7 +243,7 @@
 <li><strong>res_path</strong> (<em>str</em><em>, </em><em>default=None</em>) – The path directory where to save files, only required if save_files = True.</li>
 <li><strong>seq_len</strong> (<em>int</em><em> , </em><em>default=160</em>) – The number of flashlets in the protocol.</li>
 <li><strong>flen</strong> (<em>float</em><em>, </em><em>default=1e-6</em>) – The flashlet length in seconds.</li>
-<li><strong>irrad</strong> (<em>int</em><em>, </em><em>default=47248</em>) – The LED output in ???.</li>
+<li><strong>irrad</strong> (<em>int</em><em>, </em><em>default=None</em>) – The LED output in μE m<sup>2</sup> s<sup>-1</sup>.</li>
 </ul>
 </td>
 </tr>
@@ -257,19 +278,18 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>file</strong> (<em>dir</em>) – the path directory to the .000 data file from benchtop SAtlantic FIRe.</li>
-<li><strong>append</strong> (<em>bool</em><em>, </em><em>default=False</em>) – if True, multiple files will be concatenated together.</li>
-<li><strong>save_files</strong> (<em>bool</em><em>, </em><em>default=False</em>) – if True, files will be saved as .csv.</li>
-<li><strong>led_separate</strong> (<em>bool</em><em>, </em><em>default=False</em>) – if True, the protocols will be separated dependent upon the LED sequence.</li>
-<li><strong>res_path</strong> (<em>dir</em>) – the path directory where to save files, only required if save_files = True.</li>
-<li><strong>seq_len</strong> (<em>int</em><em>, </em><em>default=140</em>) – the number of flashlets in the protocol.</li>
-<li><strong>flen</strong> (<em>float</em><em>, </em><em>default=2e-6</em>) – flashlet length in seconds.</li>
+<li><strong>file</strong> (<em>dir</em>) – The path directory to the .000 data file from benchtop SAtlantic FIRe.</li>
+<li><strong>append</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, multiple files will be concatenated together.</li>
+<li><strong>save_files</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, files will be saved as .csv.</li>
+<li><strong>led_separate</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, the protocols will be separated dependent upon the LED sequence.</li>
+<li><strong>res_path</strong> (<em>dir</em>) – The path directory where to save files, only required if save_files = True.</li>
+<li><strong>seq_len</strong> (<em>int</em><em>, </em><em>default=140</em>) – The number of flashlets in the protocol.</li>
+<li><strong>flen</strong> (<em>float</em><em>, </em><em>default=2e-6</em>) – The flashlet length in seconds.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>df</strong> (<em>pandas.DataFrame, shape=[n,7]</em>) – A dataframe of the raw fluorescence data with columns:
-flashlet_number, fyield, datetime, seq, seq_time, pfd,  led_sequence</li>
+<li><strong>df</strong> (<em>pandas.DataFrame, shape=[n,7]</em>) – A dataframe of the raw fluorescence data with columns as below:</li>
 <li><strong>flashlet_number</strong> (<em>np.array, dtype=int, shape=[n,]</em>) – A sequential number from 1 to <code class="docutils literal notranslate"><span class="pre">seq_len</span></code></li>
 <li><strong>fyield</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The raw fluorescence yield data.</li>
 <li><strong>datetime</strong> (<em>np.array, dtype=datetime64, shape=[n,]</em>) – The date and time of measurement.</li>
@@ -317,6 +337,10 @@ flashlet_number, fyield, datetime, seq, seq_time, pfd,  led_sequence</li>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">calculate_blank_FIRe</span><span class="p">(</span><span class="n">file_</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -341,6 +365,10 @@ flashlet_number, fyield, datetime, seq, seq_time, pfd,  led_sequence</li>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">calculate_blank_FastOcean</span><span class="p">(</span><span class="n">file_</span><span class="p">,</span> <span class="n">seq_len</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -368,6 +396,10 @@ This bias is then added to the relaxation phase.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">correct_fire_bias_correction</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">sat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -396,14 +428,18 @@ The multiplier [1] can be adjusted by the user.</p>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">remove_outlier_from_time_average</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">multiplier</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
 <div class="section" id="module-phyto_photo_utils._saturation">
 <span id="saturation"></span><h2>Saturation<a class="headerlink" href="#module-phyto_photo_utils._saturation" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="phyto_photo_utils._saturation.calculate_fixedpmodel">
-<code class="descclassname">phyto_photo_utils._saturation.</code><code class="descname">calculate_fixedpmodel</code><span class="sig-paren">(</span><em>pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, bounds=True, sig_lims=[100, 2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._saturation.calculate_fixedpmodel" title="Permalink to this definition">¶</a></dt>
+<dt id="phyto_photo_utils._saturation.calculate_saturation_with_fixedpmodel">
+<code class="descclassname">phyto_photo_utils._saturation.</code><code class="descname">calculate_saturation_with_fixedpmodel</code><span class="sig-paren">(</span><em>pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, bounds=True, sig_lims=[100, 2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._saturation.calculate_saturation_with_fixedpmodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the raw transient data and perform the Kolber et al. 1998 saturation model.</p>
 <p>Note: This sets a user defined fixed value for ro (the connectivity factor).</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -411,41 +447,37 @@ The multiplier [1] can be adjusted by the user.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pfd</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – the photon flux density of the instrument</li>
-<li><strong>fyield</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – the fluorescence yield of the instrument</li>
-<li><strong>seq</strong> (<em>np.array</em><em>, </em><em>dtype=int</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – the measurement number</li>
-<li><strong>datetime</strong> (<em>np.array</em><em>, </em><em>dtype=datetime64</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – the date &amp; time of each measurement in the numpy datetime64 format</li>
+<li><strong>pfd</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The photon flux density of the instrument</li>
+<li><strong>fyield</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The fluorescence yield of the instrument</li>
+<li><strong>seq</strong> (<em>np.array</em><em>, </em><em>dtype=int</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The measurement number</li>
+<li><strong>datetime</strong> (<em>np.array</em><em>, </em><em>dtype=datetime64</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The date &amp; time of each measurement in the numpy datetime64 format</li>
 <li><strong>blank</strong> (<em>np.array</em><em>, </em><em>dype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The blank value, must be the same length as fyield.</li>
 <li><strong>sat_len</strong> (<em>int</em><em>, </em><em>default=100</em>) – The number of flashlets in saturation sequence</li>
 <li><strong>skip</strong> (<em>int</em><em>, </em><em>default=0</em>) – the number of flashlets to skip at start</li>
 <li><strong>ro</strong> (<em>float</em><em>, </em><em>default=0.3</em>) – The fixed value of the connectivity coefficient</li>
 <li><strong>bounds</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
 <li><strong>sig_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>default=</em><em>[</em><em>100</em><em>,</em><em>2200</em><em>]</em>) – The lower and upper limit bounds for fitting sigmaPSII</li>
-<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=100</em>) – The number of iterations to perform fitting routine.</li>
-<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>loss</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>f_scale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=1000</em>) – The number of iterations to perform fitting routine.</li>
+<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>res</strong> (<em>pandas.DataFrame</em>) – The results of the fitting routine with columns: fo, fm, sigma, rsq, bias, rms, fo_err, fm_err, sigma_err, nfl</li>
-<li><strong>fo</strong> (<em>minimum fluorescence yield</em>)</li>
-<li><strong>fm</strong> (<em>maximum fluorescence yield</em>)</li>
-<li><strong>fvfm</strong> (<em>maximum photochemical efficiency</em>)</li>
-<li><strong>sigma</strong> (<em>effective absorption cross-section of PSII in A^^2</em>)</li>
-<li><strong>rsq</strong> (<em>r^^2 value</em>)</li>
-<li><strong>bias</strong> (<em>bias of fit</em>)</li>
-<li><strong>chi</strong> (<em>chi-squared goodness of fit</em>)</li>
-<li><strong>fo_err</strong> (<em>fit error of Fo</em>)</li>
-<li><strong>fm_err</strong> (<em>fit error of Fm</em>)</li>
-<li><strong>sigma_err</strong> (<em>fit error of SigmaPSII</em>)</li>
-<li><strong>nfl</strong> (<em>number of flashlets used for fitting</em>)</li>
+<li><strong>res</strong> (<em>pandas.DataFrame</em>) – The results of the fitting routine with columns as below:</li>
+<li><strong>fo</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The minimum fluorescence yield</li>
+<li><strong>fm</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum fluorescence yield</li>
+<li><strong>fvfm</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum photochemical efficiency</li>
+<li><strong>sigma</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The effective absorption cross-section of PSII in Å<sup>2</sup></li>
+<li><strong>rsq</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The r<sup>2</sup> value</li>
+<li><strong>bias</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The bias of fit</li>
+<li><strong>chi</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The chi-squared goodness of fit</li>
+<li><strong>fo_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of F<sub>o</sub></li>
+<li><strong>fm_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of F<sub>m</sub></li>
+<li><strong>sigma_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of σ<sub>PSII</sub></li>
+<li><strong>nfl</strong> (<em>np.array, dtype=int, shape=[n,]</em>) – The number of flashlets used for fitting</li>
 </ul>
 </p>
 </td>
@@ -453,117 +485,113 @@ See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.
 </tbody>
 </table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/raw/ppu/fasttrackai/FASTTrackaI_example.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sat</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_pmodel</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">pfd</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ro_lims</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">sig_lims</span> <span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">2200</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;./data/output/saturation/calc_p/&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sat</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;FASTTrackaI_sat_calc_p.csv&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sat</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_saturation_with_fixedpmodel</span><span class="p">(</span><span class="n">pfd</span><span class="p">,</span> <span class="n">fyield</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ro</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">sig_lims</span> <span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">2200</span><span class="p">])</span>
 </pre></div>
 </div>
 </dd></dl>
 
 <dl class="function">
-<dt id="phyto_photo_utils._saturation.calculate_nopmodel">
-<code class="descclassname">phyto_photo_utils._saturation.</code><code class="descname">calculate_nopmodel</code><span class="sig-paren">(</span><em>pfd, fyield, seq, datetime, ro=None, blank=0, sat_len=100, skip=0, bounds=True, sig_lims=[100, 2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._saturation.calculate_nopmodel" title="Permalink to this definition">¶</a></dt>
+<dt id="phyto_photo_utils._saturation.calculate_saturation_with_nopmodel">
+<code class="descclassname">phyto_photo_utils._saturation.</code><code class="descname">calculate_saturation_with_nopmodel</code><span class="sig-paren">(</span><em>pfd, fyield, seq, datetime, ro=None, blank=0, sat_len=100, skip=0, bounds=True, sig_lims=[100, 2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._saturation.calculate_saturation_with_nopmodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the raw transient data and perform the no connectivity saturation model.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pfd</strong> (<em>numpy.ndarray</em>) – the photon flux density of the instrument</li>
-<li><strong>fyield</strong> (<em>numpy.ndarray</em>) – the fluorescence yield of the instrument</li>
-<li><strong>seq</strong> (<em>numpy.ndarray</em>) – the measurement number</li>
-<li><strong>datetime</strong> (<em>numpy.ndarray</em><em> (</em><em>datetime64</em><em>)</em>) – the date &amp; time of each measurement in the numpy datetime64 format</li>
-<li><strong>blank</strong> (<em>float</em><em>, </em><em>int</em><em> or </em><em>numpy.ndarray</em>) – the blank value, if np.ndarray must be the same length as fyield</li>
-<li><strong>sat_len</strong> (<em>int</em>) – the number of flashlets in saturation sequence</li>
-<li><strong>skip</strong> (<em>int</em>) – the number of flashlets to skip at start</li>
-<li><strong>bounds</strong> (<em>bool</em>) – if True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
-<li><strong>sig_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – the lower and upper limit bounds for fitting sigmaPSII</li>
-<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=100</em>) – The number of iterations to perform fitting routine.</li>
-<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>pfd</strong> (<em>numpy.ndarray</em>) – The photon flux density of the instrument</li>
+<li><strong>fyield</strong> (<em>numpy.ndarray</em>) – The fluorescence yield of the instrument</li>
+<li><strong>seq</strong> (<em>numpy.ndarray</em>) – The measurement number</li>
+<li><strong>datetime</strong> (<em>numpy.ndarray</em><em> (</em><em>datetime64</em><em>)</em>) – The date &amp; time of each measurement in the numpy datetime64 format</li>
+<li><strong>blank</strong> (<em>float</em><em>, </em><em>int</em><em> or </em><em>numpy.ndarray</em>) – The blank value, if np.ndarray must be the same length as fyield</li>
+<li><strong>sat_len</strong> (<em>int</em>) – The number of flashlets in saturation sequence</li>
+<li><strong>skip</strong> (<em>int</em>) – The number of flashlets to skip at start</li>
+<li><strong>bounds</strong> (<em>bool</em>) – If True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
+<li><strong>sig_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The lower and upper limit bounds for fitting sigmaPSII</li>
+<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=1000</em>) – The number of iterations to perform fitting routine.</li>
+<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>res</strong> – The results of the fitting routine with columns: fo, fm, sigma, rsq, bias, rms, fo_err, fm_err, sigma_err, nfl</p>
-<p>fo: minimum fluorescence yield
-fm: maximum fluorescence yield
-fvfm: maximum photochemical efficiency
-sigma: effective absorption cross-section of PSII in A^^2
-rsq: r^^2 value
-bias: bias of fit
-chi: chi-squared goodness of fit
-fo_err: fit error of Fo
-fm_err: fit error of Fm
-sigma_err: fit error of SigmaPSII
-nfl: number of flashlets used for fitting</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>res</strong> (<em>pandas.DataFrame, shape=[n,11]</em>) – The results of the fitting routine with as below:</li>
+<li><strong>fo</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The minimum fluorescence yield</li>
+<li><strong>fm</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum fluorescence yield</li>
+<li><strong>fvfm</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum photochemical efficiency</li>
+<li><strong>sigma</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The effective absorption cross-section of PSII in Å<sup>2</sup></li>
+<li><strong>rsq</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The r<sup>2</sup> value</li>
+<li><strong>bias</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The bias of the fit</li>
+<li><strong>chi</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The chi-squared goodness of the fit</li>
+<li><strong>fo_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of F<sub>o</sub></li>
+<li><strong>fm_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of F<sub>m</sub></li>
+<li><strong>sigma_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of σ<sub>PSII</sub></li>
+<li><strong>nfl</strong> (<em>np.array, dtype=int, shape=[n,]</em>) – The number of flashlets used for fitting</li>
+</ul>
 </p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sat</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_saturation_with_nopmodel</span><span class="p">(</span><span class="n">pfd</span><span class="p">,</span> <span class="n">fyield</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sig_lims</span> <span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">2200</span><span class="p">])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
-<dt id="phyto_photo_utils._saturation.calculate_pmodel">
-<code class="descclassname">phyto_photo_utils._saturation.</code><code class="descname">calculate_pmodel</code><span class="sig-paren">(</span><em>pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, bounds=True, ro_lims=[0.0, 1.0], sig_lims=[100, 2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._saturation.calculate_pmodel" title="Permalink to this definition">¶</a></dt>
+<dt id="phyto_photo_utils._saturation.calculate_saturation_with_pmodel">
+<code class="descclassname">phyto_photo_utils._saturation.</code><code class="descname">calculate_saturation_with_pmodel</code><span class="sig-paren">(</span><em>pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, bounds=True, ro_lims=[0.0, 1.0], sig_lims=[100, 2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._saturation.calculate_saturation_with_pmodel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process the raw transient data and perform the Kolber et al. 1998 saturation model, including modelling the connectivity coefficient.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>pfd</strong> (<em>numpy.ndarray</em>) – the photon flux density of the instrument</li>
-<li><strong>fyield</strong> (<em>numpy.ndarray</em>) – the fluorescence yield of the instrument</li>
-<li><strong>seq</strong> (<em>numpy.ndarray</em>) – the measurement number</li>
-<li><strong>datetime</strong> (<em>numpy.ndarray</em><em> (</em><em>datetime64</em><em>)</em>) – the date &amp; time of each measurement in the numpy datetime64 format</li>
-<li><strong>blank</strong> (<em>float</em><em>, </em><em>int</em><em> or </em><em>numpy.ndarray</em>) – the blank value, if np.ndarray must be the same length as fyield</li>
-<li><strong>sat_len</strong> (<em>int</em>) – the number of flashlets in saturation sequence</li>
-<li><strong>skip</strong> (<em>int</em>) – the number of flashlets to skip at start</li>
-<li><strong>bounds</strong> (<em>bool</em>) – if True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
-<li><strong>ro_lims</strong> (<em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – the lower and upper limit bounds for fitting the connectivity coefficient</li>
-<li><strong>sig_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – the lower and upper limit bounds for fitting sigmaPSII</li>
-<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
-<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=100</em>) – The number of iterations to perform fitting routine.</li>
-<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables.
-See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>pfd</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The photon flux density of the instrument</li>
+<li><strong>fyield</strong> (<em>nnp.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The fluorescence yield of the instrument</li>
+<li><strong>seq</strong> (<em>np.array</em><em>, </em><em>dtype=int</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The measurement number</li>
+<li><strong>datetime</strong> (<em>np.array</em><em>, </em><em>dtype=datetime64</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The date &amp; time of each measurement in the numpy datetime64 format</li>
+<li><strong>blank</strong> (<em>np.array</em><em>, </em><em>dype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The blank be the same length as fyield</li>
+<li><strong>sat_len</strong> (<em>int</em>) – The number of flashlets in saturation sequence</li>
+<li><strong>skip</strong> (<em>int</em>) – The number of flashlets to skip at start</li>
+<li><strong>bounds</strong> (<em>bool</em>) – If True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
+<li><strong>ro_lims</strong> (<em>[</em><em>float</em><em>, </em><em>float</em><em>]</em>) – The lower and upper limit bounds for fitting the connectivity coefficient</li>
+<li><strong>sig_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The lower and upper limit bounds for fitting sigmaPSII</li>
+<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=1000</em>) – The number of iterations to perform fitting routine.</li>
+<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><p><strong>res</strong> – The results of the fitting routine with columns: fo, fm, sigma, rsq, bias, rms, fo_err, fm_err, sigma_err, nfl</p>
-<p>fo: minimum fluorescence yield
-fm: maximum fluorescence yield
-fvfm: maximum photochemical efficiency
-sigma: effective absorption cross-section of PSII in A^^2
-rsq: r^^2 value
-bias: bias of fit
-chi: chi-squared goodness of fit
-fo_err: fit error of Fo
-fm_err: fit error of Fm
-sigma_err: fit error of SigmaPSII
-nfl: number of flashlets used for fitting</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>res</strong> (<em>pandas.DataFrame</em>) – The results of the fitting routine with columns as below:</li>
+<li><strong>fo</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The minimum fluorescence yield</li>
+<li><strong>fm</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum fluorescence yield</li>
+<li><strong>fvfm</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum photochemical efficiency</li>
+<li><strong>sigma</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The effective absorption cross-section of PSII in Å<sup>2</sup></li>
+<li><strong>rsq</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The r<sup>2</sup> value</li>
+<li><strong>bias</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The bias of the fit</li>
+<li><strong>chi</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The chi-squared goodness of the fit</li>
+<li><strong>fo_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of F<sub>o</sub></li>
+<li><strong>fm_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of F<sub>m</sub></li>
+<li><strong>sigma_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of σ<sub>PSII</sub></li>
+<li><strong>ro_err</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The fit error of ρ</li>
+<li><strong>nfl</strong> (<em>np.array, dtype=int, shape=[n,]</em>) – The number of flashlets used for fitting</li>
+</ul>
 </p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">pandas.DataFrame</p>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">sat</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_saturation_with_pmodel</span><span class="p">(</span><span class="n">pfd</span><span class="p">,</span> <span class="n">fyield</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ro_lims</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span> <span class="n">sig_lims</span> <span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">2200</span><span class="p">])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </div>
@@ -601,7 +629,7 @@ See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
-<li><strong>res</strong> (<em>pandas.DataFrame, shape=[n,11]</em>) – The results of the fitting routine with columns as below:</li>
+<li><strong>res</strong> (<em>pandas.DataFrame, shape=[n,10]</em>) – The results of the fitting routine with columns as below:</li>
 <li><strong>fo_r</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The minimum fluorescence of relaxation phase.</li>
 <li><strong>fm_r</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The maximum fluorescence of relaxation phase</li>
 <li><strong>tau</strong> (<em>np.array, dtype=float, shape=[n,]</em>) – The rate of QA- reoxidation in microseconds.</li>
@@ -619,10 +647,7 @@ See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.
 </tbody>
 </table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/raw/ppu/fastocean/FastOcean_example.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rel</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_single_relaxation</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">seq_time</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rel_len</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tau_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50000</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;./data/output/relaxation/single/&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rel</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;FastOcean_rel_single.csv&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rel</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_single_relaxation</span><span class="p">(</span><span class="n">fyield</span><span class="p">,</span> <span class="n">seq_time</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rel_len</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tau_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50000</span><span class="p">])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -636,18 +661,18 @@ See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>seq_time</strong> (<em>numpy.ndarray</em>) – the sequence time of the flashlets</li>
-<li><strong>fyield</strong> (<em>numpy.ndarray</em>) – the fluorescence yield of the instrument</li>
-<li><strong>seq</strong> (<em>numpy.ndarray</em>) – the measurement number</li>
-<li><strong>datetime</strong> (<em>numpy.ndarray</em><em> (</em><em>datetime64</em><em>)</em>) – the date &amp; time of each measurement in the numpy datetime64 format</li>
-<li><strong>blank</strong> (<em>float</em><em>, </em><em>int</em><em> or </em><em>numpy.ndarray</em>) – the blank value, if np.ndarray must be the same length as fyield</li>
-<li><strong>sat_len</strong> (<em>int</em>) – the number of flashlets in the saturation sequence</li>
-<li><strong>rel_len</strong> (<em>int</em>) – the number of flashlets in the relaxation sequence</li>
-<li><strong>sat_flashlets</strong> (<em>int</em>) – the number of saturation flashlets to include at the start</li>
-<li><strong>bounds</strong> (<em>bool</em>) – if True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
-<li><strong>tau1_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – the lower and upper limit bounds for fitting τ1</li>
-<li><strong>tau2_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – the lower and upper limit bounds for fitting τ2</li>
-<li><strong>tau3_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – the lower and upper limit bounds for fitting τ3</li>
+<li><strong>seq_time</strong> (<em>numpy.ndarray</em>) – The sequence time of the flashlets</li>
+<li><strong>fyield</strong> (<em>numpy.ndarray</em>) – The fluorescence yield of the instrument</li>
+<li><strong>seq</strong> (<em>numpy.ndarray</em>) – The measurement number</li>
+<li><strong>datetime</strong> (<em>numpy.ndarray</em><em> (</em><em>datetime64</em><em>)</em>) – The date &amp; time of each measurement in the numpy datetime64 format</li>
+<li><strong>blank</strong> (<em>float</em><em>, </em><em>int</em><em> or </em><em>numpy.ndarray</em>) – The blank value, if np.ndarray must be the same length as fyield</li>
+<li><strong>sat_len</strong> (<em>int</em>) – The number of flashlets in the saturation sequence</li>
+<li><strong>rel_len</strong> (<em>int</em>) – The number of flashlets in the relaxation sequence</li>
+<li><strong>sat_flashlets</strong> (<em>int</em>) – The number of saturation flashlets to include at the start</li>
+<li><strong>bounds</strong> (<em>bool</em>) – If True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
+<li><strong>tau1_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The lower and upper limit bounds for fitting τ1</li>
+<li><strong>tau2_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The lower and upper limit bounds for fitting τ2</li>
+<li><strong>tau3_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em>) – The lower and upper limit bounds for fitting τ3</li>
 <li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization.
 See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
 <li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss.
@@ -689,10 +714,282 @@ See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.
 </tbody>
 </table>
 <p class="rubric">Example</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./data/raw/ppu/fire/FIRe_example.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rel</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_triple_relaxation</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">fyield</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">seq_time</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rel_len</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">sat_flashlets</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tau1_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">800</span><span class="p">],</span> <span class="n">tau2_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">800</span><span class="p">,</span> <span class="mi">2000</span><span class="p">],</span> <span class="n">tau3_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="s1">&#39;./data/output/relaxation/triple/&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rel</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output</span><span class="o">+</span><span class="s1">&#39;FIRe_rel_triple.csv&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">rel</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_triple_relaxation</span><span class="p">(</span><span class="n">fyield</span><span class="p">,</span> <span class="n">seq_time</span><span class="p">,</span> <span class="n">seq</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sat_len</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">rel_len</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">sat_flashlets</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tau1_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">800</span><span class="p">],</span> <span class="n">tau2_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">800</span><span class="p">,</span> <span class="mi">2000</span><span class="p">],</span> <span class="n">tau3_lims</span><span class="o">=</span><span class="p">[</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-phyto_photo_utils._spectral_correction">
+<span id="spectral-correction"></span><h2>Spectral Correction<a class="headerlink" href="#module-phyto_photo_utils._spectral_correction" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="phyto_photo_utils._spectral_correction.calculate_chl_specific_absorption">
+<code class="descclassname">phyto_photo_utils._spectral_correction.</code><code class="descname">calculate_chl_specific_absorption</code><span class="sig-paren">(</span><em>aptot</em>, <em>blank</em>, <em>ap_lambda</em>, <em>depig=None</em>, <em>chl=None</em>, <em>vol=None</em>, <em>beta=None</em>, <em>diam=None</em>, <em>bricaud_slope=True</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._spectral_correction.calculate_chl_specific_absorption" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the raw absorbance data to produce chlorophyll specific phytoplankton absorption.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>aptot</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The raw absorbance data.</li>
+<li><strong>blank</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The blank absorbance data.</li>
+<li><strong>ap_lambda</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The wavelengths corresponding to the measurements.</li>
+<li><strong>depig</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The raw depigmented absorbance data.</li>
+<li><strong>chl</strong> (<em>float</em>) – The chlorophyll concentration associated with the measurement.</li>
+<li><strong>vol</strong> (<em>int</em>) – The volume of water filtered in mL.</li>
+<li><strong>beta</strong> (<em>int</em>) – The pathlength amplification factor (see Roesler et al. 1998).</li>
+<li><strong>diam</strong> (<em>float</em>) – The diameter of filtrate in mm.</li>
+<li><strong>bricaud_slope</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, will theoretically calculate detrital slope (see Bricaud &amp; Stramski 1990). If False, will subtract depigmented absorption from total absorption.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>aphy</strong> – The chlorophyll specific phytoplankton absorption data.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">np.array, dtype=float, shape=[n,]</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aphy</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_chl_specific_absorption</span><span class="p">(</span><span class="n">pa_data</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">chl</span><span class="o">=</span><span class="mf">0.19</span><span class="p">,</span> <span class="n">vol</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">diam</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">bricaud_slope</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="phyto_photo_utils._spectral_correction.calculate_instrument_led_correction">
+<code class="descclassname">phyto_photo_utils._spectral_correction.</code><code class="descname">calculate_instrument_led_correction</code><span class="sig-paren">(</span><em>aphy</em>, <em>ap_lambda</em>, <em>e_insitu=None</em>, <em>e_led=None</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._spectral_correction.calculate_instrument_led_correction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the spectral correction factor
+TO DO: Create method to convert all arrays to same length and resolution</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>aphy</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The chlorophyll specific phytoplankton absorption.</li>
+<li><strong>ap_lambda</strong> (<em>np.array</em><em>, </em><em>dtype=int</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The wavelengths associated with the aphy.</li>
+<li><strong>e_insitu</strong> (<em>np.array</em><em>, </em><em>dtype=int</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The in situ irradiance field, if None is passed then will theoretically calculated in situ light field.</li>
+<li><strong>e_led</strong> (<em>'fire'</em><em>,</em><em>'fasttracka_ii'</em>) – The excitation spectra of the instrument.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>scf</strong> – The spectral correction factor.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">calculate_instrument_led_correction</span><span class="p">(</span><span class="n">aphy</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">e_led</span><span class="o">=</span><span class="s1">&#39;fire&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-phyto_photo_utils._flc">
+<span id="fluorescence-light-curves"></span><h2>Fluorescence Light Curves<a class="headerlink" href="#module-phyto_photo_utils._flc" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="phyto_photo_utils._flc.calculate_e_dependent_etr">
+<code class="descclassname">phyto_photo_utils._flc.</code><code class="descname">calculate_e_dependent_etr</code><span class="sig-paren">(</span><em>fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0, 4], etrmax_lims=[0, 2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._flc.calculate_e_dependent_etr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the raw transient data and perform the no connectivity saturation model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fo</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The minimum fluorescence yield</li>
+<li><strong>fm</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The maximum fluorescence yield</li>
+<li><strong>fvfm</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The photosynthetic efficiency</li>
+<li><strong>sigma</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The effective absorption cross-section of PSII in Å<sup>2</sup></li>
+<li><strong>par</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The actinic light levels in μE m<sup>2</sup> s<sup>-1</sup></li>
+<li><strong>dark_sigma</strong> (<em>bool</em>) – If True, will use mean of σ<sub>PSII</sub> under 0 actinic light for calculation. If False, will use σ<sub>PSII</sub> and σ<sub>PSII</sub>’ for calculation</li>
+<li><strong>light_step_size</strong> (<em>int</em>) – The number of measurements for initial light step</li>
+<li><strong>outlier_multiplier</strong> (<em>int</em><em>, </em><em>default=3</em>) – The multiplier to apply to the standard deviation for determining the upper and lower limits</li>
+<li><strong>return_data</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, will return the final data used for the fit</li>
+<li><strong>bounds</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
+<li><strong>alpha_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>,</em><em>4</em><em>]</em>) – The lower and upper limit bounds for fitting α<sup>ETR</sup></li>
+<li><strong>etrmax_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>,</em><em>2000</em><em>]</em>) – The lower and upper limit bounds for fitting ETR<sub>max</sub></li>
+<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=100</em>) – The number of iterations to perform fitting routine.</li>
+<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>etr_max</strong> (<em>float</em>) – The maximum electron transport rate</li>
+<li><strong>alpha</strong> (<em>float</em>) – The light limited slope of electron transport</li>
+<li><strong>ek</strong> (<em>float</em>) – The photoacclimation of ETR</li>
+<li><strong>rsq</strong> (<em>float</em>) – The r<sup>2</sup> value</li>
+<li><strong>bias</strong> (<em>float</em>) – The bias of the fit</li>
+<li><strong>chi</strong> (<em>float</em>) – The chi-squared goodness of the fit</li>
+<li><strong>etrmax_err</strong> (<em>float</em>) – The fit error of ETR<sup>max</sup></li>
+<li><strong>alpha_err</strong> (<em>float</em>) – The fit error of α<sub>ETR</sub></li>
+<li><strong>data</strong> (<em>[np.array, np.array]</em>) – Optional, the final data used for the fitting procedure</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">etr_max</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">ek</span><span class="p">,</span> <span class="n">rsq</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">etr_max_err</span><span class="p">,</span> <span class="n">alpha_err</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_e_dependent_etr</span><span class="p">(</span><span class="n">fo</span><span class="p">,</span> <span class="n">fm</span><span class="p">,</span> <span class="n">fvfm</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">return_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="phyto_photo_utils._flc.calculate_e_independent_etr">
+<code class="descclassname">phyto_photo_utils._flc.</code><code class="descname">calculate_e_independent_etr</code><span class="sig-paren">(</span><em>fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0, 4], etrmax_lims=[0, 2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-09</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._flc.calculate_e_independent_etr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process the raw transient data and perform the no connectivity saturation model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fvfm</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The photosynthetic efficiency</li>
+<li><strong>sigma</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The effective absorption cross-section of PSII in Å<sup>2</sup></li>
+<li><strong>par</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The actinic light levels in μE m<sup>2</sup> s<sup>-1</sup></li>
+<li><strong>dark_sigma</strong> (<em>bool</em>) – If True, will use mean of σ<sub>PSII</sub> under 0 actinic light for calculation. If False, will use σ<sub>PSII</sub> and σ<sub>PSII</sub>’ for calculation</li>
+<li><strong>light_step_size</strong> (<em>int</em>) – The number of measurements for initial light step</li>
+<li><strong>outlier_multiplier</strong> (<em>int</em><em>, </em><em>default=3</em>) – The multiplier to apply to the standard deviation for determining the upper and lower limits</li>
+<li><strong>return_data</strong> (<em>bool</em><em>, </em><em>default=False</em>) – If True, will return the final data used for the fit</li>
+<li><strong>bounds</strong> (<em>bool</em><em>, </em><em>default=True</em>) – If True, will set lower and upper limit bounds for the estimation, not suitable for methods ‘lm’</li>
+<li><strong>alpha_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>,</em><em>4</em><em>]</em>) – The lower and upper limit bounds for fitting α<sup>ETR</sup></li>
+<li><strong>etrmax_lims</strong> (<em>[</em><em>int</em><em>, </em><em>int</em><em>]</em><em>, </em><em>default=</em><em>[</em><em>0</em><em>,</em><em>2000</em><em>]</em>) – The lower and upper limit bounds for fitting ETR<sub>max</sub></li>
+<li><strong>fit_method</strong> (<em>str</em><em>, </em><em>default='trf'</em>) – The algorithm to perform minimization. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>loss_method</strong> (<em>str</em><em>, </em><em>default='soft_l1'</em>) – The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>fscale</strong> (<em>float</em><em>, </em><em>default=0.1</em>) – The soft margin value between inlier and outlier residuals. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+<li><strong>max_nfev</strong> (<em>int</em><em>, </em><em>default=100</em>) – The number of iterations to perform fitting routine.</li>
+<li><strong>xtol</strong> (<em>float</em><em>, </em><em>default=1e-9</em>) – The tolerance for termination by the change of the independent variables. See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.least_squares</span></code> documentation for more information on non-linear least squares fitting options.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>etr_max</strong> (<em>float</em>) – The maximum electron transport rate</li>
+<li><strong>alpha</strong> (<em>float</em>) – The light limited slope of electron transport</li>
+<li><strong>ek</strong> (<em>float</em>) – The photoacclimation of ETR</li>
+<li><strong>rsq</strong> (<em>float</em>) – The r<sup>2</sup> value</li>
+<li><strong>bias</strong> (<em>float</em>) – The bias of the fit</li>
+<li><strong>chi</strong> (<em>float</em>) – The chi-squared goodness of the fit</li>
+<li><strong>etrmax_err</strong> (<em>float</em>) – The fit error of ETR<sup>max</sup></li>
+<li><strong>alpha_err</strong> (<em>float</em>) – The fit error of α<sub>ETR</sub></li>
+<li><strong>data</strong> (<em>[np.array, np.array]</em>) – Optional, the final data used for the fitting procedure</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">etr_max</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">ek</span><span class="p">,</span> <span class="n">rsq</span><span class="p">,</span> <span class="n">bias</span><span class="p">,</span> <span class="n">chi</span><span class="p">,</span> <span class="n">etr_max_err</span><span class="p">,</span> <span class="n">alpha_err</span> <span class="o">=</span> <span class="n">ppu</span><span class="o">.</span><span class="n">calculate_e_independent_etr</span><span class="p">(</span><span class="n">fvfm</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">return_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-phyto_photo_utils._plot">
+<span id="plotting"></span><h2>Plotting<a class="headerlink" href="#module-phyto_photo_utils._plot" title="Permalink to this headline">¶</a></h2>
+<p>&#64;package phyto_photo_utils.saturation
+&#64;file phyto_photo_utils/saturation.py
+&#64;author Thomas Ryan-Keogh
+&#64;brief module containing the functions for plotting.</p>
+<dl class="function">
+<dt id="phyto_photo_utils._plot.plot_fluorescence_light_curve">
+<code class="descclassname">phyto_photo_utils._plot.</code><code class="descname">plot_fluorescence_light_curve</code><span class="sig-paren">(</span><em>par</em>, <em>etr</em>, <em>etrmax=None</em>, <em>alpha=None</em>, <em>rsq=None</em>, <em>sigma=None</em>, <em>phi=False</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._plot.plot_fluorescence_light_curve" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>par</strong> (<em>np.array</em><em>, </em><em>dtype=float</em>) – the actinic light data from the fluorescence light curve</li>
+<li><strong>etr</strong> (<em>np.array</em><em>, </em><em>dtype=float</em>) – the electron transport rate data</li>
+<li><strong>etrmax</strong> (<em>float</em><em>, </em><em>default=None</em>) – the maximum electron transport rate</li>
+<li><strong>alpha</strong> (<em>float</em><em>, </em><em>default=None</em>) – the light limited slope of electron transport</li>
+<li><strong>rsq</strong> (<em>float</em><em>, </em><em>default=None</em>) – the r-squared value of the fit</li>
+<li><strong>sigma</strong> (<em>float</em><em>, </em><em>default=None</em>) – the effective absorption-cross section</li>
+<li><strong>phi</strong> (<em>bool</em><em>, </em><em>default=False</em>) – if True, etr data is phi and the modified Webb et al. (1974) fit is used</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> – a matplotlib figure object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">plot_fluorescence_light_curve</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">etr</span><span class="p">,</span> <span class="n">etrmax</span><span class="o">=</span><span class="n">etr_max</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="n">alpha</span><span class="p">,</span> <span class="n">rsq</span><span class="o">=</span><span class="n">rsq</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">phi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="phyto_photo_utils._plot.plot_relaxation_data">
+<code class="descclassname">phyto_photo_utils._plot.</code><code class="descname">plot_relaxation_data</code><span class="sig-paren">(</span><em>fyield</em>, <em>seq_time</em>, <em>fo_relax=None</em>, <em>fm_relax=None</em>, <em>tau=None</em>, <em>alpha=None</em>, <em>rsq=None</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._plot.plot_relaxation_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fyield</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The raw fluorescence yield data.</li>
+<li><strong>seq_time</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The time of the flashlet measurements.</li>
+<li><strong>fo_relax</strong> (<em>float</em><em>, </em><em>default=None</em>) – The minimum fluorescence value in the relaxation phase.</li>
+<li><strong>fm_relax</strong> (<em>float</em><em>, </em><em>default=None</em>) – The maximum fluorescence value in the relaxation phase.</li>
+<li><strong>tau</strong> (<em>float</em><em>, </em><em>default=None</em>) – The</li>
+<li><strong>alpha</strong> (<em>float</em><em>, </em><em>default=None</em>) – The</li>
+<li><strong>rsq</strong> (<em>float</em><em>, </em><em>default=None</em>) – The r-squared value of the fit.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> – a matplotlib figure object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ppu</span><span class="o">.</span><span class="n">plot_relaxation_data</span><span class="p">(</span><span class="n">fyield</span><span class="p">,</span> <span class="n">seq_time</span><span class="p">,</span> <span class="n">fo_relax</span><span class="o">=</span><span class="n">fo_r</span><span class="p">,</span> <span class="n">fm_relax</span><span class="o">=</span><span class="n">fm_r</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="p">(</span><span class="n">tau1</span><span class="p">,</span> <span class="n">tau2</span><span class="p">,</span> <span class="n">tau3</span><span class="p">),</span> <span class="n">alpha</span><span class="o">=</span><span class="p">(</span><span class="n">alpha1</span><span class="p">,</span> <span class="n">alpha2</span><span class="p">,</span> <span class="n">alpha3</span><span class="p">),</span> <span class="n">rsq</span><span class="o">=</span><span class="n">rsq</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="phyto_photo_utils._plot.plot_saturation_data">
+<code class="descclassname">phyto_photo_utils._plot.</code><code class="descname">plot_saturation_data</code><span class="sig-paren">(</span><em>fyield</em>, <em>pfd</em>, <em>fo=None</em>, <em>fm=None</em>, <em>sigma=None</em>, <em>ro=None</em>, <em>rsq=None</em><span class="sig-paren">)</span><a class="headerlink" href="#phyto_photo_utils._plot.plot_saturation_data" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fyield</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The raw fluorescence yield data.</li>
+<li><strong>pfd</strong> (<em>np.array</em><em>, </em><em>dtype=float</em><em>, </em><em>shape=</em><em>[</em><em>n</em><em>,</em><em>]</em>) – The photon flux density.</li>
+<li><strong>fo</strong> (<em>float</em><em>, </em><em>default=None</em>) – The minimum fluorescence value.</li>
+<li><strong>fm</strong> (<em>float</em><em>, </em><em>default=None</em>) – The maximum fluorescence value.</li>
+<li><strong>sigma</strong> (<em>float</em><em>, </em><em>default=None</em>) – The effective absorption cross-section value.</li>
+<li><strong>ro</strong> (<em>float</em><em>, </em><em>default=None</em>) – The connectivity coefficient.</li>
+<li><strong>rsq</strong> (<em>float</em><em>, </em><em>default=None</em>) – The r-squared value of the fit.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ax</strong> – a matplotlib figure object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">plot_saturation_data</span><span class="p">(</span><span class="n">fyield</span><span class="p">,</span> <span class="n">pfd</span><span class="p">,</span> <span class="n">fo</span><span class="o">=</span><span class="n">fo</span><span class="p">,</span> <span class="n">fm</span><span class="o">=</span><span class="n">fm</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">,</span> <span class="n">ro</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rsq</span><span class="o">=</span><span class="n">rsq</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -708,8 +1005,10 @@ See <code class="docutils literal notranslate"><span class="pre">scipy.optimize.
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="citing.html" class="btn btn-neutral float-right" title="Citing and Referencing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to PhytoPhotoUtils’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="plot.html" class="btn btn-neutral float-left" title="Plotting" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
