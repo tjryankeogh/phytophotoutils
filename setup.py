@@ -63,5 +63,7 @@ setup(
         "scipy",
         "numpy",
         "pandas",
+        "datetime",
+        "csv",
     ],
 )

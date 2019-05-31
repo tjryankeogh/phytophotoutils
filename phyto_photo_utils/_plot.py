@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-"""
-@package phyto_photo_utils.saturation
-@file phyto_photo_utils/saturation.py
-@author Thomas Ryan-Keogh
-@brief module containing the functions for plotting.
-"""
+
+from ._equations import __fit_kolber__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_Webb_model__, __calculate_modified_Webb_model__
+from matplotlib.pyplot import subplots
+from numpy import arange, array
 
 def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq=None):
 
@@ -21,27 +19,22 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 	fm : float, default=None
 		The maximum fluorescence value.
 	sigma: float, default=None
-		The effective absorption cross-section value.
+		The effective absorption cross-section value in Å\ :sup:`2`.
 	ro: float, default=None
 		The connectivity coefficient.
 	rsq: float, default=None
-		The r-squared value of the fit.
+		The r\ :sup:`2` value of the fit.
 
 	Returns
 	-------
 
 	ax : object
-		a matplotlib figure object
+		A matplotlib figure object.
 
 	Example
 	-------
 	>>> plot_saturation_data(fyield, pfd, fo=fo, fm=fm, sigma=sigma, ro=None, rsq=rsq)
 	"""
-
-
-	from ._equations import __fit_kolber__
-	from matplotlib.pyplot import subplots
-	from numpy import arange, array
 
 	if ro is None:
 		params = [fo, fm, sigma]
@@ -78,25 +71,22 @@ def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=Non
 	fm_relax : float, default=None
 		The maximum fluorescence value in the relaxation phase.
 	tau: float, default=None
-		The 
+		The rate of reoxidation in μs.
 	alpha: float, default=None
-		The
+		The ratio of reoxidisation components.
 	rsq: float, default=None
-		The r-squared value of the fit.
+		The r\ :sup:`2` value of the fit.
 
 	Returns
 	-------
 
 	ax : object
-		a matplotlib figure object
+		A matplotlib figure object.
 	
 	Example
 	-------
 	>>> ppu.plot_relaxation_data(fyield, seq_time, fo_relax=fo_r, fm_relax=fm_r, tau=(tau1, tau2, tau3), alpha=(alpha1, alpha2, alpha3), rsq=rsq)
 	"""
-	from ._equations import __fit_single_relaxation__, __fit_triple_relaxation__
-	from matplotlib.pyplot import subplots
-	from numpy import arange, array
 
 	fyield = array(fyield)
 	seq_time = array(seq_time)
@@ -134,34 +124,30 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 	----------
 
 	par : np.array, dtype=float
-		the actinic light data from the fluorescence light curve
+		The actinic light data from the fluorescence light curve.
 	etr : np.array, dtype=float
-		the electron transport rate data
+		The electron transport rate data.
 	etrmax : float, default=None
-		the maximum electron transport rate
+		The maximum electron transport rate.
 	alpha : float, default=None
-		the light limited slope of electron transport
+		The light limited slope of electron transport.
 	rsq: float, default=None
-		the r-squared value of the fit
+		The r\ :sup:`2` value of the fit.
 	sigma: float, default=None
-		the effective absorption-cross section
+		The effective absorption-cross section.
 	phi: bool, default=False
-		if True, etr data is phi and the modified Webb et al. (1974) fit is used
+		If True, etr data is phi and the modified Webb et al. (1974) fit is used.
 
 	Returns
 	-------
 
 	ax : object
-		a matplotlib figure object
+		A matplotlib figure object.
 
 	Example
 	-------
 	>>> ppu.plot_fluorescence_light_curve(par, etr, etrmax=etr_max, alpha=alpha, rsq=rsq, sigma=sigma, phi=True)
 	"""
-
-	from ._equations import __calculate_Webb_model__, __calculate_modified_Webb_model__
-	from matplotlib.pyplot import subplots
-	from numpy import array
 
 	x = array(par)
 	y = array(etr)
@@ -177,7 +163,6 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 		params = [etrmax, alpha]
 		ax.plot(x, __calculate_Webb_model__(x, *params), color='k', label='{}'.format(formula))
 		ax.set_ylabel('ETR (mol e$^{-1}$ mol RCII$^{-1}$ s$^{-1}$)')
-		ax.legend()
 	
 	else:
 		sig = sigma*6.022e-3
@@ -185,6 +170,7 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 		ax.plot(x, __calculate_modified_Webb_model__(x, *params), color='k', label='{}'.format(formula))
 		ax.set_xscale('log')
 		ax.set_ylabel('\u03D5')
-		ax.legend()
+	
+	ax.legend()
 	
 	return ax

@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+from numpy import nan, repeat, concatenate, array, unique, reshape
+from pandas import Grouper, DataFrame, read_csv, to_datetime
+from tqdm import tqdm
+from datetime import timedelta
+
 def remove_outlier_from_time_average(df, time=4, multiplier=3):
     """
     
@@ -11,7 +16,6 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
 
     Parameters
     ----------
-
     df : pandas.DataFrame
         A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load
     time : int, default=4
@@ -21,20 +25,15 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
 
     Returns
     -------
-
     df : pandas.DataFrame 
         A dataframe of the time averaged data with outliers excluded.
 
     Example
     -------
-
     >>> ppu.remove_outlier_from_time_average(df, time=2, multiplier=3)
 
     """
-        
-    from numpy import nan, repeat, concatenate
-    from pandas import Grouper, DataFrame
-    
+
     # Convert time window to string
     dt = str(time)+'T'
     # Group data by time window and flashlet number
@@ -73,7 +72,7 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
     
     return df
 
-def correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100):
+def correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100):
     
     """
     
@@ -82,7 +81,6 @@ def correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100):
 
     Parameters
     ----------
-
     df : pandas.DataFrame 
         A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load
     sat : bool, default=False
@@ -94,20 +92,15 @@ def correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100):
 
     Returns
     -------
-
     df : pandas.DataFrame 
         A dataframe of FIRe data corrected for the instrument bias.
 
     Example
     -------
-
     >>> ppu.correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100)
 
     """
 
-    from tqdm import tqdm
-    from numpy import array, unique, reshape
-    
     fyield = array(df.fyield)
     seq = array(df.seq)
     
@@ -150,6 +143,7 @@ def calculate_blank_FastOcean(file_, seq_len=100):
         The path directory to the raw blank file in csv format.
     seq_len : int, default=100
         The length of the measurement sequence.
+    
     Returns
     -------
     res : pandas.DataFrame
@@ -157,11 +151,8 @@ def calculate_blank_FastOcean(file_, seq_len=100):
 
     Example
     -------
-
     >>> ppu.calculate_blank_FastOcean(file_, seq_len=100)
     """
-
-    from pandas import read_csv, DataFrame, to_datetime
 
     df = read_csv(file_, skiprows=26, nrows=2, header=None)
     df = df.iloc[:,2:].T
@@ -195,14 +186,8 @@ def calculate_blank_FIRe(file_):
 
     Example
     -------
-
     >>> ppu.calculate_blank_FIRe(file_)
-
     """
-
-    from numpy import array
-    from pandas import read_csv, DataFrame, to_datetime
-    from datetime import timedelta
 
     df = read_csv(file_)
     # Get date and time data

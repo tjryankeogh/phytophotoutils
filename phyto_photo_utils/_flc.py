@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+from ._equations import __calculate_Webb_model__, __calculate_modified_Webb_model__, __calculate_residual_etr__, __calculate_residual_phi__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
+from numpy import mean, array, isnan, inf, repeat, nan, concatenate
+from pandas import DataFrame
+from scipy.optimize import least_squares
+
 def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
       
 	"""
@@ -9,29 +14,29 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	Parameters
 	----------
 	fo : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence yield
+		The minimum fluorescence yield.
 	fm : np.array, dtype=float, shape=[n,] 
-		The maximum fluorescence yield
+		The maximum fluorescence yield.
 	fvfm : np.array, dtype=float, shape=[n,]
-		The photosynthetic efficiency
+		The photosynthetic efficiency.
 	sigma : np.array, dtype=float, shape=[n,] 
-		The effective absorption cross-section of PSII in Å\ :sup:`2`
+		The effective absorption cross-section of PSII in Å\ :sup:`2`.
 	par : np.array, dtype=float, shape=[n,]
-		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`
+		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`.
 	dark_sigma : bool
-		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation
+		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation.
 	light_step_size : int
-		The number of measurements for initial light step
+		The number of measurements for initial light step.
 	outlier_multiplier : int, default=3
-		The multiplier to apply to the standard deviation for determining the upper and lower limits
+		The multiplier to apply to the standard deviation for determining the upper and lower limits.
 	return_data : bool, default=False
-		If True, will return the final data used for the fit
+		If True, will return the final data used for the fit.
 	bounds : bool, default=True
-		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
+		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'.
 	alpha_lims : [int, int], default=[0,4]
-		The lower and upper limit bounds for fitting α\ :sup:`ETR`
+		The lower and upper limit bounds for fitting α\ :sup:`ETR`.
 	etrmax_lims : [int, int], default=[0,2000]
-	 	The lower and upper limit bounds for fitting ETR\ :sub:`max`
+	 	The lower and upper limit bounds for fitting ETR\ :sub:`max`.
 	fit_method : str, default='trf'
 		The algorithm to perform minimization. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	loss_method : str, default='soft_l1'
@@ -47,33 +52,29 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	-------
 	
 	etr_max : float
-		The maximum electron transport rate
+		The maximum electron transport rate.
 	alpha : float
-		The light limited slope of electron transport
+		The light limited slope of electron transport.
 	ek : float
-		The photoacclimation of ETR
+		The photoacclimation of ETR.
 	rsq : float
-		The r\ :sup:`2` value
+		The r\ :sup:`2` value.
 	bias : float
-		The bias of the fit
+		The bias of the fit.
 	chi : float
-		The chi-squared goodness of the fit
+		The chi-squared goodness of the fit.
 	etrmax_err : float
-		The fit error of ETR\ :sup:`max`
+		The fit error of ETR\ :sup:`max`.
 	alpha_err : float
-		The fit error of α\ :sub:`ETR`
+		The fit error of α\ :sub:`ETR`.
 	data : [np.array, np.array]
-		Optional, the final data used for the fitting procedure
+		Optional, the final data used for the fitting procedure.
 
 
 	Example
 	-------
 	>>> etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err = ppu.calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, return_data=False)
 	"""
-	from ._equations import __calculate_Webb_model__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
-	from numpy import mean, array, isnan, inf, repeat, nan, concatenate
-	from pandas import DataFrame
-	from scipy.optimize import least_squares 
 
 	fvfm = array(fvfm)
 	sigma = array(sigma)
@@ -130,18 +131,18 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	mask = isnan(P)
 	E = E[~mask]
 	P = P[~mask]
-		
-	def residual(p, E, P):
-		return P - __calculate_Webb_model__(E, *p)
-	
+
 	bds = [-inf, inf]
 	if bounds:
-			bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
+		bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
+		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]):
+			print('Lower bounds greater than upper bounds - fitting with no bounds.')
+			bds = [-inf, inf]
 
 	# See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options
 	opts = {'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
-	popt = least_squares(residual, p0, args=(E, P), bounds=(bds), **opts)
+	popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
     
 	etr_max = popt.x[0]
 	alpha = popt.x[1]
@@ -154,8 +155,11 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 	perr = __calculate_fit_errors__(popt, res)
 	etr_max_err = perr[0]
 	alpha_err = perr[1]
-
-	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
+	
+	if return_data:
+		return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
+	else:
+		return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
 
 
 def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
@@ -167,25 +171,25 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_
 	Parameters
 	----------
 	fvfm : np.array, dtype=float, shape=[n,] 
-		The photosynthetic efficiency
+		The photosynthetic efficiency.
 	sigma : np.array, dtype=float, shape=[n,] 
-		The effective absorption cross-section of PSII in Å\ :sup:`2`
+		The effective absorption cross-section of PSII in Å\ :sup:`2`.
 	par : np.array, dtype=float, shape=[n,]
-		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`
+		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`.
 	dark_sigma : bool
-		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation
+		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation.
 	light_step_size : int
-		The number of measurements for initial light step
+		The number of measurements for initial light step.
 	outlier_multiplier : int, default=3
-		The multiplier to apply to the standard deviation for determining the upper and lower limits
+		The multiplier to apply to the standard deviation for determining the upper and lower limits.
 	return_data: bool, default=False
-		If True, will return the final data used for the fit
+		If True, will return the final data used for the fit.
 	bounds: bool, default=True
-		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'
+		If True, will set lower and upper limit bounds for the estimation, not suitable for methods 'lm'.
 	alpha_lims: [int, int], default=[0,4]
-		The lower and upper limit bounds for fitting α\ :sup:`ETR`
+		The lower and upper limit bounds for fitting α\ :sup:`ETR`.
 	etrmax_lims: [int, int], default=[0,2000]
-	 	The lower and upper limit bounds for fitting ETR\ :sub:`max`
+	 	The lower and upper limit bounds for fitting ETR\ :sub:`max`.
 	fit_method : str, default='trf'
 		The algorithm to perform minimization. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	loss_method : str, default='soft_l1'
@@ -201,33 +205,29 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_
 	-------
 	
 	etr_max : float
-		The maximum electron transport rate
+		The maximum electron transport rate.
 	alpha : float
-		The light limited slope of electron transport
+		The light limited slope of electron transport.
 	ek : float
-		The photoacclimation of ETR
+		The photoacclimation of ETR.
 	rsq : float
-		The r\ :sup:`2` value
+		The r\ :sup:`2` value.
 	bias : float
-		The bias of the fit
+		The bias of the fit.
 	chi : float
-		The chi-squared goodness of the fit
+		The chi-squared goodness of the fit.
 	etrmax_err : float
-		The fit error of ETR\ :sup:`max`
+		The fit error of ETR\ :sup:`max`.
 	alpha_err : float
-		The fit error of α\ :sub:`ETR`
+		The fit error of α\ :sub:`ETR`.
 	data : [np.array, np.array]
-		Optional, the final data used for the fitting procedure
+		Optional, the final data used for the fitting procedure.
 
 
 	Example
 	-------
 	>>> etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err = ppu.calculate_e_independent_etr(fvfm, sigma, par, return_data=False)
 	"""
-	from ._equations import __calculate_modified_Webb_model__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
-	from numpy import mean, array, isnan, inf, repeat, nan, concatenate
-	from pandas import DataFrame
-	from scipy.optimize import least_squares 
 
 	lss = light_step_size - 1
 	sigma = mean(sigma[0:lss])
@@ -277,17 +277,17 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_
 	mask = isnan(P) | (P < 0) | (E == 0)
 	E = E[~mask]
 	P = P[~mask]
-		
-	def residual(p, E, P):
-		return P - __calculate_modified_Webb_model__(E, *p)
 	
 	bds = [-inf, inf]
 	if bounds:
 		bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
+		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]):
+			print('Lower bounds greater than upper bounds - fitting with no bounds.')
+			bds = [-inf, inf]
 
 	opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 	
-	popt = least_squares(residual, p0, args=(E, P), bounds=(bds), **opts)
+	popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
     
 	etr_max = popt.x[0]
 	alpha = popt.x[1]
@@ -303,6 +303,8 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_
 	etr_max_err = perr[0]
 	alpha_err = perr[1]
 	
-
-	return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
+	if return_data:
+		return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err, [E,P]
+	else:
+		return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
 

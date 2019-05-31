@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+from numpy import exp, argmin, abs, nanmin, nanmax, nansum, array
+from math import pi
+from pandas import read_csv
+
 def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, beta=None, diam=None, bricaud_slope=True):
 	"""
 
@@ -40,9 +44,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	>>> aphy = ppu.calculate_chl_specific_absorption(pa_data, blank, wavelength, chl=0.19, vol=2000, beta=2, diam=15, bricaud_slope=True)
 	   
 	"""
-	from numpy import exp, argmin, abs, min
-	from math import pi
-    
+
 	aptot -= blank # subtract blank from data
 
 	# Convert from absorbance to absorption
@@ -52,7 +54,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	aptot /= divol
 
 	# Normalise to minimum value (~750 nm)
-	dmin = min(aptot)
+	dmin = nanmin(aptot)
 	aptot -= dmin
 
 	if bricaud_slope: # See Bricaud & Stramski 1990 for more details
@@ -104,7 +106,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	    depig /= divol
 
 	    # Normalise to minimum value (~750 nm)
-	    depmin = min(depig)
+	    depmin = nanmin(depig)
 	    depig -= depmin
 	    
 	    # Calculate phytoplankton specific absorption
@@ -143,8 +145,6 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=No
 	>>> ppu.calculate_instrument_led_correction(aphy, wavelength, e_led='fire')
 	   
 	"""
-	from numpy import nanmax, nansum, exp, array
-	from pandas import read_csv
 
 	idx400 = abs(ap_lambda - 400).idxmin()
 	idx700 = abs(ap_lambda - 700).idxmin()+1

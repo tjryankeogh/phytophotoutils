@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+
+from pandas import read_csv, to_datetime, DataFrame, concat, Series
+from numpy import array, repeat, arange, squeeze, reshape, r_, nansum
+from os import chdir
+from csv import reader
+
 def load_FIRe_files(file_, append=False, save_files=False, res_path=None, 
                    seq_len=160, flen=1e-6, irrad=None):
     """
@@ -35,9 +41,9 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
     seq : np.array, dtype=int, shape=[n,]
         The sample measurement number.
     seq_time : np.array, dtype=float, shape=[n,]
-        The measurement sequence time in microseconds.
+        The measurement sequence time in μs.
     pfd : np.array, dype=float, shape=[n,]
-        The photon flux density.
+        The photon flux density in μmol photons m\ :sup:`2` s\ :sup:`-1`.
 
     Example
     -------
@@ -46,10 +52,7 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
     >>> df = ppu.load_FIRe_files(fname, append=False, save_files=True, res_path=output, seq_len=160, flen=1e-6, irrad=47248)
        
     """
-    from pandas import read_csv, to_datetime, DataFrame, concat, Series
-    from numpy import array, repeat, arange, squeeze, reshape
-    from os import chdir
-    
+
     format = '%m/%d/%Y%H:%M:%S.%f'
     
     name = file_.split('/')[-1].split('.')[0]
@@ -163,9 +166,9 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
     seq : np.array, dtype=int, shape=[n,]
         The sample measurement number.
     seq_time : np.array, dtype=float, shape=[n,]
-        The measurement sequence time in microseconds.
+        The measurement sequence time in μs.
     pfd : np.array, dype=float, shape=[n,]
-        The photon flux density.
+        The photon flux density in μmol photons m\ :sup:`2` s\ :sup:`-1`.
     channel : np.array, dtype=str, shape=[n,]
         The chamber used for measurements, A = light chamber, B = dark chamber.
     gain : np.array, dtype=int, shape=[n,]
@@ -177,12 +180,7 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
     >>> output = './data/raw/ppu/fasttrackai/'
     >>> df = ppu.load_FASTTrackaI_files(fname, append=False, save_files=True, res_path=output, seq_len=120, irrad=545.62e10)
        
-    """
-
-    from numpy import arange, repeat, r_, array
-    from csv import reader
-    from pandas import to_datetime, read_csv, Series, concat, DataFrame
-    
+    """    
     df = read_csv(file_, header=0)
     name = file_.split('/')[-1].split('.')[0]
     
@@ -306,9 +304,9 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     seq : np.array, dtype=int, shape=[n,]
         The sample measurement number.
     seq_time : np.array, dtype=float, shape=[n,]
-        The measurement sequence time in microseconds.
+        The measurement sequence time in μs.
     pfd : np.array, dype=float, shape=[n,]
-        The photon flux density.
+        The photon flux density in μmol photons m\ :sup:`2` s\ :sup:`-1`.
     led_sequence : np.array, dtype=int, shape=[n,]
         The LED combination using during the measurement, see example below.
 
@@ -324,11 +322,7 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     >>> led_sequence == 5, LED 450 nm + LED 530 nm + LED 624 nm
     >>> led_sequence == 6, LED 530 nm
     >>> led_sequence == 7, LED 624 nm
-    """
-
-    from pandas import read_csv, DataFrame, to_datetime, concat
-    from numpy import nansum, array, repeat, arange
-    
+    """    
     name = file_.split('/')[-1].split('.')[0]
     
     md = read_csv(file_, skiprows=16, nrows=12, header=None)
