@@ -1,5 +1,12 @@
 Change Log
 ----------
+
+**v0.6** (2019-05-30)
+
+- read the docs formatting applied
+- added warning messages when lower bounds are higher than upper bounds
+- added demo file
+
 **v0.5** (2019-05-23)
 
 - various bug fixes

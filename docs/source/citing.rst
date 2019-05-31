@@ -4,13 +4,14 @@ Citing and Referencing
 
 Reference
 ---------
-If you would like to cite or reference Glider Tools, please use:
+If you would like to cite or reference Phytoplankton Photophysiology Utilities, please use:
 
-Link to DOI
+Source: phyto_photo_utils https://gitlab.com/socco/BuoyancyGliderUtils retrieved on 30 May 2019.
 
 
 
 Authors and contributors
 ------------------------
 
-Authors and people who have contributed to the development. Not necessarily on the paper. 
+Thomas Ryan-Keogh: Southern Ocean Carbon and Climate Observatory
+Charlotte Robinson: Curtin University 
