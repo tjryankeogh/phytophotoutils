@@ -2,7 +2,7 @@
 
 from numpy import count_nonzero, isnan, inf, linalg
 from scipy.optimize import least_squares
-from ._equations import __fit_kolber__, __fit_single_relaxation__, __fit_triple_relaxation__,__calculate_residual_saturation__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
+from ._equations import __fit_kolber__, __fit_single_relaxation__, __fit_triple_relaxation__,__calculate_residual_saturation__, __calculate_residual_saturation_pmodel__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__
 	
 	
 def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
@@ -28,23 +28,27 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 	
 	opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
-	popt = least_squares(__calculate_residual_saturation__, x0, bounds=(bds), args=(pfd, fyield, ro), **opts)
-	fo = popt.x[0]
-	fm = popt.x[1]
-	sigma = popt.x[2]
+	try:
+		popt = least_squares(__calculate_residual_saturation__, x0, bounds=(bds), args=(pfd, fyield, ro), **opts)
+		fo = popt.x[0]
+		fm = popt.x[1]
+		sigma = popt.x[2]
 
-	# Calculate curve fitting statistical metrics
-	res = fyield - __fit_kolber__(pfd, *popt.x, ro)
-	rsq = __calculate_rsquared__(res, fyield)
-	bias = __calculate_bias__(res, fyield)
-	chi = __calculate_chisquared__(res, fyield)		
-	perr = __calculate_fit_errors__(popt, res)
-	fo_err = perr[0]
-	fm_err = perr[1]
-	sigma_err = perr[2]
-	
-	return fo, fm, sigma, rsq, bias, chi, fo_err, fm_err, sigma_err, nfl
-
+		# Calculate curve fitting statistical metrics
+		res = fyield - __fit_kolber__(pfd, *popt.x, ro)
+		rsq = __calculate_rsquared__(res, fyield)
+		bias = __calculate_bias__(res, fyield)
+		chi = __calculate_chisquared__(res, fyield)		
+		perr = __calculate_fit_errors__(popt, res)
+		fo_err = perr[0]
+		fm_err = perr[1]
+		sigma_err = perr[2]
+		
+		return fo, fm, sigma, rsq, bias, chi, fo_err, fm_err, sigma_err, nfl
+	except linalg.LinAlgError as err:
+		if str(err) == 'Singular matrix':
+			print('Unable to calculate fitting errors, skipping sequence.', end="\r"),
+			pass
 
 def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 
@@ -64,30 +68,35 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 	bds = [-inf, inf]
 	if bounds:
 		bds = [fo-fo10, fm-fm10, sig_lims[0], ro_lims[0]],[fo+fo10, fm+fm10, sig_lims[1], ro_lims[1]]
-		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]) | (bds[0][2] > bds[1][2]) | (bds[0][3] > bds[1][3]):
+		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]) | (bds[0][2] > bds[1][2]) | (bds[0][3] > bds[1][3]) | (bds[0][0] == 0):
 			print('Lower bounds greater than upper bounds - fitting with no bounds.')
 			bds = [-inf, inf]
 
 	opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
-	popt = least_squares(__calculate_residual_saturation__, x0, bounds=(bds), args=(pfd, fyield), **opts)
-	fo = popt.x[0]
-	fm = popt.x[1]
-	sigma = popt.x[2]
-	ro = popt.x[3]
+	try:
+		popt = least_squares(__calculate_residual_saturation_pmodel__, x0, bounds=(bds), args=(pfd, fyield), **opts)
+		fo = popt.x[0]
+		fm = popt.x[1]
+		sigma = popt.x[2]
+		ro = popt.x[3]
 
-	# Calculate curve fitting statistical metrics
-	res = fyield - __fit_kolber__(pfd, *popt.x)
-	rsq = __calculate_rsquared__(res, fyield)
-	bias = __calculate_bias__(res, fyield)
-	chi = __calculate_chisquared__(res, fyield)		
-	perr = __calculate_fit_errors__(popt, res)
-	fo_err = perr[0]
-	fm_err = perr[1]
-	sigma_err = perr[2]
-	ro_err = perr[3]
+		# Calculate curve fitting statistical metrics
+		res = fyield - __fit_kolber__(pfd, *popt.x)
+		rsq = __calculate_rsquared__(res, fyield)
+		bias = __calculate_bias__(res, fyield)
+		chi = __calculate_chisquared__(res, fyield)		
+		perr = __calculate_fit_errors__(popt, res)
+		fo_err = perr[0]
+		fm_err = perr[1]
+		sigma_err = perr[2]
+		ro_err = perr[3]
 
-	return fo, fm, sigma, ro, rsq, bias, chi, fo_err, fm_err, sigma_err, ro_err, nfl
+		return fo, fm, sigma, ro, rsq, bias, chi, fo_err, fm_err, sigma_err, ro_err, nfl
+	except linalg.LinAlgError as err:
+		if str(err) == 'Singular matrix':
+			print('Unable to calculate fitting errors, skipping sequence.', end="\r"),
+			pass
 
 def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
 	
@@ -112,22 +121,28 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			print('Lower bounds greater than upper bounds - fitting with no bounds.')
 			bds = [-inf, inf]
 
-	popt = least_squares(__calculate_residual_saturation__, x0, bounds=(bds), args=(pfd, fyield, ro), **opts)
-	fo = popt.x[0] 
-	fm = popt.x[1]
-	sigma = popt.x[2]
+	try:
+		popt = least_squares(__calculate_residual_saturation__, x0, bounds=(bds), args=(pfd, fyield, ro), **opts)
+		fo = popt.x[0] 
+		fm = popt.x[1]
+		sigma = popt.x[2]
 
-	# Calculate curve fitting statistical metrics
-	res = fyield - __fit_kolber__(pfd, *popt.x, ro)
-	rsq = __calculate_rsquared__(res, fyield)
-	bias = __calculate_bias__(res, fyield)
-	chi = __calculate_chisquared__(res, fyield)		
-	perr = __calculate_fit_errors__(popt, res)
-	fo_err = perr[0]
-	fm_err = perr[1]
-	sigma_err = perr[2]
+		# Calculate curve fitting statistical metrics
+		res = fyield - __fit_kolber__(pfd, *popt.x, ro)
+		rsq = __calculate_rsquared__(res, fyield)
+		bias = __calculate_bias__(res, fyield)
+		chi = __calculate_chisquared__(res, fyield)		
+		perr = __calculate_fit_errors__(popt, res)
+		fo_err = perr[0]
+		fm_err = perr[1]
+		sigma_err = perr[2]
 
-	return fo, fm, sigma, rsq, bias, chi, fo_err, fm_err, sigma_err, nfl
+		return fo, fm, sigma, rsq, bias, chi, fo_err, fm_err, sigma_err, nfl
+	
+	except linalg.LinAlgError as err:
+		if str(err) == 'Singular matrix':
+			print('Unable to calculate fitting errors, skipping sequence.', end="\r"),
+			pass
 
 def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
    

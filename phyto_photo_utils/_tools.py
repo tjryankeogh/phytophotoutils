@@ -163,7 +163,7 @@ def calculate_blank_FastOcean(file_, seq_len=100):
     res = read_csv(file_, skiprows=43, nrows=seq_len, header=None)
     res = res.iloc[:,2:]
     res = res.agg(['mean','std']).T
-
+    res.columns = ['blank_mean', 'blank_stdev']
     res = DataFrame(res)
     res['datetime'] = df.datetime
 

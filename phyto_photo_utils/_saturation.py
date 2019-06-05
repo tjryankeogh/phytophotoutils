@@ -51,9 +51,9 @@ def calculate_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, s
 	res : pandas.DataFrame 
 		The results of the fitting routine with columns as below:
 	fo : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence yield.
+		The minimum fluorescence level.
 	fm : np.array, dtype=float, shape=[n,]
-		The maximum fluorescence yield.
+		The maximum fluorescence level.
 	fvfm : np.array, dtype=float, shape=[n,]
 		The maximum photochemical efficiency.
 	sigma : np.array, dtype=float, shape=[n,]
@@ -161,9 +161,9 @@ def calculate_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_le
 	res : pandas.DataFrame 
 		The results of the fitting routine with columns as below:
 	fo : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence yield.
+		The minimum fluorescence level.
 	fm : np.array, dtype=float, shape=[n,]
-		The maximum fluorescence yield.
+		The maximum fluorescence level.
 	fvfm : np.array, dtype=float, shape=[n,]
 		The maximum photochemical efficiency.
 	sigma : np.array, dtype=float, shape=[n,]
@@ -271,9 +271,9 @@ def calculate_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blan
 	res : pandas.DataFrame, shape=[n,11] 
 		The results of the fitting routine with as below:
 	fo : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence yield.
+		The minimum fluorescence level.
 	fm : np.array, dtype=float, shape=[n,]
-		The maximum fluorescence yield.
+		The maximum fluorescence level.
 	fvfm : np.array, dtype=float, shape=[n,]
 		The maximum photochemical efficiency.
 	sigma : np.array, dtype=float, shape=[n,]

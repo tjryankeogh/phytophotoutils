@@ -15,6 +15,9 @@ def __fit_kolber__(pfd, fo, fm, sig, ro):
 def __calculate_residual_saturation__(p, pfd, fyield, ro=None):
 	return fyield - __fit_kolber__(pfd, *p, ro)
 
+def __calculate_residual_saturation_pmodel__(p, pfd, fyield):
+	return fyield - __fit_kolber__(pfd, *p)
+
 def __fit_single_relaxation__(seq_time, fo_relax, fm_relax, tau):
 	return (fm_relax - (fm_relax - fo_relax) * (1 - exp(-seq_time/tau)))
 

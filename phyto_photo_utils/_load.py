@@ -190,9 +190,9 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
 
     DESIRED_ROWS = rows
     with open(file_) as input_file:
-        reader = reader(input_file)
+        creader = reader(input_file)
 
-        desired_rows = [row for row_number, row in enumerate(reader)
+        desired_rows = [row for row_number, row in enumerate(creader)
                         if row_number in DESIRED_ROWS]
 
     md = DataFrame(desired_rows)
@@ -368,7 +368,6 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     df = DataFrame(concat(dfm, axis=0)).reset_index(drop=True)
     df.columns = ['fyield']
     df['pfd'] = repeat((pfd.values*1e22), seq_len) * flen * sigscale
-    #df['nled'] = repeat(nled.values, seq_len)
     df['seq'] = repeat(md.seq.values, seq_len)
     df['seq_time'] = array(list(seq_time) * len(md.seq))
     df['flashlet_number'] = array(list(flashlet_number) * len(md.seq))

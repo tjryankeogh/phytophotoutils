@@ -48,9 +48,9 @@ def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 	res: pandas.DataFrame, shape=[n,10]
 		The results of the fitting routine with columns as below:
 	fo_r : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence of relaxation phase.
+		The minimum fluorescence level of relaxation phase.
 	fm_r : np.array, dtype=float, shape=[n,]
-		The maximum fluorescence of relaxation phase
+		The maximum fluorescence level of relaxation phase
 	tau : np.array, dtype=float, shape=[n,]
 		The rate of QA\ :sup:`-` reoxidation in μs.
 	rsq: np.array, dtype=float, shape=[n,]
@@ -155,9 +155,9 @@ def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 	res: pandas.DataFrame, shape=[n,20]
 		The results of the fitting routine with columns as below:
 	fo_r : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence of relaxation phase.
+		The minimum fluorescence level of relaxation phase.
 	fm_r : np.array, dtype=float, shape=[n,]
-		The maximum fluorescence of relaxation phase
+		The maximum fluorescence level of relaxation phase
 	alpha1 : np.array, dtype=float, shape=[n,]
 	tau1 : np.array, dtype=float, shape=[n,]
 		The rate of QA\ :sup:`-` reoxidation in μs.
