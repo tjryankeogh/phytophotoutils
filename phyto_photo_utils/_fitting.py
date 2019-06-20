@@ -14,24 +14,24 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
-	#try:
+	try:
 	y = fyield[:8]
-	x = arange(0,8)[:,None]
-	fo_model = model.fit(x,y)
-	fo = fo_model.intercept_
-	#except Exception:
-	#	fo = fyield[:3].mean()
+		x = arange(0,8)[:,None]
+		fo_model = model.fit(x,y)
+		fo = fo_model.intercept_
+	except Exception:
+		fo = fyield[:3].mean()
 	
-	#try:
-	y = fyield[76:]
-	x = arange(0,24)[:,None]
-	fm_model = model.fit(x,y)
-	fm = fm_model.intercept_
-	#except Exception:
-	#	fm = fyield[-3:].mean()
+	try:
+		y = fyield[76:]
+		x = arange(0,24)[:,None]
+		fm_model = model.fit(x,y)
+		fm = fm_model.intercept_
+	except Exception:
+		fm = fyield[-3:].mean()
 	
 	if (fo > fm) | (fo <= 0):
-		#(print('Fo greater than Fm - skipping fit.'))
+		(print('Fo greater than Fm - skipping fit.'))
 		pass
 	
 	else:
@@ -148,24 +148,24 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
-	#try:
-	y = fyield[:8]
-	x = arange(0,8)[:,None]
-	fo_model = model.fit(x,y)
-	fo = fo_model.intercept_
-	#except Exception:
-	#	fo = fyield[:3].mean()
+	try:
+		y = fyield[:8]
+		x = arange(0,8)[:,None]
+		fo_model = model.fit(x,y)
+		fo = fo_model.intercept_
+	except Exception:
+		fo = fyield[:3].mean()
 	
-	#try:
-	y = fyield[76:]
-	x = arange(0,24)[:,None]
-	fm_model = model.fit(x,y)
-	fm = fm_model.intercept_
-	#except Exception:
-	#	fm = fyield[-3:].mean()
+	try:
+		y = fyield[76:]
+		x = arange(0,24)[:,None]
+		fm_model = model.fit(x,y)
+		fm = fm_model.intercept_
+	except Exception:
+		fm = fyield[-3:].mean()
 
 	if (fo > fm) | (fo <= 0):
-		#(print('Fo greater than Fm - skipping fit.'))
+		(print('Fo greater than Fm - skipping fit.'))
 		pass
 
 	else:

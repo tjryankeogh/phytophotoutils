@@ -268,7 +268,7 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
     return df
 
 def load_FastOcean_files(file_, append=False, save_files=False, led_separate=False, res_path=None, 
-                   seq_len=140, flen=2e-6):
+                   seq_len=140, flen=1e-6):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
