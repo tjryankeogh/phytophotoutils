@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR and Curtin University.
 
-- Version: 0.6
+- Version: 0.7
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -99,13 +99,16 @@ NOTE: This package structure is defined by the `__init__.py` file
 
 ACKNOWLEDGEMENTS
 ----------------
-- 
+- Kevin Oxborough (Chelsea Technology Groups) for methods to estimate Fo and Fm
 
 
 TO DO
 -----
+- Add deconvolution method for triple decay relaxation
 - Add the option using different production models in FLC processing
 - Add methods to load in discrete FIRe files
 - Add additional load methods for newer FIRe instruments
 - Add additional load method for FastTracka II
+- Add additional load method for Soliense LIFT-FRR
+- Add additional load method for CTG LabSTAF
 
