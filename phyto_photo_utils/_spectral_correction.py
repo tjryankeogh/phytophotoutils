@@ -116,7 +116,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 
 	return aphy
 
-def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=None):
+def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=None, e_led=None):
 	"""
 
 	Calculate the spectral correction factor
@@ -131,6 +131,8 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=No
 		The wavelengths associated with the aphy.
 	e_insitu : np.array, dtype=int, shape=[n,]
 		The in situ irradiance field, if None is passed then will theoretically calculated in situ light field.
+	depth : float
+		The depth of the corresponding aphy measurement.
 	e_led : 'fire','fasttracka_ii'
 		The excitation spectra of the instrument.
 
@@ -152,12 +154,14 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=No
 
 
 	if e_insitu is None:
-		
-		df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
-		kd = df.a_W + df.a_gt + aphy
-		Ez = df.Ezero * exp(-kd * 5)
-		Erange = Ez.max() - Ez.min()
-		e_insitu = (Ez - Ez.min())/Erange
+		if depth is None:
+			print('User must define depth for calculating in situ light spectra')
+		else:
+			df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
+			kd = df.a_W + df.a_gt + aphy
+			Ez = df.Ezero * exp(-kd * depth)
+			Erange = Ez.max() - Ez.min()
+			e_insitu = (Ez - Ez.min())/Erange
 
 	else:
 		e_insitu = e_insitu / max(e_insitu) 
@@ -166,11 +170,11 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, e_led=No
 		print('No instrument selected. Unable to calculate spectral correction factor.')
 
 	elif e_led == 'fire':
-		e_led = df.fire.values
-		e_led = e_led / nanmax(e_led)
+		 e_led = df.fire.values
+		 e_led = e_led / nanmax(e_led)
 	elif e_led == 'fasttracka_ii':
-		e_led = df.fasttracka_ii.values
-		e_led = e_led / nanmax(e_led)
+		 e_led = df.fasttracka_ii.values
+		 e_led = e_led / nanmax(e_led)
 
 	aphy = aphy / nanmax(aphy)	
 

@@ -231,16 +231,16 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
     df['fyield'] = df.em / df.ex
     df['datetime'] = repeat(md.datetime.values, seq_len)
     df['seq'] = repeat(md.seq.values, seq_len)
-    df['seq_time'] = stime.values * 1000
+    df['seq_time'] = stime.values * 1e6
     df['channel'] = repeat(md.channel.values, seq_len)
 
     # Calculation of photon flux density
     sigscale = 1e-20
     df['pfd'] = (df.ex * irrad) * sigscale
     df['gain'] = repeat(md.gain.values, seq_len) # won't be need if gain correction implemented here
-    df = df.drop(['ex','em'], axis=1)
+    df = df.drop(['ex','em','flashlet_number'], axis=1)
     idx = int(df.seq.max()) + 1
-    df.loc[:,'flashlet_number'] = array(list(arange(0,120,1)) * idx)
+    df['flashlet_number'] = array(list(arange(0,seq_len,1)) * idx)
     
     ##TO DO##
     #add if statements to handle the gain settings   

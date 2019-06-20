@@ -65,5 +65,7 @@ setup(
         "pandas",
         "datetime",
         "csv",
+        "sklearn",
+        "netCDF4"
     ],
 )

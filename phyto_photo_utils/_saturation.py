@@ -97,7 +97,7 @@ def calculate_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, s
 
 	res = concat(res, axis=1)
 	res = res.T
-	
+
 	if res.empty:
 		pass
 	
