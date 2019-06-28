@@ -5,7 +5,7 @@ from numpy import array, unique
 from tqdm import tqdm
 from pandas import Series, concat
 
-def calculate_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, bounds=True, sig_lims =[100,2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def fit_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, bounds=True, sig_lims =[100,2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	"""
 	Process the raw transient data and perform the Kolber et al. 1998 saturation model.
@@ -103,7 +103,7 @@ def calculate_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, s
 	
 	else: 
 
-		res.columns = ['fo','fm','sigma','rsq','bias','chi','fo_err','fm_err','sigma_err','nfl']
+		res.columns = ['fo','fm','sigma','ro','rsq','bias','chi','rchi','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
 	
 		# Subtract blank from Fo and Fm - blank can be single value or same length as dataframe
 		res['fo'] -= blank
@@ -117,7 +117,7 @@ def calculate_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, s
 	
 	return res
 
-def calculate_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, bounds=True, ro_lims=[0.0,1.0], sig_lims =[100,2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def fit_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, bounds=True, ro_lims=[0.0,1.0], sig_lims =[100,2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	"""
 	Process the raw transient data and perform the Kolber et al. 1998 saturation model, including modelling the connectivity coefficient.
@@ -215,7 +215,7 @@ def calculate_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_le
 	
 	else: 
 
-		res.columns = ['fo','fm','sigma','ro','rsq','bias','chi','fo_err','fm_err','sigma_err','ro_err','nfl']
+		res.columns = ['fo','fm','sigma','ro','rsq','bias','chi','rchi','rmse','fo_err','fm_err','sigma_err','ro_err','nfl','niters','flag','success']
 	
 		# Subtract blank from Fo and Fm - blank can be single value or same length as dataframe
 		res['fo'] -= blank
@@ -229,7 +229,7 @@ def calculate_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_le
 	
 	return res
 
-def calculate_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blank=0, sat_len=100, skip=0, bounds=True, sig_lims =[100,2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def fit_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blank=0, sat_len=100, skip=0, bounds=True, sig_lims =[100,2200], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
       
 	"""
 	
@@ -322,7 +322,7 @@ def calculate_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blan
 	
 	else: 
 
-		res.columns = ['fo','fm','sigma','rsq','bias','chi','fo_err','fm_err','sigma_err','nfl']
+		res.columns = ['fo','fm','sigma','rsq','bias','chi','rchi','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
 	
 		# Subtract blank from Fo and Fm - blank can be single value or same length as dataframe
 		res['fo'] -= blank

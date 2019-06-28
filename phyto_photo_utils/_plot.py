@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ._equations import __fit_kolber__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_Webb_model__, __calculate_modified_Webb_model__
+from ._equations import __fit_kolber_p__, __fit_kolber_nop__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_Webb_model__, __calculate_modified_Webb_model__
 from matplotlib.pyplot import subplots
 from numpy import arange, array
 
@@ -36,11 +36,6 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 	>>> plot_saturation_data(fyield, pfd, fo=fo, fm=fm, sigma=sigma, ro=None, rsq=rsq)
 	"""
 
-	if ro is None:
-		params = [fo, fm, sigma]
-	else:
-		params = [fo, fm, sigma, ro]
-
 	fyield = array(fyield)
 	pfd = array(pfd)
 	fvfm = (params[1] - params[0])/params[1]
@@ -49,11 +44,20 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 	fig, ax = subplots(1, 1, figsize=[5,4], dpi=90)
 
 	ax.plot(x, fyield, marker='o', lw=0, label='Raw Data', color='0.5')
-	formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; r$^2$ = {:.2f}".format(fvfm, sigma, rsq)
-	ax.plot(x, __fit_kolber__(pfd, *params), color='k', label='{}'.format(formula))
-	ax.legend()
 	ax.set_ylabel('Fluorescence Yield')
 	ax.set_xlabel('Flashlet Number')
+
+	if ro is None:
+		params = [fo, fm, sigma]
+		formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; r$^2$ = {:.2f}".format(fvfm, sigma, rsq)
+		ax.plot(x, __fit_kolber_nop__(pfd, *params), color='k', label='{}'.format(formula))
+	else:
+		params = [fo, fm, sigma, ro]
+		formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; r$^2$ = {:.2f}".format(fvfm, sigma, rsq)
+		ax.plot(x, __fit_kolber_p__(pfd, *params), color='k', label='{}'.format(formula))
+
+	ax.legend()
+	
 
 	return ax
 

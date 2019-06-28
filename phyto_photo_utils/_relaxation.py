@@ -5,7 +5,7 @@ from numpy import array, unique
 from pandas import Series, concat
 from tqdm import tqdm
 
-def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=0, bounds=True, tau_lims=[100,50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def fit_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=0, bounds=True, tau_lims=[100,50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 	"""
 
 	Process the raw transient data and perform the Kolber et al. 1998 relaxation model.
@@ -102,12 +102,12 @@ def calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 		pass
 	
 	else: 
-		res.columns = ['fo_r','fm_r','tau','rsq','bias','chi','fo_err','fm_err','tau_err','nfl']
+		res.columns = ['fo_r','fm_r','tau','rsq','bias','chi','rchi','rmse','fo_err','fm_err','tau_err','nfl','niters','flag','success']
 		res['datetime'] = unique(dt)
 
 	return res
 
-def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=0, bounds=True, tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def fit_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=0, bounds=True, tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	"""
 	
@@ -226,7 +226,7 @@ def calculate_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_le
 		pass
 	
 	else:
-		res.columns = ['fo_r', 'fm_r', 'alpha1', 'tau1', 'alpha2', 'tau2', 'alpha3', 'tau3', 'rsq', 'bias', 'chi', 'for_err', 'fmr_err', 'alpha1_err', 'tau1_err', 'alpha2_err', 'tau2_err', 'alpha3_err', 'tau3_err', 'nfl']
+		res.columns = ['fo_r','fm_r','alpha1','tau1','alpha2','tau2','alpha3','tau3','rsq','bias','chi','rchi','rsme','for_err','fmr_err','alpha1_err','tau1_err','alpha2_err','tau2_err','alpha3_err','tau3_err','nfl','niters','flag','success']
 		res['datetime'] = unique(dt)
 
 	return res

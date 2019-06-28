@@ -1,22 +1,26 @@
 #!/usr/bin/env python
 
 from numpy import exp, sum, mean, sqrt, diag, linalg, arange, cumsum
+from sklearn.metrics import mean_squared_error
 
-def __fit_kolber__(pfd, fo, fm, sig, ro):
-	if ro is None:
-		return fo + (fm - fo) * (1 - exp(-sig * cumsum(pfd)))
-	else:
-		c = pfd[:] * 0.
-		c[0] = pfd[0] * sig
-		for i in arange(1, len(pfd)):
-			c[i] = c[i-1] + pfd[i] * sig * (1 - c[i-1])/(1 - ro * c[i-1])
-		return fo + (fm - fo) * c * (1-ro) / (1-c*ro)
+def __fit_kolber_nop__(pfd, fo, fm, sig):
+	return fo + (fm - fo) * (1 - exp(-sig * cumsum(pfd)))
 
-def __calculate_residual_saturation__(p, pfd, fyield, ro=None):
-	return fyield - __fit_kolber__(pfd, *p, ro)
+def __fit_kolber_p__(pfd, fo, fm, sig, ro):
+	c = pfd[:] * 0.
+	c[0] = pfd[0] * sig
+	for i in arange(1, len(pfd)):
+		c[i] = c[i-1] + pfd[i] * sig * (1 - c[i-1])/(1 - ro * c[i-1])
+	return fo + (fm - fo) * c * (1-ro) / (1-c*ro)
 
-def __calculate_residual_saturation_pmodel__(p, pfd, fyield):
-	return fyield - __fit_kolber__(pfd, *p)
+def __calculate_residual_saturation_nop__(p, pfd, fyield):
+	return  fyield - __fit_kolber_nop__(pfd, *p)
+
+def __calculate_residual_saturation_p__(p, pfd, fyield):
+	return  fyield - __fit_kolber_p__(pfd, *p)
+
+def __calculate_residual_saturation_fixedp__(p, pfd, fyield, ro):
+	return  fyield - __fit_kolber_p__(pfd, *p, ro)
 
 def __fit_single_relaxation__(seq_time, fo_relax, fm_relax, tau):
 	return (fm_relax - (fm_relax - fo_relax) * (1 - exp(-seq_time/tau)))
@@ -50,9 +54,15 @@ def __calculate_bias__(res, fyield):
 	return sum((1 - res)/fyield) / (len(fyield)*100)
 
 def __calculate_chisquared__(res, fyield):
-	return sum(res**2 / fyield)	
+	return sum(res**2)
 
-def __calculate_fit_errors__(popt, res):
-	J = popt.jac
-	pcov = linalg.inv(J.T.dot(J)) * mean(res**2)
+def __calculate_reduced_chisquared__(chi, fyield, nvars):
+	return chi/(len(fyield) - nvars)
+
+def __calculate_rmse__(res, fyield):
+	return sqrt(mean_squared_error(fyield, res+fyield))	
+
+def __calculate_fit_errors__(jac, res):
+	#J = popt.jac
+	pcov = linalg.inv(jac.T.dot(jac)) * mean(res**2)
 	return sqrt(diag(pcov))
