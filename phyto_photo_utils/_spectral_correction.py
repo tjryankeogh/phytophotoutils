@@ -44,6 +44,8 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	>>> aphy = ppu.calculate_chl_specific_absorption(pa_data, blank, wavelength, chl=0.19, vol=2000, beta=2, diam=15, bricaud_slope=True)
 	   
 	"""
+	aptot = array(aptot)
+	ap_lambda = array(ap_lambda)
 
 	aptot -= blank # subtract blank from data
 
@@ -60,11 +62,11 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	if bricaud_slope: # See Bricaud & Stramski 1990 for more details
 	    
 	    # Find unique indices based upon wavelengths measured
-	    idx380 = abs(ap_lambda - 380).idxmin()
-	    idx505 = abs(ap_lambda - 505).idxmin()
-	    idx580 = abs(ap_lambda - 580).idxmin()
-	    idx692 = abs(ap_lambda - 692).idxmin()
-	    idx750 = abs(ap_lambda - 750).idxmin()
+	    idx380 = argmin(abs(ap_lambda - 380))
+	    idx505 = argmin(abs(ap_lambda - 505))
+	    idx580 = argmin(abs(ap_lambda - 580))
+	    idx692 = argmin(abs(ap_lambda - 692))
+	    idx750 = argmin(abs(ap_lambda - 750))
 	    
 	    ap750 = aptot[idx750]
 	    R1 = (0.99 * aptot[idx380]) - aptot[idx505]
@@ -111,12 +113,18 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	    
 	    # Calculate phytoplankton specific absorption
 	    aphy = aptot - depig
+	
+	if chl is None:
 
-	aphy /= chl
+		return aphy
+	
+	else:
+		aphy /= chl
 
-	return aphy
+		return aphy
+	
 
-def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=None, e_led=None):
+def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=None, e_led=None, constants=None):
 	"""
 
 	Calculate the spectral correction factor
@@ -147,9 +155,11 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=No
 	>>> ppu.calculate_instrument_led_correction(aphy, wavelength, e_led='fire')
 	   
 	"""
+	aphy = array(aphy)
+	ap_lambda = array(ap_lambda)
 
-	idx400 = abs(ap_lambda - 400).idxmin()
-	idx700 = abs(ap_lambda - 700).idxmin()+1
+	idx400 = argmin(abs(ap_lambda - 400))
+	idx700 = argmin(abs(ap_lambda - 700))+1
 	aphy = array(aphy[idx400:idx700])
 
 
@@ -157,7 +167,10 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=No
 		if depth is None:
 			print('User must define depth for calculating in situ light spectra')
 		else:
-			df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
+			if constants is None:
+				df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
+			else:
+				df = read_csv(constants, index_col=0)
 			kd = df.a_W + df.a_gt + aphy
 			Ez = df.Ezero * exp(-kd * depth)
 			Erange = Ez.max() - Ez.min()
