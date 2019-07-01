@@ -18,17 +18,17 @@ output = '/output_path'
 # Load all variables needed for fitting saturation and relaxation models
 df = ppu.load_FASTTrackaI_files(fname, append=False, save_files=True, res_path=output, seq_len=120, irrad=545.62e10)
 
-# Perform a no ρ saturation model fit on the data
-sat = ppu.calculate_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro_lims=[0.0,1.0], sig_lims =[100,2200])
+# Perform a ρ saturation model fit on the data
+sat = ppu.fit_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro_lims=[0.0,1.0], sig_lims =[100,2200])
 
 # Perform a single decay relaxation model fit on the data
-rel = ppu.calculate_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, bounds=True, tau_lims=[100, 50000])
+rel = ppu.fit_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, bounds=True, tau_lims=[100, 50000])
 
 # Perform time averaging on raw transients, including the removal of outliers (mean + stdev * 3)
-dfm = ppu.remove_outlier_from_time_average(df, time=2, multiplier=3)
+dfm = ppu.remove_outlier_from_time_average(df, time=5, multiplier=3)
 
 # Correct for FIRe instrument detector bias
-dfb = ppu.correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100)
+dfb = ppu.correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100)
 
 # See the demo file for more info
 ```
@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR and Curtin University.
 
-- Version: 0.7
+- Version: 0.8
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -55,18 +55,18 @@ PACKAGE STRUCTURE
 NOTE: This package structure is defined by the `__init__.py` file
 - load
 	- load_FIRe_files
-	- load_FastTrackaI_files
+	- load_FASTTrackaI_files
 	- load_FastOcean_files
 - saturation
-	- calculate_saturation_with_fixedpmodel
-	- calculate_saturation_with_pmodel
-	- calculate_saturation_with_nopmodel
+	- fit_saturation_with_fixedpmodel
+	- fit_saturation_with_pmodel
+	- fit_saturation_with_nopmodel
 - relaxation
-	- calculate_single_relaxation
-	- calculate_triple_relaxation
+	- fit_single_relaxation
+	- fit_triple_relaxation
 - tools
 	- remove_outlier_from_time_average
-	- correct_fire_bias_correction
+	- correct_fire_instrument_bias
 	- calculate_blank_FastOcean
 	_ calculate_blank_FIRe
 - spectral_correction
@@ -80,14 +80,23 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- plot_relaxation_data
 	- plot_fluorescence_light_curve
 - equations
-	- __fit_kolber__
+	- __fit_kolber_nop__
+	- __calculatate_residual_saturation_nop__
+	- __fit_kolber_p__
+	- __calculate_residual_saturation_p__
 	- __fit_single_relaxation__
+	- __calculate_residual_single_relaxation__
 	- __fit_triple_relaxation__
+	- __calculate_residual_triple_relaxation__
 	- __calculate_Webb_model__
+	- __calculate_residual_etr__
 	- __calculate_modified_Webb_model__
+	- __calculate_residual_phi__
 	- __calculate_rsquared__
 	- __calculate_bias__
 	- __calculate_chisquared__
+	- __calculate_reduced_chisquared__
+	- __calculate_rmse__
 	- __calculate_fit_errors__
 - fitting
 	- __fit_fixed_p_model__
@@ -99,7 +108,7 @@ NOTE: This package structure is defined by the `__init__.py` file
 
 ACKNOWLEDGEMENTS
 ----------------
-- Kevin Oxborough (Chelsea Technology Groups) for methods to estimate Fo and Fm
+- Kevin Oxborough (Chelsea Technology Groups) for linear methods to estimate Fo and Fm
 
 
 TO DO

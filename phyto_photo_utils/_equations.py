@@ -6,15 +6,15 @@ from sklearn.metrics import mean_squared_error
 def __fit_kolber_nop__(pfd, fo, fm, sig):
 	return fo + (fm - fo) * (1 - exp(-sig * cumsum(pfd)))
 
+def __calculate_residual_saturation_nop__(p, pfd, fyield):
+	return  fyield - __fit_kolber_nop__(pfd, *p)
+
 def __fit_kolber_p__(pfd, fo, fm, sig, ro):
 	c = pfd[:] * 0.
 	c[0] = pfd[0] * sig
 	for i in arange(1, len(pfd)):
 		c[i] = c[i-1] + pfd[i] * sig * (1 - c[i-1])/(1 - ro * c[i-1])
 	return fo + (fm - fo) * c * (1-ro) / (1-c*ro)
-
-def __calculate_residual_saturation_nop__(p, pfd, fyield):
-	return  fyield - __fit_kolber_nop__(pfd, *p)
 
 def __calculate_residual_saturation_p__(p, pfd, fyield):
 	return  fyield - __fit_kolber_p__(pfd, *p)
@@ -53,7 +53,7 @@ def __calculate_rsquared__(res, fyield):
 def __calculate_bias__(res, fyield):
 	return sum((1 - res)/fyield) / (len(fyield)*100)
 
-def __calculate_chisquared__(res, fyield):
+def __calculate_chisquared__(res):
 	return sum(res**2)
 
 def __calculate_reduced_chisquared__(chi, fyield, nvars):

@@ -45,7 +45,7 @@ def fit_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100,
 
 	Returns
 	-------
-	res: pandas.DataFrame, shape=[n,10]
+	res: pandas.DataFrame, shape=[n,17]
 		The results of the fitting routine with columns as below:
 	fo_r : np.array, dtype=float, shape=[n,]
 		The minimum fluorescence level of relaxation phase.
@@ -59,14 +59,34 @@ def fit_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100,
 		The bias of fit.
 	chi : np.array, dtype=float, shape=[n,]
 		The chi-squared goodness of fit.
+	rchi : np.array, dtype=float, shape=[n,]
+		The reduced chi-squared goodness of fit.
+	rmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
 		The fit error of Fo_relax.
 	fm_err : np.array, dtype=float, shape=[n,]
 		The fit error of Fm_relax.
 	tau_err : np.array, dtype=float, shape=[n,]
 		The fit error of τ.
-	nfl : np.array, dtype=float, shape=[n,]
+	nfl : np.array, dtype=int, shape=[n,]
 		The number of flashlets used for fitting.
+	niters : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the fitting routine.
+	flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE.
+		-3 : Unable to calculate parameter errors
+		-2 : F\ :sub:`o` Relax > F\ :sub:`m` Relax
+		-1 : improper input parameters status returned from MINPACK.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE)
+	datetime : np.array, dtype=datetime64, shape=[n,]
+		The date and time associated with the measurement.
 
 	Example
 	-------
@@ -152,19 +172,22 @@ def fit_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100,
 	
 	Returns
 	-------
-	res: pandas.DataFrame, shape=[n,20]
+	res: pandas.DataFrame, shape=[n,27]
 		The results of the fitting routine with columns as below:
 	fo_r : np.array, dtype=float, shape=[n,]
 		The minimum fluorescence level of relaxation phase.
 	fm_r : np.array, dtype=float, shape=[n,]
 		The maximum fluorescence level of relaxation phase
 	alpha1 : np.array, dtype=float, shape=[n,]
+		The decay coefficient of τ\ :sub:`1`.
 	tau1 : np.array, dtype=float, shape=[n,]
 		The rate of QA\ :sup:`-` reoxidation in μs.
 	alpha2 : np.array, dtype=float, shape=[n,]
+		The decay coefficient of τ\ :sub:`2`.
 	tau2 : np.array, dtype=float, shape=[n,]
 		The rate of QB\ :sup:`-` reoxidation in μs.
 	alpha3 : np.array, dtype=float, shape=[n,]
+		The decay coefficient of τ\ :sub:`3`.
 	tau3 : np.array, dtype=float, shape=[n,]
 		The rate of PQ reoxidation in μs.
 	rsq: np.array, dtype=float, shape=[n,]
@@ -173,24 +196,44 @@ def fit_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100,
 		The bias of fit.
 	chi : np.array, dtype=float, shape=[n,]
 		The chi-squared goodness of fit.
+	rchi : np.array, dtype=float, shape=[n,]
+		The reduced chi-squared goodness of fit.
+	rmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
 		The fit error of Fo_relax.
 	fm_err : np.array, dtype=float, shape=[n,]
 		The fit error of Fm_relax.
 	alpha1_err : np.array, dtype=float, shape=[n,]
-		The fit error of α1.
+		The fit error of α\ :sub:`1`.
 	tau1_err : np.array, dtype=float, shape=[n,]
-		The fit error of τ1.
+		The fit error of τ\ :sub:`1`.
 	alpha2_err : np.array, dtype=float, shape=[n,]
-		The fit error of α2.
+		The fit error of α\ :sub:`2`.
 	tau2_err : np.array, dtype=float, shape=[n,]
-		The fit error of τ2.
+		The fit error of τ\ :sub:`2`.
 	alpha3_err : np.array, dtype=float, shape=[n,]
-		The fit error of α3.
+		The fit error of α\ :sub:`3`.
 	tau3_err : np.array, dtype=float, shape=[n,]
-		The fit error of τ3.
-	nfl : np.array, dtype=float, shape=[n,]
+		The fit error of τ\ :sub:`3`.
+	nfl : np.array, dtype=int, shape=[n,]
 		The number of flashlets used for fitting.
+	niters : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the fitting routine.
+	flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE.
+		-3 : Unable to calculate parameter errors
+		-2 : F\ :sub:`o` Relax > F\ :sub:`m` Relax
+		-1 : improper input parameters status returned from MINPACK.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE)
+	datetime : np.array, dtype=datetime64, shape=[n,]
+		The date and time associated with the measurement.
 
 	Example
 	-------

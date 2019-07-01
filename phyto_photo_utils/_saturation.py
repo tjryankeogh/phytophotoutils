@@ -40,7 +40,7 @@ def fit_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, sat_len
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	f_scale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=1000			
+	max_nfev : int, default=None			
 		The number of iterations to perform fitting routine.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
@@ -48,22 +48,28 @@ def fit_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, sat_len
 	Returns
 	-------
 
-	res : pandas.DataFrame 
+	res: pandas.DataFrame, shape=[n,18]
 		The results of the fitting routine with columns as below:
 	fo : np.array, dtype=float, shape=[n,]
 		The minimum fluorescence level.
 	fm : np.array, dtype=float, shape=[n,]
 		The maximum fluorescence level.
-	fvfm : np.array, dtype=float, shape=[n,]
-		The maximum photochemical efficiency.
 	sigma : np.array, dtype=float, shape=[n,]
 		The effective absorption cross-section of PSII in Å\ :sup:`2`.
+	fvfm : np.array, dtype=float, shape=[n,]
+		The maximum photochemical efficiency.
+	ro : np.array, dtype=float, shape=[n,]
+		The connectivity coefficient, ρ.
 	rsq : np.array, dtype=float, shape=[n,]
 		The r\ :sup:`2` value.
 	bias : np.array, dtype=float, shape=[n,]
 		The bias of fit.
 	chi : np.array, dtype=float, shape=[n,]
 		The chi-squared goodness of fit.
+	rchi : np.array, dtype=float, shape=[n,]
+		The reduced chi-squared goodness of fit.
+	rmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
 		The fit error of F\ :sub:`o`.
 	fm_err : np.array, dtype=float, shape=[n,]
@@ -72,6 +78,22 @@ def fit_saturation_with_fixedpmodel(pfd, fyield, seq, datetime, blank=0, sat_len
 		The fit error of σ\ :sub:`PSII`.
 	nfl : np.array, dtype=int, shape=[n,]
 		The number of flashlets used for fitting.
+	niters : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the fitting routine.
+	flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE.
+		-3 : Unable to calculate parameter errors
+		-2 : F\ :sub:`o` > F\ :sub:`m`
+		-1 : improper input parameters status returned from MINPACK.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE)
+	datetime : np.array, dtype=datetime64, shape=[n,]
+		The date and time associated with the measurement.
 
 	Example
 	-------
@@ -150,7 +172,7 @@ def fit_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100,
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=1000			
+	max_nfev : int, default=None			
 		The number of iterations to perform fitting routine.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
@@ -158,22 +180,28 @@ def fit_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100,
 	Returns
 	-------
 
-	res : pandas.DataFrame 
+	res: pandas.DataFrame, shape=[n,19]
 		The results of the fitting routine with columns as below:
 	fo : np.array, dtype=float, shape=[n,]
 		The minimum fluorescence level.
 	fm : np.array, dtype=float, shape=[n,]
 		The maximum fluorescence level.
-	fvfm : np.array, dtype=float, shape=[n,]
-		The maximum photochemical efficiency.
 	sigma : np.array, dtype=float, shape=[n,]
 		The effective absorption cross-section of PSII in Å\ :sup:`2`.
+	fvfm : np.array, dtype=float, shape=[n,]
+		The maximum photochemical efficiency.
+	ro : np.array, dtype=float, shape=[n,]
+		The connectivity coefficient, ρ.
 	rsq : np.array, dtype=float, shape=[n,]
 		The r\ :sup:`2` value.
 	bias : np.array, dtype=float, shape=[n,]
 		The bias of the fit.
 	chi : np.array, dtype=float, shape=[n,]
 		The chi-squared goodness of the fit.
+	rchi : np.array, dtype=float, shape=[n,]
+		The reduced chi-squared goodness of the fit.
+	rmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
 		The fit error of F\ :sub:`o`.
 	fm_err : np.array, dtype=float, shape=[n,]
@@ -184,6 +212,22 @@ def fit_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100,
 		The fit error of ρ.
 	nfl : np.array, dtype=int, shape=[n,]
 		The number of flashlets used for fitting.
+	niters : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the fitting routine.
+	flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE.
+		-3 : Unable to calculate parameter errors
+		-2 : F\ :sub:`o` > F\ :sub:`m`
+		-1 : improper input parameters status returned from MINPACK.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE)
+	datetime : np.array, dtype=datetime64, shape=[n,]
+		The date and time associated with the measurement.
 
 	Example
 	-------
@@ -261,14 +305,14 @@ def fit_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blank=0, s
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=1000			
+	max_nfev : int, default=None			
 		The number of iterations to perform fitting routine.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
 	Returns
 	-------
-	res : pandas.DataFrame, shape=[n,11] 
+	res : pandas.DataFrame, shape=[n,17] 
 		The results of the fitting routine with as below:
 	fo : np.array, dtype=float, shape=[n,]
 		The minimum fluorescence level.
@@ -284,6 +328,10 @@ def fit_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blank=0, s
 		The bias of the fit.
 	chi : np.array, dtype=float, shape=[n,]
 		The chi-squared goodness of the fit.
+	rchi : np.array, dtype=float, shape=[n,]
+		The reduced chi-squared goodness of the fit.
+	rmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
 		The fit error of F\ :sub:`o`.
 	fm_err : np.array, dtype=float, shape=[n,]
@@ -292,6 +340,22 @@ def fit_saturation_with_nopmodel(pfd, fyield, seq, datetime, ro=None, blank=0, s
 		The fit error of σ\ :sub:`PSII`.
 	nfl : np.array, dtype=int, shape=[n,]
 		The number of flashlets used for fitting.
+	niters : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the fitting routine.
+	flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE.
+		-3 : Unable to calculate parameter errors
+		-2 : F\ :sub:`o` > F\ :sub:`m`
+		-1 : improper input parameters status returned from MINPACK.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE)
+	datetime : np.array, dtype=datetime64, shape=[n,]
+		The date and time associated with the measurement.
 
 	Example
 	-------

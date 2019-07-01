@@ -10,7 +10,9 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
-	fyield = fyield[~isnan(fyield)]
+	m = ~isnan(fyield)
+	fyield = fyield[m]
+	pfd = pfd[m]
 
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
@@ -65,7 +67,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			# Calculate curve fitting statistical metrics
 			rsq = __calculate_rsquared__(popt.fun, fyield)
 			bias = __calculate_bias__(popt.fun, fyield)
-			chi = __calculate_chisquared__(popt.fun, fyield)
+			chi = __calculate_chisquared__(popt.fun)
 			rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
@@ -96,7 +98,9 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
-	fyield = fyield[~isnan(fyield)]
+	m = ~isnan(fyield)
+	fyield = fyield[m]
+	pfd = pfd[m]
 	
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
@@ -153,7 +157,7 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 			# Calculate curve fitting statistical metrics
 			rsq = __calculate_rsquared__(popt.fun, fyield)
 			bias = __calculate_bias__(popt.fun, fyield)
-			chi = __calculate_chisquared__(popt.fun, fyield)
+			chi = __calculate_chisquared__(popt.fun)
 			rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
@@ -185,7 +189,9 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 	
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
-	fyield = fyield[~isnan(fyield)]
+	m = ~isnan(fyield)
+	fyield = fyield[m]
+	pfd = pfd[m]
 
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
@@ -240,7 +246,7 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			# Calculate curve fitting statistical metrics
 			rsq = __calculate_rsquared__(popt.fun, fyield)
 			bias = __calculate_bias__(popt.fun, fyield)
-			chi = __calculate_chisquared__(popt.fun, fyield)
+			chi = __calculate_chisquared__(popt.fun)
 			rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
@@ -270,8 +276,10 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
    
 	# Count number of flashlets excluding NaNs
-	fyield = fyield[~isnan(fyield)]
-	nfl = count_nonzero(fyield)
+	nfl = count_nonzero(~isnan(fyield))
+	m = ~isnan(fyield)
+	fyield = fyield[m]
+	seq_time = seq_time[m]
 
 	# Estimates of relaxation parameters
 	fo_relax = fyield[-3:].mean()
@@ -311,7 +319,7 @@ def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='
 		# Calculate curve fitting statistical metrics
 		rsq = __calculate_rsquared__(popt.fun, fyield)
 		bias = __calculate_bias__(popt.fun, fyield)
-		chi = __calculate_chisquared__(popt.fun, fyield)
+		chi = __calculate_chisquared__(popt.fun)
 		rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
 		rmse = __calculate_rmse__(popt.fun, fyield)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
@@ -341,7 +349,7 @@ def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='
 	except Exception:
 		print('Unable to calculate fit, skipping sequence.'),
 		fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 12)
-		flag = -4
+		flag = -1
 		success = 'False'
 		return fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
@@ -351,7 +359,9 @@ def __fit_triple_decay__(seq_time, fyield, bounds=False, tau1_lims=None, tau2_li
     
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
-	fyield = fyield[~isnan(fyield)]
+	m = ~isnan(fyield)
+	fyield = fyield[m]
+	seq_time = seq_time[m]
 
 	# Estimates of relaxation parameters
 	fo_relax = fyield[-3:].mean()
@@ -401,7 +411,7 @@ def __fit_triple_decay__(seq_time, fyield, bounds=False, tau1_lims=None, tau2_li
 		# Calculate curve fitting statistical metrics
 		rsq = __calculate_rsquared__(popt.fun, fyield)
 		bias = __calculate_bias__(popt.fun, fyield)
-		chi = __calculate_chisquared__(popt.fun, fyield)
+		chi = __calculate_chisquared__(popt.fun)
 		rchi = __calculate_reduced_chisquared__(chi, fyield, 8)
 		rmse = __calculate_rmse__(popt.fun, fyield)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
@@ -436,7 +446,7 @@ def __fit_triple_decay__(seq_time, fyield, bounds=False, tau1_lims=None, tau2_li
 	except Exception:
 		print('Unable to calculate fit, skipping sequence.'),
 		fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 17)
-		flag = -4
+		flag = -1
 		success = 'False'
 		return fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
