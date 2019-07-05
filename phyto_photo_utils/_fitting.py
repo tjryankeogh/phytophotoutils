@@ -93,6 +93,13 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 				success = 'False'
 				return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 				pass
+		except Exception:
+			print('Unable to calculate fit, skipping sequence.'),
+			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 13)
+			flag = -1
+			success = 'False'
+			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+			pass
 
 def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 
@@ -185,6 +192,14 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 				return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
 				pass
 
+		except Exception:
+			print('Unable to calculate fit, skipping sequence.'),
+			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfev = repeat(nan, 14)
+			flag = -1
+			success = 'False'
+			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
+			pass
+
 def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 	
 	# Count number of flashlets excluding NaNs
@@ -272,6 +287,14 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 				success = 'False'
 				return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 				pass
+
+		except Exception:
+			print('Unable to calculate fit, skipping sequence.'),
+			fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 12)
+			flag = -1
+			success = 'False'
+			return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+			pass
 
 def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
    
