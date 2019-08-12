@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.realpath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'PhytoPhotoUtils'
-copyright = '2019, Thomas Ryan-Keogh, Charlotte Robinson'
+copyright = '2019, Thomas Ryan-Keogh, Charlotte Robinson,'
 author = 'Thomas Ryan-Keogh, Charlotte Robinson'
 
 # The short X.Y version
