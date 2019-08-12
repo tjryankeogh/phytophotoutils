@@ -10,7 +10,7 @@ EXAMPLE USAGE
 This package is meant to be used in an interactive environment - ideally Jupyter Notebook
 
 ```python
-import PhytoPhotoUtils as ppu
+import phyto_photo_utils as ppu
 
 fname = '/path_to_data/data'
 output = '/output_path'
@@ -113,6 +113,7 @@ ACKNOWLEDGEMENTS
 
 TO DO
 -----
+- Add in function to read FastTracka I binary files
 - Add deconvolution method for triple decay relaxation
 - Add the option using different production models in FLC processing
 - Add methods to load in discrete FIRe files

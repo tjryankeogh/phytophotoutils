@@ -40,7 +40,7 @@ setup(
     version=find_version_from_readme(),
 
     # Application author details:
-    author="Thomas Ryan-Keogh",
+    author="Thomas Ryan-Keogh, Charlotte Robinson",
     author_email="tjryankeogh@gmail.com",
 
     # Packages
@@ -52,8 +52,8 @@ setup(
     # Details
     url="https://gitlab.com/tjryankeogh/phytophotoutils",
     license="MIT License",
-    description='Tools and utilities for photophysiology data processing. ',
-    organisation='Council for Scientific and Industrial Research',
+    description='Tools and utilities for active chlorophyll fluorescence data processing.',
+    organisation='Council for Scientific and Industrial Research, Curtin University',
 
     long_description=read("README.md"),
 
@@ -64,7 +64,6 @@ setup(
         "numpy",
         "pandas",
         "datetime",
-        "csv",
         "sklearn",
         "netCDF4"
     ],
