@@ -1,5 +1,16 @@
 Change Log
 ----------
+**v0.8**(2019-06-28)
+
+- Bug fix to spectral correction for handling arrays
+- Statistical metrics now outputs RMSE, reduced Chi squared
+- Processing flags now included in output
+
+**v0.7**(2019-06-20)
+
+- Fo and Fm now estimated as intercepts of Huber Regression linear fits
+- Fitting skipped if Fo is greater than Fm
+- Spectral correction now calculates factor as a function of depth
 
 **v0.6** (2019-05-30)
 

@@ -43,7 +43,7 @@ This work was funded by the CSIR and Curtin University.
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
 - Institution: Council for Scientific and Industrial Research, Curtin University
-- Research group: Southern Ocean Carbon - Climate Observatory (SOCCO)
+- Research group: Southern Ocean Carbon - Climate Observatory (SOCCO), Earth and Planetary Sciences
 
 Please use the guidlines given on https://integrity.mit.edu/handbook/writing-code to cite this code.
 
