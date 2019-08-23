@@ -5,7 +5,7 @@ from numpy import mean, array, isnan, inf, repeat, nan, concatenate
 from pandas import DataFrame
 from scipy.optimize import least_squares
 
-def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
       
 	"""
 	
@@ -43,8 +43,8 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=100			
-		The number of iterations to perform fitting routine.
+	max_nfev : int, default=None		
+		The number of iterations to perform fitting routine. If None, the value is chosen automatically. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
@@ -139,8 +139,10 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 			print('Lower bounds greater than upper bounds - fitting with no bounds.')
 			bds = [-inf, inf]
 
-	# See scipy.optimize.least_squares documentation for more information on non-linear least squares fitting options
-	opts = {'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
+	if max_nfev is None:
+		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'xtol':xtol} 
+	else:
+		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
 	popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
     
@@ -162,7 +164,7 @@ def calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, dark_sigma=True, light_s
 		return etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err
 
 
-def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=1000, xtol=1e-9):
+def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
       
 	"""
 	
@@ -196,8 +198,8 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=100			
-		The number of iterations to perform fitting routine.
+	max_nfev : int, default=None		
+		The number of iterations to perform fitting routine. If None, the value is chosen automatically. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
@@ -285,7 +287,10 @@ def calculate_e_independent_etr(fvfm, sigma, par, light_step_size=None, outlier_
 			print('Lower bounds greater than upper bounds - fitting with no bounds.')
 			bds = [-inf, inf]
 
-	opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
+	if max_nfev is None:
+		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'xtol':xtol} 
+	else:
+		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 	
 	popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
     

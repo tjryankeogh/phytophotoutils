@@ -38,8 +38,8 @@ def fit_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100,
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=100			
-		The number of iterations to perform fitting routine.
+	max_nfev : int, default=None		
+		The number of iterations to perform fitting routine. If None, the value is chosen automatically. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 
@@ -165,8 +165,8 @@ def fit_triple_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100,
 		The loss function to be used. Note: Method ‘lm’ supports only ‘linear’ loss. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	fscale : float, default=0.1
 	 	The soft margin value between inlier and outlier residuals. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
-	max_nfev : int, default=100			
-		The number of iterations to perform fitting routine.
+	max_nfev : int, default=None		
+		The number of iterations to perform fitting routine. If None, the value is chosen automatically. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	xtol : float, default=1e-9			
 		The tolerance for termination by the change of the independent variables. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	
