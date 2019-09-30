@@ -4,7 +4,7 @@ from numpy import exp, argmin, abs, nanmin, nanmax, nansum, array
 from math import pi
 from pandas import read_csv
 
-def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, beta=None, diam=None, bricaud_slope=True):
+def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, beta=None, diam=None, bricaud_slope=True, phycobilin=False, norm_750=True):
 	"""
 
 	Process the raw absorbance data to produce chlorophyll specific phytoplankton absorption.
@@ -25,11 +25,15 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	vol : int
 		The volume of water filtered in mL.
 	beta : int
-		The pathlength amplification factor (see Roesler et al. 1998).
+		The pathlength amplification factor (see Stramski et al. 2015).
 	diam : float			
 		The diameter of filtrate in mm.
 	bricaud_slope: bool, default=True
 	 	If True, will theoretically calculate detrital slope (see Bricaud & Stramski 1990). If False, will subtract depigmented absorption from total absorption.
+	phycobilin: bool, default=False
+		If True, will account for high absorption in the green wavelengths (580 - 600 nm) by phycobilin proteins when performing the bricaud_slope detrital correction.
+	norm_750: bool, default=True
+		If True, will normalise the data to the value at 750 nm.
 
 
 
@@ -56,63 +60,94 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	aptot /= divol
 
 	# Normalise to minimum value (~750 nm)
-	dmin = nanmin(aptot)
-	aptot -= dmin
+	if norm_750:
+		dmin = argmin(abs(ap_lambda - 750))
+		dmin = aptot[dmin]
+		aptot -= dmin
 
 	if bricaud_slope: # See Bricaud & Stramski 1990 for more details
 	    
 	    # Find unique indices based upon wavelengths measured
-	    idx380 = argmin(abs(ap_lambda - 380))
-	    idx505 = argmin(abs(ap_lambda - 505))
-	    idx580 = argmin(abs(ap_lambda - 580))
-	    idx692 = argmin(abs(ap_lambda - 692))
-	    idx750 = argmin(abs(ap_lambda - 750))
+		idx380 = argmin(abs(ap_lambda - 380))
+		idx505 = argmin(abs(ap_lambda - 505))
+		idx580 = argmin(abs(ap_lambda - 580))
+		idx600 = argmin(abs(ap_lambda - 600))
+		idx692 = argmin(abs(ap_lambda - 692))
+		idx750 = argmin(abs(ap_lambda - 750))
 	    
-	    ap750 = aptot[idx750]
-	    R1 = (0.99 * aptot[idx380]) - aptot[idx505]
-	    R2 = (aptot[idx580]) - 0.92 * aptot[idx692]
+		ap750 = aptot[idx750]
+		R1 = (0.99 * aptot[idx380]) - aptot[idx505]
+	    
+		if phycobilin:
 
-	    if (R1 <= 0) | (R2 <= 0):
-	        S = 0
+			phyco = aptot[idx580:idx600]
+			ratio = []
 
-	    else:
-	        R = R1/R2
-	        S = 0.0001
-	        L1 = (0.99 * exp(-380 * S)) - exp(-505 * S)
-	        L2 = exp(-580 * S) - 0.92 * exp(-692 * S)
-	        L = L1/L2
+			for i in range(len(phyco)):
 
-	        while (S < 0.03):
-	                S += 0.0001
-	                L = (0.99 * exp(-380 * S) - 0.99 * exp(-505 * S)) 
-	                L = L / (exp(-580 * S) - 0.92 * exp(-692 * S))
-	                if (L/R) >= 1:
-	                    break
-	        else: 
-	            S = 0
-	    if (S == 0 or S == 0.03):
-	        A = 0 
-	    else:
-	        A = (0.99 * aptot[idx380] - aptot[idx505]) / (0.99 * exp(-380 * S) - exp(-505 * S)) 
+				r = phyco.values[i] / aptot[idx692]
+				ratio.append(r)
 
-	    slope = A*exp(-S*ap_lambda) - A*exp(-750*S)
+			val, idx = min((val, idx) for (idx, val) in enumerate(ratio))
+			idx = phyco.index[idx]
+			widx = ap_lambda[idx]
+			R2 = (aptot[idx]) - 0.92 * aptot[idx692]
+
+		else:
+			R2 = (aptot[idx580]) - 0.92 * aptot[idx692]
+
+		if (R1 <= 0) | (R2 <= 0):
+			S = 0
+
+		else:
+			R = R1/R2
+			S = 0.0001
+			L1 = (0.99 * exp(-380 * S)) - exp(-505 * S)
+
+			if phycobilin:
+				L2 = exp(-widx * S) - 0.92 * exp(-widx * S)
+			else:
+				L2 = exp(-580 * S) - 0.92 * exp(-692 * S)
+			L = L1/L2
+
+			while (S < 0.03):
+				S += 0.0001
+				L = (0.99 * exp(-380 * S) - 0.99 * exp(-505 * S)) 
+				if phycobilin:
+					L = L / (exp(-widx * S) - 0.92 * exp(-692 * S))
+				else:
+					L = L / (exp(-580 * S) - 0.92 * exp(-692 * S))
+
+				if (L/R) >= 1:
+					break
+			else: 
+				S = 0
+		if (S == 0 or S == 0.03):
+			A = 0 
+		else:
+			A = (0.99 * aptot[idx380] - aptot[idx505]) / (0.99 * exp(-380 * S) - exp(-505 * S)) 
+
+		slope = A*exp(-S*ap_lambda) - A*exp(-750*S)
 
 	    # Calculate phytoplankton specific absorption
-	    aphy = aptot - slope
+		aphy = aptot - slope
 
 	else:
 
 		# Convert from absorbance to absorption
-	    depig -= blank
-	    depig *= 2.303 # Conversion from log10 to loge
-	    depig /= divol
+		depig -= blank
+		depig *= 2.303 # Conversion from log10 to loge
+		depig /= divol
 
-	    # Normalise to minimum value (~750 nm)
-	    depmin = nanmin(depig)
-	    depig -= depmin
+ 		# Normalise to minimum value (~750 nm)
+		if norm_750:
+			
+			depmin = argmin(abs(ap_lambda - 750))
+			depmin = depig[depmin]
+			depig -= depmin
 	    
 	    # Calculate phytoplankton specific absorption
-	    aphy = aptot - depig
+		aphy = aptot - depig
 	
 	if chl is None:
 

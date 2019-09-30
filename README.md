@@ -36,14 +36,14 @@ dfb = ppu.correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100)
 
 ABOUT
 -----
-This work was funded by the CSIR and Curtin University.
+This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
 - Version: 0.8
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
 - Institution: Council for Scientific and Industrial Research, Curtin University
-- Research group: Southern Ocean Carbon - Climate Observatory (SOCCO), Earth and Planetary Sciences
+- Research group: Southern Ocean Carbon - Climate Observatory (SOCCO), Remote Sensing and Satellite Research Group
 
 Please use the guidlines given on https://integrity.mit.edu/handbook/writing-code to cite this code.
 
