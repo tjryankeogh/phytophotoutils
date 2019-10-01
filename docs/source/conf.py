@@ -14,7 +14,8 @@
 #
 import sys
 import os
-sys.path.insert(0, os.path.realpath('../../'))
+
+sys.path.insert(0, os.path.realpath('../..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -24,9 +25,9 @@ copyright = '2019, Thomas Ryan-Keogh, Charlotte Robinson,'
 author = 'Thomas Ryan-Keogh, Charlotte Robinson'
 
 # The short X.Y version
-version = ''
+version = '1.0'
 # The full version, including alpha/beta/rc tags
-release = '20-05-2019'
+release = '01-10-2019'
 
 
 # -- General configuration ---------------------------------------------------
