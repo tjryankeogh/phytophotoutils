@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 	
 from ._fitting import __fit_fixed_p_model__, __fit_calc_p_model__, __fit_no_p_model__
+from pandas import Series, concat
 from numpy import array, unique
 from tqdm import tqdm
-from pandas import Series, concat
+
 
 def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, fixed_ro=False, bounds=True, sig_lims =[100, 2200], ro_lims=[0.0, 1.0], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
