@@ -34,7 +34,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 	
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
-		fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 13)
+		fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 14)
 		flag = -2
 		success = 'False'
 		return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
@@ -88,14 +88,14 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 		except linalg.LinAlgError as err:
 			if str(err) == 'Singular matrix':
 				print('Unable to calculate fitting errors, skipping sequence.'),
-				fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 13)
+				fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 14)
 				flag = -3
 				success = 'False'
 				return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 				pass
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 13)
+			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 14)
 			flag = -1
 			success = 'False'
 			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
@@ -129,7 +129,7 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
-		fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfev = repeat(nan, 14)
+		fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 15)
 		flag = -2
 		success = 'False'
 		return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
@@ -186,7 +186,7 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 		except linalg.LinAlgError as err:
 			if str(err) == 'Singular matrix':
 				print('Unable to calculate fitting errors, skipping sequence.'),
-				fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfev = repeat(nan, 14)
+				fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 15)
 				flag = -3
 				success = 'False'
 				return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
@@ -194,7 +194,7 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfev = repeat(nan, 14)
+			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 15)
 			flag = -1
 			success = 'False'
 			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
@@ -282,7 +282,7 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 		except linalg.LinAlgError as err:
 			if str(err) == 'Singular matrix':
 				print('Unable to calculate fitting errors, skipping sequence.'),
-				fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 12)
+				fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 13)
 				flag = -3
 				success = 'False'
 				return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
@@ -290,13 +290,13 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 12)
+			fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 13)
 			flag = -1
 			success = 'False'
 			return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 			pass
 
-def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_single_decay__(seq_time, fyield, bounds=False, single_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
    
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
@@ -323,7 +323,7 @@ def __fit_single_decay__(seq_time, fyield, bounds=False, tau_lims=None, method='
 
 	bds = [-inf, inf]
 	if bounds:
-		bds = [fo_relax-fo10, fm_relax-fm10, tau_lims[0]],[fo_relax+fo10, fm_relax+fm10, tau_lims[1]]
+		bds = [fo_relax-fo10, fm_relax-fm10, single_lims[0]],[fo_relax+fo10, fm_relax+fm10, single_lims[1]]
 		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]) | (bds[0][2] > bds[1][2]):
 			print('Lower bounds greater than upper bounds - fitting with no bounds.')
 			bds = [-inf, inf]

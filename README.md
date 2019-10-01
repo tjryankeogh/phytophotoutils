@@ -2,7 +2,7 @@ Phytoplankton Photophysiology Utils
 ===================================
 
 This is a tool to read and process active chlorophyll fluorescence data from raw format and apply the biophysical model of Kolber et al. (1998).
-For more information see the documentation, below is a short example of how to use the data to read in and process variables.
+For more information see the documentation and demo file, below is a short example of how to use the data to read in and process variables.
 
 
 EXAMPLE USAGE
@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 0.8
+- Version: 0.9
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -58,12 +58,9 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- load_FASTTrackaI_files
 	- load_FastOcean_files
 - saturation
-	- fit_saturation_with_fixedpmodel
-	- fit_saturation_with_pmodel
-	- fit_saturation_with_nopmodel
+	- fit_saturation
 - relaxation
-	- fit_single_relaxation
-	- fit_triple_relaxation
+	- fit_relaxation
 - tools
 	- remove_outlier_from_time_average
 	- correct_fire_instrument_bias
@@ -73,8 +70,7 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- calculate_chl_specific_absorption
 	- calculate_instrument_led_correction
 - flc
-	- calculate_e_dependent_etr
-	- calculate_e_independent_etr
+	- calculate_etr
 - plot
 	- plot_saturation_data
 	- plot_relaxation_data

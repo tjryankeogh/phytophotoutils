@@ -1,5 +1,15 @@
 Change Log
 ----------
+**v1.0**(2019-10-01)
+
+- Syntax changes to saturation, relaxation and flc. Different models now called with optional arguments instead of separate functions.
+
+**v0.9**(2019-10-01)
+
+- Update to phytoplankton specific absorption code for handling phycobilin content
+- Update to phytoplankton specific absorption code for updated pathlength amplification coefficients
+- Update to phytoplankton specific absorption code for not normalising in the infra-red (750 nm) region
+
 **v0.8**(2019-06-28)
 
 - Bug fix to spectral correction for handling arrays
