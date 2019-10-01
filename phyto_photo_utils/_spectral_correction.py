@@ -4,7 +4,7 @@ from numpy import exp, argmin, abs, nanmin, nanmax, nansum, array
 from math import pi
 from pandas import read_csv
 
-def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, beta=None, diam=None, bricaud_slope=True, phycobilin=False, norm_750=True):
+def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, betac1=None, betac2=None, diam=None, bricaud_slope=True, phycobilin=False, norm_750=True):
 	"""
 
 	Process the raw absorbance data to produce chlorophyll specific phytoplankton absorption.
@@ -24,8 +24,10 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 		The chlorophyll concentration associated with the measurement.
 	vol : int
 		The volume of water filtered in mL.
-	beta : int
-		The pathlength amplification factor (see Stramski et al. 2015).
+	betac1 : int
+		The pathlength amplification coefficient 1 (see Stramski et al. 2015). For transmittance mode, 0.679, for transmittance-reflectance mode, 0.719, and for integrating sphere mode, 0.323.
+	betac2 : int
+		The pathlength amplification coefficient 2 (see Stramski et al. 2015). For transmittance mode, 1.2804, for transmittance-reflectance mode, 1.2287, and for integrating sphere mode, 1.0867.
 	diam : float			
 		The diameter of filtrate in mm.
 	bricaud_slope: bool, default=True
@@ -55,9 +57,10 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 
 	# Convert from absorbance to absorption
 	diam = pi * ((diam / 2000)**2) 
-	divol = beta * ((vol / 1e6) / diam) 
+	divol = ((vol / 1e6) / diam) 
 	aptot *= 2.303 # conversion from log10 to loge
 	aptot /= divol
+	aptot = betac1 * aptot**betac2
 
 	# Normalise to minimum value (~750 nm)
 	if norm_750:
