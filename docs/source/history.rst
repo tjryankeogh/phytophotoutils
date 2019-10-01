@@ -1,22 +1,22 @@
 Change Log
 ----------
-**v1.0**(2019-10-01)
+**v1.0** (2019-10-01)
 
 - Syntax changes to saturation, relaxation and flc. Different models now called with optional arguments instead of separate functions.
 
-**v0.9**(2019-10-01)
+**v0.9** (2019-10-01)
 
 - Update to phytoplankton specific absorption code for handling phycobilin content
 - Update to phytoplankton specific absorption code for updated pathlength amplification coefficients
 - Update to phytoplankton specific absorption code for not normalising in the infra-red (750 nm) region
 
-**v0.8**(2019-06-28)
+**v0.8** (2019-06-28)
 
 - Bug fix to spectral correction for handling arrays
 - Statistical metrics now outputs RMSE, reduced Chi squared
 - Processing flags now included in output
 
-**v0.7**(2019-06-20)
+**v0.7** (2019-06-20)
 
 - Fo and Fm now estimated as intercepts of Huber Regression linear fits
 - Fitting skipped if Fo is greater than Fm
