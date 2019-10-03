@@ -56,7 +56,8 @@ setup(
     description='Tools and utilities for active chlorophyll fluorescence data processing.',
     organisation='Council for Scientific and Industrial Research, Curtin University',
 
-    #long_description=read('README.md'),
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
 
     # Dependent packages (distributions)
     install_requires=[
@@ -65,6 +66,6 @@ setup(
         'numpy',
         'pandas',
         'datetime',
-        'matplotlib'
+        'matplotlib',
         'sklearn'],
 )
