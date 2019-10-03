@@ -8,7 +8,7 @@ def read(fname):
 
 
 def find_version_from_readme():
-    s = read("README.md")
+    s = read('README.md')
     i0 = s.lower().find('version')
     i1 = i0 + 20
     v = s[i0:i1].splitlines()[0]  # removes next line
@@ -34,14 +34,14 @@ def walker(base, *paths):
 
 setup(
     # Application name:
-    name="phyto_photo_utils",
+    name='phyto_photo_utils',
 
     # Version number (initial):
     version=find_version_from_readme(),
 
     # Application author details:
-    author="Thomas Ryan-Keogh, Charlotte Robinson",
-    author_email="tjryankeogh@gmail.com",
+    author='Thomas Ryan-Keogh, Charlotte Robinson',
+    author_email='tjryankeogh@gmail.com',
 
     # Packages
     packages=find_packages(),
@@ -50,21 +50,21 @@ setup(
     include_package_data=True,
 
     # Details
-    url="https://gitlab.com/tjryankeogh/phytophotoutils",
-    license="MIT License",
+    url='https://gitlab.com/tjryankeogh/phytophotoutils',
+    download_url= 'https://gitlab.com/tjryankeogh/phytophotoutils/-/archive/v1.0/phytophotoutils-v1.0.tar.gz',
+    license='MIT License',
     description='Tools and utilities for active chlorophyll fluorescence data processing.',
     organisation='Council for Scientific and Industrial Research, Curtin University',
 
-    long_description=read("README.md"),
+    #long_description=read('README.md'),
 
     # Dependent packages (distributions)
     install_requires=[
-        "tqdm",
-        "scipy",
-        "numpy",
-        "pandas",
-        "datetime",
-        "sklearn",
-        "netCDF4"
-    ],
+        'tqdm',
+        'scipy',
+        'numpy',
+        'pandas',
+        'datetime',
+        'matplotlib'
+        'sklearn'],
 )
