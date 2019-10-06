@@ -1,5 +1,14 @@
 Change Log
 ----------
+**v1.0.2**(2019-10-06)
+
+- Saturation flashlets in relaxation fitting are now included in F\ :sub:`m`Relax estimation, rather than replacing relaxation flashlets.
+- FIRe instrument relaxation bias now only uses the difference in relaxation flashlets to correct the large difference in flashlets.
+
+**v1.0.1**(2019-10-04)
+
+- Implementation of code for submission to PyPi. Package now available for installation using pip install phyto_photo_utils.
+
 **v1.0** (2019-10-01)
 
 - Syntax changes to saturation, relaxation and flc. Different models now called with optional arguments instead of separate functions.
@@ -18,8 +27,8 @@ Change Log
 
 **v0.7** (2019-06-20)
 
-- Fo and Fm now estimated as intercepts of Huber Regression linear fits
-- Fitting skipped if Fo is greater than Fm
+- F\ :sub:`o` and F\ :sub:`m` now estimated as intercepts of Huber Regression linear fits
+- Fitting skipped if F\ :sub:`o` is greater than F\ :sub:`m`
 - Spectral correction now calculates factor as a function of depth
 
 **v0.6** (2019-05-30)
@@ -45,3 +54,7 @@ Change Log
 **v0.2** (2018-12-07)
 
 - added functionality for FLCs
+
+**v0.1** (2018-12-01)
+
+- Functions compiled in package format

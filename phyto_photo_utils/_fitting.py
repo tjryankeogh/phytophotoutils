@@ -296,7 +296,7 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 			pass
 
-def __fit_single_decay__(seq_time, fyield, bounds=False, single_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, single_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
    
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
@@ -306,7 +306,11 @@ def __fit_single_decay__(seq_time, fyield, bounds=False, single_lims=None, metho
 
 	# Estimates of relaxation parameters
 	fo_relax = fyield[-3:].mean()
-	fm_relax = fyield[:3].mean()
+	
+	if sat_flashlets is None:
+		fm_relax = fyield[:3].mean()
+	else:
+		fm_relax = fyield[:3+sat_flashlets].mean()
 
 	if (fo_relax > fm_relax):
 		(print('Fo_relax greater than Fm_relax - skipping fit.'))
@@ -378,7 +382,7 @@ def __fit_single_decay__(seq_time, fyield, bounds=False, single_lims=None, metho
 		pass
 
 
-def __fit_triple_decay__(seq_time, fyield, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
@@ -388,7 +392,11 @@ def __fit_triple_decay__(seq_time, fyield, bounds=False, tau1_lims=None, tau2_li
 
 	# Estimates of relaxation parameters
 	fo_relax = fyield[-3:].mean()
-	fm_relax = fyield[:3].mean()
+	
+	if sat_flashlets is None:
+		fm_relax = fyield[:3].mean()
+	else:
+		fm_relax = fyield[:3+sat_flashlets].mean()
 
 	if (fo_relax > fm_relax):
 		(print('Fo_relax greater than Fm_relax - skipping fit.'))

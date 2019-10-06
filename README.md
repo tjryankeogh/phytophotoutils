@@ -19,12 +19,12 @@ output = '/output_path'
 df = ppu.load_FASTTrackaI_files(fname, append=False, save_files=True, res_path=output, seq_len=120, irrad=545.62e10)
 
 # Perform a ρ saturation model fit on the data
-sat = ppu.fit_saturation_with_pmodel(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro_lims=[0.0,1.0], sig_lims =[100,2200])
+sat = ppu.fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro_lims=[0.0,1.0], sig_lims =[100,2200])
 
 # Perform a single decay relaxation model fit on the data
-rel = ppu.fit_single_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, bounds=True, tau_lims=[100, 50000])
+rel = ppu.fit_single(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, single_decay=True, bounds=True, tau_lims=[100, 50000])
 
-# Perform time averaging on raw transients, including the removal of outliers (mean + stdev * 3)
+# Perform time averaging (5 minute averages) on raw transients, including the removal of outliers (mean + stdev * 3)
 dfm = ppu.remove_outlier_from_time_average(df, time=5, multiplier=3)
 
 # Correct for FIRe instrument detector bias
@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 1.0.1
+- Version: 1.0.2
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06

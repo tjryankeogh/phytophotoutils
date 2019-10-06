@@ -131,9 +131,9 @@ def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 	seq = array(seq)
 	dt = array(datetime)
 	if single_decay:
-		opts = {'bounds':bounds, 'single_lims':tau_lims, 'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
+		opts = {'sat_flashlets':sat_flashlets, 'bounds':bounds, 'single_lims':single_lims, 'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 	else:
-		opts = {'bounds':bounds, 'tau1_lims':tau1_lims, 'tau2_lims':tau2_lims, 'tau3_lims':tau3_lims, 'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
+		opts = {'sat_flashlets':sat_flashlets, 'bounds':bounds, 'tau1_lims':tau1_lims, 'tau2_lims':tau2_lims, 'tau3_lims':tau3_lims, 'method':method,'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 	res = []
     
 	for s in tqdm(unique(seq)):

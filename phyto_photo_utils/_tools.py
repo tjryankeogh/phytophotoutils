@@ -72,7 +72,7 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
     
     return df
 
-def correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100):
+def correct_fire_instrument_bias(df, pos=1, sat_len=100):
     
     """
     
@@ -83,8 +83,6 @@ def correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100):
     ----------
     df : pandas.DataFrame 
         A dataframe of the raw data, can either be imported from pandas.read_csv or the output from phyto_photo_utils.load
-    sat : bool, default=False
-     	If True, correct using bias of saturation phase. If False correct using bias of relaxation phase.
     pos : int, default=1
      	The flashlet number after the start of the phase, either saturation or relaxation, to calculate difference between.
     sat_len : int, default=100
@@ -97,7 +95,7 @@ def correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100):
 
     Example
     -------
-    >>> ppu.correct_fire_bias_correction(df, sat=False, pos=1, sat_len=100)
+    >>> ppu.correct_fire_bias_correction(df, pos=1, sat_len=100)
 
     """
 
@@ -111,16 +109,8 @@ def correct_fire_instrument_bias(df, sat=False, pos=1, sat_len=100):
 
         i = seq == s
         y = fyield[i]
-
-        # If sat is True will use bias of saturation phase
-        if sat:
-            d = y[pos] - y[0]
-            y[sat_len:] += d
-        
-        # If sat is False will use bias of relaxation phase
-        else:
-            d = y[sat_len - pos] - y[sat_len]
-            y[sat_len:] += d
+        d = y[sat_len - pos] - y[sat_len]
+        y[sat_len:] += d
         
         ycorr.append(y)
         
@@ -207,10 +197,10 @@ def calculate_blank_FIRe(file_):
     df.columns = ['time', 'ex', 'fyield']
     blank = df.fyield[:sat_len].mean(axis=0)
     stdev = df.fyield[:sat_len].std(axis=0)
-    data = array([blank, stdev, dt]).T
+    data = array([dt, blank, stdev]).T
     res = DataFrame(data)
     res = res.T
-    res.columns = ['blank_mean', 'blank_stdev','datetime']
+    res.columns = ['datetime', 'blank_mean', 'blank_stdev']
 
     return res
 
