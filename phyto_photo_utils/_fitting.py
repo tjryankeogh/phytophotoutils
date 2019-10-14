@@ -34,10 +34,10 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 	
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
-		fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 14)
+		fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 11)
 		flag = -2
 		success = 'False'
-		return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+		return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 		pass
 	
 	else:
@@ -65,10 +65,10 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
-			rsq = __calculate_rsquared__(popt.fun, fyield)
+			#rsq = __calculate_rsquared__(popt.fun, fyield)
 			bias = __calculate_bias__(popt.fun, fyield)
-			chi = __calculate_chisquared__(popt.fun)
-			rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
+			#chi = __calculate_chisquared__(popt.fun)
+			#rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
@@ -83,22 +83,22 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			flag = popt.status
 			success = popt.success
 			
-			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 		
 		except linalg.LinAlgError as err:
 			if str(err) == 'Singular matrix':
 				print('Unable to calculate fitting errors, skipping sequence.'),
-				fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 14)
+				fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 11)
 				flag = -3
 				success = 'False'
-				return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+				return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 				pass
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 14)
+			fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 11)
 			flag = -1
 			success = 'False'
-			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 			pass
 
 def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
@@ -129,10 +129,10 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
-		fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 15)
+		fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 12)
 		flag = -2
 		success = 'False'
-		return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
+		return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
 		pass
 	
 	else:
@@ -162,10 +162,10 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 			ro = popt.x[3]
 
 			# Calculate curve fitting statistical metrics
-			rsq = __calculate_rsquared__(popt.fun, fyield)
+			#rsq = __calculate_rsquared__(popt.fun, fyield)
 			bias = __calculate_bias__(popt.fun, fyield)
-			chi = __calculate_chisquared__(popt.fun)
-			rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
+			#chi = __calculate_chisquared__(popt.fun)
+			#rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
@@ -181,23 +181,23 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 			flag = popt.status
 			status = popt.success
 			
-			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, status
+			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, status
 		
 		except linalg.LinAlgError as err:
 			if str(err) == 'Singular matrix':
 				print('Unable to calculate fitting errors, skipping sequence.'),
-				fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 15)
+				fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 12)
 				flag = -3
 				success = 'False'
-				return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
+				return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
 				pass
 
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 15)
+			fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev = repeat(nan, 12)
 			flag = -1
 			success = 'False'
-			return fo, fm, sigma, ro, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
+			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
 			pass
 
 def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
@@ -228,10 +228,10 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
-		fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 12)
+		fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 9)
 		flag = -2
 		success = False
-		return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+		return fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 		pass
 
 	else:
@@ -259,10 +259,10 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
-			rsq = __calculate_rsquared__(popt.fun, fyield)
+			#rsq = __calculate_rsquared__(popt.fun, fyield)
 			bias = __calculate_bias__(popt.fun, fyield)
-			chi = __calculate_chisquared__(popt.fun)
-			rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
+			#chi = __calculate_chisquared__(popt.fun)
+			#rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
@@ -277,23 +277,23 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			flag = popt.status
 			success = popt.success
 			
-			return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+			return fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 		
 		except linalg.LinAlgError as err:
 			if str(err) == 'Singular matrix':
 				print('Unable to calculate fitting errors, skipping sequence.'),
-				fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 13)
+				fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 10)
 				flag = -3
 				success = 'False'
-				return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+				return fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 				pass
 
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 13)
+			fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 10)
 			flag = -1
 			success = 'False'
-			return fo, fm, sigma, rsq, bias, chi, rchi, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
+			return fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 			pass
 
 def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, single_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
@@ -314,10 +314,10 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 
 	if (fo_relax > fm_relax):
 		(print('Fo_relax greater than Fm_relax - skipping fit.'))
-		fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 12)
+		fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 9)
 		flag = -2
 		success = 'False'
-		return fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+		return fo_r, fm_r, tau, bias, chi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
 
 	fo10 = fo_relax * 0.1
@@ -344,10 +344,10 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		tau = popt.x[2]
 
 		# Calculate curve fitting statistical metrics
-		rsq = __calculate_rsquared__(popt.fun, fyield)
+		#rsq = __calculate_rsquared__(popt.fun, fyield)
 		bias = __calculate_bias__(popt.fun, fyield)
-		chi = __calculate_chisquared__(popt.fun)
-		rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
+		#chi = __calculate_chisquared__(popt.fun)
+		#rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
 		rmse = __calculate_rmse__(popt.fun, fyield)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		fo_err = perr[0]
@@ -362,23 +362,23 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		flag = popt.status
 		success = popt.success
 
-		return  fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+		return  fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 	
 	except linalg.LinAlgError as err:
 		if str(err) == 'Singular matrix':
 			print('Unable to calculate fitting errors, skipping sequence.'),
-			fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 12)
+			fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 9)
 			flag = -3
 			success = 'False'
-			return fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+			return fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 			pass
 	
 	except Exception:
 		print('Unable to calculate fit, skipping sequence.'),
-		fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 12)
+		fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 9)
 		flag = -1
 		success = 'False'
-		return fo_r, fm_r, tau, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+		return fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
 
 
@@ -400,10 +400,10 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 
 	if (fo_relax > fm_relax):
 		(print('Fo_relax greater than Fm_relax - skipping fit.'))
-		fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 17)
+		fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 14)
 		flag = -2
 		success = 'False'
-		return fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+		return fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
 
 	fo10 = fo_relax * 0.1
@@ -440,10 +440,10 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 		t3 = popt.x[7]
 
 		# Calculate curve fitting statistical metrics
-		rsq = __calculate_rsquared__(popt.fun, fyield)
+		#rsq = __calculate_rsquared__(popt.fun, fyield)
 		bias = __calculate_bias__(popt.fun, fyield)
-		chi = __calculate_chisquared__(popt.fun)
-		rchi = __calculate_reduced_chisquared__(chi, fyield, 8)
+		#chi = __calculate_chisquared__(popt.fun)
+		#rchi = __calculate_reduced_chisquared__(chi, fyield, 8)
 		rmse = __calculate_rmse__(popt.fun, fyield)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		fo_err = perr[0]
@@ -463,22 +463,22 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 		flag = popt.status
 		success = popt.success
 
-		return  fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, a1_err, t1_err, a2_err, t2_err, a3_err, t3_err, nfl, nfev, flag, success
+		return  fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, a1_err, t1_err, a2_err, t2_err, a3_err, t3_err, nfl, nfev, flag, success
 	
 	except linalg.LinAlgError as err:
 		if str(err) == 'Singular matrix':
 			print('Unable to calculate fitting errors, skipping sequence.'),
-			fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 17)
+			fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 14)
 			flag = -3
 			success = 'False'
-			return fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+			return fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 			pass
 	
 	except Exception:
 		print('Unable to calculate fit, skipping sequence.'),
-		fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 17)
+		fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 14)
 		flag = -1
 		success = 'False'
-		return fo_r, fm_r, a1, t1, a2, t2, a3, t3, rsq, bias, chi, rchi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+		return fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
 

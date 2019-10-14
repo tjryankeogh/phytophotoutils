@@ -73,14 +73,8 @@ def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 		The decay coefficient of τ\ :sub:`3`, only returned if single_decay is False.
 	tau3 : np.array, dtype=float, shape=[n,]
 		The rate of PQ reoxidation in μs, only returned if single_decay is False.
-	rsq: np.array, dtype=float, shape=[n,]
-		The r-squared value of the fit.
 	bias : np.array, dtype=float, shape=[n,]
 		The bias of fit.
-	chi : np.array, dtype=float, shape=[n,]
-		The chi-squared goodness of fit.
-	rchi : np.array, dtype=float, shape=[n,]
-		The reduced chi-squared goodness of fit.
 	rmse : np.array, dtype=float, shape=[n,]
 		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
@@ -158,9 +152,9 @@ def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 	
 	else:
 		if single_decay: 
-			res.columns = ['fo_r','fm_r','tau','rsq','bias','chi','rchi','rmse','fo_err','fm_err','tau_err','nfl','niters','flag','success']
+			res.columns = ['fo_r','fm_r','tau','bias','rmse','fo_err','fm_err','tau_err','nfl','niters','flag','success']
 		else:
-			res.columns = ['fo_r','fm_r','alpha1','tau1','alpha2','tau2','alpha3','tau3','rsq','bias','chi','rchi','rsme','for_err','fmr_err','alpha1_err','tau1_err','alpha2_err','tau2_err','alpha3_err','tau3_err','nfl','niters','flag','success']
+			res.columns = ['fo_r','fm_r','alpha1','tau1','alpha2','tau2','alpha3','tau3','bias','rsme','for_err','fmr_err','alpha1_err','tau1_err','alpha2_err','tau2_err','alpha3_err','tau3_err','nfl','niters','flag','success']
 		res['datetime'] = unique(dt)
 
 	return res

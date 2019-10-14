@@ -66,14 +66,8 @@ def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 		The maximum photochemical efficiency.
 	ro : np.array, dtype=float, shape=[n,]
 		The connectivity coefficient, ρ, only returned if no_ro and fixed_ro are False.
-	rsq : np.array, dtype=float, shape=[n,]
-		The r\ :sup:`2` value.
 	bias : np.array, dtype=float, shape=[n,]
 		The bias of fit.
-	chi : np.array, dtype=float, shape=[n,]
-		The chi-squared goodness of fit.
-	rchi : np.array, dtype=float, shape=[n,]
-		The reduced chi-squared goodness of fit.
 	rmse : np.array, dtype=float, shape=[n,]
 		The root mean squared error of the fit.
 	fo_err : np.array, dtype=float, shape=[n,]
@@ -144,11 +138,11 @@ def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 	
 	else: 
 		if no_ro:
-			res.columns = ['fo','fm','sigma','rsq','bias','chi','rchi','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
+			res.columns = ['fo','fm','sigma','bias','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
 		if fixed_ro:
-			res.columns = ['fo','fm','sigma','ro','rsq','bias','chi','rchi','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
+			res.columns = ['fo','fm','sigma','ro','bias','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
 		else:
-			res.columns = ['fo','fm','sigma','ro','rsq','bias','chi','rchi','rmse','fo_err','fm_err','sigma_err','ro_err','nfl','niters','flag','success']
+			res.columns = ['fo','fm','sigma','ro','bias','rmse','fo_err','fm_err','sigma_err','ro_err','nfl','niters','flag','success']
 	
 		# Subtract blank from Fo and Fm 
 		res['fo'] -= blank
