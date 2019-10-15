@@ -1,6 +1,6 @@
 Change Log
 ----------
-**v1.0.3**(2019-10-15)
+**v1.1**(2019-10-15)
 
 - Statistical metrics returned from fitting procedure no longer include R\ :sup:`2`, Chi\ :sup:`2` or reduced Chi\ :sup:`2`.
 
