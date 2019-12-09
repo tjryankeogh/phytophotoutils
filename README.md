@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 1.1
+- Version: 1.2
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -48,7 +48,7 @@ This work was funded by the CSIR. This research was partially supported by the A
 Please use the guidlines given on https://integrity.mit.edu/handbook/writing-code to cite this code.
 
 **Example citation:**
-Source: phyto_photo_utils [https://gitlab.com/socco/BuoyancyGliderUtils](https://gitlab.com/tjryankeogh/phytophotoutils) retrieved on 30 May 2019.
+Source: phyto_photo_utils [https://gitlab.com/tjryankeogh/phytophotoutils] retrieved on 30 May 2019.
 
 PACKAGE STRUCTURE
 -----------------
@@ -88,10 +88,7 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- __calculate_residual_etr__
 	- __calculate_modified_Webb_model__
 	- __calculate_residual_phi__
-	- __calculate_rsquared__
 	- __calculate_bias__
-	- __calculate_chisquared__
-	- __calculate_reduced_chisquared__
 	- __calculate_rmse__
 	- __calculate_fit_errors__
 - fitting
@@ -114,7 +111,6 @@ TO DO
 - Add the option using different production models in FLC processing
 - Add methods to load in discrete FIRe files
 - Add additional load methods for newer FIRe instruments
-- Add additional load method for FastTracka II
 - Add additional load method for Soliense LIFT-FRR
 - Add additional load method for CTG LabSTAF
 

@@ -3,7 +3,9 @@
 from numpy import count_nonzero, isnan, inf, linalg, arange, repeat, nan
 from scipy.optimize import least_squares
 from sklearn import linear_model
-from ._equations import __calculate_residual_saturation_p__, __calculate_residual_saturation_nop__, __calculate_residual_saturation_fixedp__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_reduced_chisquared__, __calculate_rmse__, __calculate_fit_errors__
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+from ._equations import __fit_kolber_nop__, __fit_kolber_p__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_residual_saturation_p__, __calculate_residual_saturation_nop__, __calculate_residual_saturation_fixedp__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_bias__, __calculate_rmse__, __calculate_fit_errors__
 	
 	
 def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
@@ -18,7 +20,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 	model = linear_model.HuberRegressor()
 	try:
 		y = fyield[:8]
-		x = arange(0,8)[:,None]
+		x = arange(1,9)[:,None]
 		fo_model = model.fit(x,y)
 		fo = fo_model.intercept_
 	except Exception:
@@ -26,7 +28,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 	
 	try:
 		y = fyield[76:]
-		x = arange(0,24)[:,None]
+		x = arange(1,25)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
 	except Exception:
@@ -65,10 +67,8 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
-			#rsq = __calculate_rsquared__(popt.fun, fyield)
-			bias = __calculate_bias__(popt.fun, fyield)
-			#chi = __calculate_chisquared__(popt.fun)
-			#rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
+			sol = __fit_kolber_p__(pfd, *popt.x)
+			bias = __calculate_bias__(sol, fyield)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
@@ -162,10 +162,8 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 			ro = popt.x[3]
 
 			# Calculate curve fitting statistical metrics
-			#rsq = __calculate_rsquared__(popt.fun, fyield)
-			bias = __calculate_bias__(popt.fun, fyield)
-			#chi = __calculate_chisquared__(popt.fun)
-			#rchi = __calculate_reduced_chisquared__(chi, fyield, 4)
+			sol = __fit_kolber_p__(pfd, *popt.x)
+			bias = __calculate_bias__(sol, fyield)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
@@ -259,10 +257,8 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
-			#rsq = __calculate_rsquared__(popt.fun, fyield)
-			bias = __calculate_bias__(popt.fun, fyield)
-			#chi = __calculate_chisquared__(popt.fun)
-			#rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
+			sol = __fit_kolber_nop__(pfd, *popt.x)
+			bias = __calculate_bias__(sol, fyield)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
@@ -317,7 +313,7 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfev = repeat(nan, 9)
 		flag = -2
 		success = 'False'
-		return fo_r, fm_r, tau, bias, chi, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
+		return fo_r, fm_r, tau, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
 
 	fo10 = fo_relax * 0.1
@@ -344,10 +340,8 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		tau = popt.x[2]
 
 		# Calculate curve fitting statistical metrics
-		#rsq = __calculate_rsquared__(popt.fun, fyield)
-		bias = __calculate_bias__(popt.fun, fyield)
-		#chi = __calculate_chisquared__(popt.fun)
-		#rchi = __calculate_reduced_chisquared__(chi, fyield, 3)
+		sol = __fit_single_relaxation__(seq_time, *popt.x)
+		bias = __calculate_bias__(sol, fyield)
 		rmse = __calculate_rmse__(popt.fun, fyield)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		fo_err = perr[0]
@@ -382,7 +376,7 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		pass
 
 
-def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_triple_decay__(seq_time, pfd, fyield, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))
@@ -440,10 +434,8 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 		t3 = popt.x[7]
 
 		# Calculate curve fitting statistical metrics
-		#rsq = __calculate_rsquared__(popt.fun, fyield)
-		bias = __calculate_bias__(popt.fun, fyield)
-		#chi = __calculate_chisquared__(popt.fun)
-		#rchi = __calculate_reduced_chisquared__(chi, fyield, 8)
+		sol = __fit_single_relaxation__(seq_time, *popt.x)
+		bias = __calculate_bias__(sol, fyield)
 		rmse = __calculate_rmse__(popt.fun, fyield)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		fo_err = perr[0]
@@ -481,4 +473,101 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 		success = 'False'
 		return fo_r, fm_r, a1, t1, a2, t2, a3, t3, bias, rmse, fo_err, fm_err, tau_err, nfl, nfev, flag, success
 		pass
+
+#def __fit_light_dependent_etr__(fo, fm, sigma, par, dark_sigma=False)
+#
+#	fo = array(fo)
+#	fm = array(fm)
+#	fvfm = (fm - fo) / fm
+#	sigma = array(sigma)
+#	par = array(par)
+#
+#	lss = light_step_size - 1 # Python starts at 0
+#	
+#	if dark_sigma:
+#		etr = (par * mean(sigma[0:lss]) * (fvfm / mean(fvfm[0:lss]))) * 6.022e-3
+#	else:
+#		f_o = mean(fo[0:lss]) / (mean(fvfm[0:lss]) + (mean(fo[0:lss])/fm))
+#		fqfv = (fm - fo) / (fm - f_o)
+#		etr = par * sigma * fqfv * 6.022e-3
+#
+#	df = DataFrame([par, etr])
+#	df = df.T
+#	df.columns = ['par', 'etr']
+#
+#	# exclude outliers if more than mean ± (stdev * multiplier)
+#	grp = df.groupby(by='par')
+#	mn = grp.mean()
+#	std = grp.std()
+#	c = grp.count()
+#	ulim = repeat((mn.etr.values + std.etr.values * outlier_multiplier), c.etr.values)
+#	llim = repeat((mn.etr.values - std.etr.values * outlier_multiplier), c.etr.values)
+#	idx = []
+#	for i, items in enumerate(grp.indices.items()):
+#		idx.append(items[-1])
+#
+#	idx = concatenate(idx, axis=0)
+#
+#	# Create pandas DataFrame of upper and lower using original indexes of data
+#	mask = DataFrame([ulim, llim, idx]).T
+#	mask.columns = ['ulim','llim','index']
+#	mask = mask.set_index('index').sort_index()
+#
+#	m = (df.etr.values > mask.ulim) | (df.etr.values < mask.llim)
+#
+#	# Where condition is True, set values of value to NaN
+#	df.loc[m.values,'etr'] = nan
+#
+#	# Create means per light step
+#	df = df.groupby('par').mean().reset_index()
+#	#TO DO apply function of excluding outliers from means
+#
+#	# Define data for fitting and estimates of ETRmax and alpha
+#	P = array(df.etr)
+#	E = array(df.par)
+#
+#	p0 = [1000, 1.5]
+#
+#	# Mask missing data
+#
+#	mask = isnan(P) | isnan(E)	
+#	E = E[~mask]
+#	P = P[~mask]
+#	
+#	if bounds:
+#		bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
+#		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]):
+#			print('Lower bounds greater than upper bounds - fitting with no bounds.')
+#			bds = [-inf, inf]
+#	else:
+#		bds = [-inf, inf]
+#
+#	if max_nfev is None:
+#		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'xtol':xtol} 
+#	else:
+#		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
+#
+#	try:
+#		popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
+#		
+#		etr_max = popt.x[0]
+#		alpha = popt.x[1]
+#		ek = etr_max / alpha
+#		bias = __calculate_bias__(popt.fun, P)
+#		rmse = __calculate_rmse__(popt.fun, P)				
+#		perr = __calculate_fit_errors__(popt.jac, popt.fun)
+#		etr_max_err = perr[0]
+#		alpha_err = perr[1]
+#	
+#	except Exception:
+#		print(('Unable to calculate fit, skipping sequence'))
+#		etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err = repeat(nan, 7)
+#	
+#	if return_data:
+#		return etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err, [E,P]
+#	else:
+#		return etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err
+#
+#def __fit_light_independent_etr__()
+
 

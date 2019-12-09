@@ -1,5 +1,15 @@
 Change Log
 ----------
+**v1.2**(2019-12-09)
+- Update to bias calculation.
+- Update to spectral correction code for correcting for background light and using chlorophyll to calculate Kd.
+- Update to spectral correction code to include FastOcean LED spectra.
+- Update to spectral correction code that allows the user to include their own constants/spectra instead of the pre-included file.
+- Plot functions now close any existing figure objects.
+- Plot functions now include RMSE in the legend.
+- Update to remove outliers code to make the datetime array 'datetime64'.
+- Statistical metrics returned from FLC fitting procedure no longer include R\ :sup:`2`, Chi\ :sup:`2` or reduced Chi\ :sup:`2`.
+
 **v1.1**(2019-10-15)
 
 - Statistical metrics returned from fitting procedure no longer include R\ :sup:`2`, Chi\ :sup:`2` or reduced Chi\ :sup:`2`.

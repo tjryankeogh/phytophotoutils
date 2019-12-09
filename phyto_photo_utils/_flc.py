@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
-from ._equations import __calculate_residual_etr__, __calculate_residual_phi__, __calculate_rsquared__, __calculate_bias__, __calculate_chisquared__, __calculate_fit_errors__, __calculate_rmse__, __calculate_reduced_chisquared__
+from ._equations import __calculate_residual_etr__, __calculate_residual_phi__, __calculate_Webb_model__, __calculate_modified_Webb_model__, __calculate_bias__, __calculate_fit_errors__, __calculate_rmse__
 from numpy import mean, array, isnan, inf, repeat, nan, concatenate
 from pandas import DataFrame
 from scipy.optimize import least_squares
+import warnings
 
-def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=None, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, light_step_size=None, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
       
 	"""
 	
@@ -14,9 +15,9 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=None, l
 	Parameters
 	----------
 	fo : np.array, dtype=float, shape=[n,]
-		The minimum fluorescence yield.
+		The minimum fluorescence level.
 	fm : np.array, dtype=float, shape=[n,] 
-		The maximum fluorescence yield.
+		The maximum fluorescence level.
 	sigma : np.array, dtype=float, shape=[n,] 
 		The effective absorption cross-section of PSII in Å\ :sup:`2`.
 	par : np.array, dtype=float, shape=[n,]
@@ -80,6 +81,8 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=None, l
 	>>> etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err = ppu.calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, return_data=False)
 	"""
 
+	warnings.simplefilter(action = "ignore", category = RuntimeWarning)
+
 	fo = array(fo)
 	fm = array(fm)
 	fvfm = (fm - fo) / fm
@@ -134,30 +137,30 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=None, l
 	P = array(df.etr)
 	E = array(df.par)
 
-	p0 = [1000, 2]
+	p0 = [1000, 1.5]
 
 	# Mask missing data
 	if light_independent:
-		mask = isnan(P) | (P < 0) | (E == 0)
+		mask = isnan(P) | isnan(E) | (P < 0) | (E == 0)
 	else:
-		mask = isnan(P)
+		mask = isnan(P) | isnan(E)
 	
 	E = E[~mask]
 	P = P[~mask]
-
-	bds = [-inf, inf]
 	
 	if bounds:
 		bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
 		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]):
 			print('Lower bounds greater than upper bounds - fitting with no bounds.')
 			bds = [-inf, inf]
+	else:
+		bds = [-inf, inf]
 
 	if max_nfev is None:
 		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'xtol':xtol} 
 	else:
 		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
-	
+
 	try:
 		if light_independent:
 			popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
@@ -175,10 +178,13 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=None, l
 			alpha = popt.x[1]
 
 		ek = etr_max / alpha
-		rsq = __calculate_rsquared__(popt.fun, P)
-		bias = __calculate_bias__(popt.fun, P)
-		chi = __calculate_chisquared__(popt.fun)
-		rchi = __calculate_reduced_chisquared__(chi, P, 4)
+		
+		if light_independent:
+			sol = __calculate_modified_Webb_model__(E, *popt.x)
+		else:
+			sol = __calculate_Webb_model__(E, *popt.x)
+
+		bias = __calculate_bias__(sol, P)
 		rmse = __calculate_rmse__(popt.fun, P)				
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		etr_max_err = perr[0]
@@ -186,9 +192,9 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=None, l
 	
 	except Exception:
 		print(('Unable to calculate fit, skipping sequence'))
-		etr_max, alpha, ek, rsq, bias, chi, rchi, rmse, etr_max_err, alpha_err = repeat(nan, 10)
+		etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err = repeat(nan, 7)
 	
 	if return_data:
-		return etr_max, alpha, ek, rsq, bias, chi, rchi, rmse, etr_max_err, alpha_err, [E,P]
+		return etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err, [E,P]
 	else:
-		return etr_max, alpha, ek, rsq, bias, chi, rchi, rmse, etr_max_err, alpha_err
+		return etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err

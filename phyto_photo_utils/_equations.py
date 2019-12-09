@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from numpy import exp, sum, mean, sqrt, diag, linalg, arange, cumsum
+from numpy import exp, sum, mean, sqrt, diag, linalg, arange, cumsum, nansum, isnan, log10
 from sklearn.metrics import mean_squared_error
 
 def __fit_kolber_nop__(pfd, fo, fm, sig):
@@ -47,22 +47,13 @@ def __calculate_modified_Webb_model__(E, P, a):
 def __calculate_residual_phi__(p, E, P):
 	return P - __calculate_modified_Webb_model__(E, *p)
 
-def __calculate_rsquared__(res, fyield):
-	return 1 - (sum(res**2)/sum((fyield - mean(fyield))**2))
-
-def __calculate_bias__(res, fyield):
-	return sum((1 - res)/fyield) / (len(fyield)*100)
-
-def __calculate_chisquared__(res):
-	return sum(res**2)
-
-def __calculate_reduced_chisquared__(chi, fyield, nvars):
-	return chi/(len(fyield) - nvars)
+def __calculate_bias__(sol, fyield):
+	m = (isnan(sol)) | (isnan(fyield)) | (sol <= 0) | (fyield <= 0)
+	return 10 ** ((nansum(log10(sol[~m]) - log10(fyield[~m])) / len(fyield[~m])))
 
 def __calculate_rmse__(res, fyield):
 	return sqrt(mean_squared_error(fyield, res+fyield))	
 
 def __calculate_fit_errors__(jac, res):
-	#J = popt.jac
 	pcov = linalg.inv(jac.T.dot(jac)) * mean(res**2)
 	return sqrt(diag(pcov))

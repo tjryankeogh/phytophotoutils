@@ -14,7 +14,7 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
     Parameters
     ----------
     file_ : str
-        The path directory to the .000 data file from benchtop SAtlantic FIRe.
+        The path directory to the data file from benchtop SAtlantic FIRe.
     append : bool, default=False
         If True, multiple files will be concatenated together.
     save_files : bool, default=False
@@ -314,7 +314,7 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     -------
     >>> fname = './data/raw/instrument/fire/FastOcean_example.000'
     >>> output = './data/raw/ppu/fastocean/'
-    >>> df = ppu.load_FastOcean_files(fname, append=False, save_files=True, led_separate=False, res_path=output, seq_len=140, flen=2e-6)
+    >>> df = ppu.load_FastOcean_files(fname, append=False, save_files=True, led_separate=False, res_path=output, seq_len=140, flen=1e-6)
     >>> led_sequence == 1, LED 450 nm
     >>> led_sequence == 2, LED 450 nm + LED 530 nm
     >>> led_sequence == 3, LED 450 nm + LED 624 nm

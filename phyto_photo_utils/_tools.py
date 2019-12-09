@@ -36,6 +36,8 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
 
     # Convert time window to string
     dt = str(time)+'T'
+    # Convert dtype of the datetime column
+    df['datetime'] = df.datetime.astype('datetime64')
     # Group data by time window and flashlet number
     grp = df.groupby([Grouper(key='datetime', freq=dt), 'flashlet_number'])
     # Calculate means, standard deviations and counts of the groups
@@ -76,7 +78,7 @@ def correct_fire_instrument_bias(df, pos=1, sat_len=100):
     
     """
     
-    Corrects for instrumentation bias by calculating difference between flashlet 0 & flashlet[pos].
+    Corrects for instrumentation bias in the relaxation phase by calculating difference between flashlet 0 the relaxation phase & flashlet[pos].
     This bias is then added to the relaxation phase.
 
     Parameters

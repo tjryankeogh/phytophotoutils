@@ -4,7 +4,7 @@ from numpy import exp, argmin, abs, nanmin, nanmax, nansum, array
 from math import pi
 from pandas import read_csv
 
-def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, betac1=None, betac2=None, diam=None, bricaud_slope=True, phycobilin=False, norm_750=True):
+def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=None, vol=None, betac1=None, betac2=None, diam=None, bricaud_slope=False, phycobilin=False, norm_750=False):
 	"""
 
 	Process the raw absorbance data to produce chlorophyll specific phytoplankton absorption.
@@ -34,7 +34,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	 	If True, will theoretically calculate detrital slope (see Bricaud & Stramski 1990). If False, will subtract depigmented absorption from total absorption.
 	phycobilin: bool, default=False
 		If True, will account for high absorption in the green wavelengths (580 - 600 nm) by phycobilin proteins when performing the bricaud_slope detrital correction.
-	norm_750: bool, default=True
+	norm_750: bool, default=False
 		If True, will normalise the data to the value at 750 nm.
 
 
@@ -47,7 +47,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 
 	Example
 	-------
-	>>> aphy = ppu.calculate_chl_specific_absorption(pa_data, blank, wavelength, chl=0.19, vol=2000, beta=2, diam=15, bricaud_slope=True)
+	>>> aphy = ppu.calculate_chl_specific_absorption(pa_data, blank, wavelength, chl=0.19, vol=2000, betac1=0.323, betac2=1.0867, diam=15, bricaud_slope=True, phycobilin=True, norm750=False)
 	   
 	"""
 	aptot = array(aptot)
@@ -136,7 +136,8 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 		aphy = aptot - slope
 
 	else:
-
+		if depig is None:
+			print('UserError - no depigmented data provided.')
 		# Convert from absorbance to absorption
 		depig -= blank
 		depig *= 2.303 # Conversion from log10 to loge
@@ -162,36 +163,47 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 		return aphy
 	
 
-def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=None, e_led=None, constants=None):
+def calculate_instrument_led_correction(aphy, ap_lambda, method=None, chl=None, e_background=None, e_insitu=None, e_actinic=None, depth=None, e_led=None, wl=None, constants=None):
 	"""
 
 	Calculate the spectral correction factor
 	TO DO: Create method to convert all arrays to same length and resolution
+	TO DO: Add in functionality to calculate mixed excitation wavelength spectra for FastOcean when using 1+ wavelength
 
 	Parameters
 	----------
 
 	aphy : np.array, dtype=float, shape=[n,]
-		The chlorophyll specific phytoplankton absorption.
+		The wavelength specific phytoplankton absorption coefficients.
 	ap_lambda : np.array, dtype=int, shape=[n,]
-		The wavelengths associated with the aphy.
+		The wavelengths associated with the aphy and aphy_star.
+	method : 'sigma', 'actinic'
+		Choose spectral correction method to either correct SigmaPSII or correct the background actinic light.
+	e_background : 'insitu', 'actinic'
+		For sigma spectral correction factor, select either insitu light (e.g. for underway or insitu measurements) or actinic light (e.g. for fluorescence light curves) as the background light source
 	e_insitu : np.array, dtype=int, shape=[n,]
-		The in situ irradiance field, if None is passed then will theoretically calculated in situ light field.
-	depth : float
-		The depth of the corresponding aphy measurement.
-	e_led : 'fire','fasttracka_ii'
+		The in situ irradiance field, if None is passed then will theoretically calculate in situ light field.
+	chl : dtype=float
+		Chlorophyll concentration for estimation of Kbio for theoretical in situ light field. If None is passed then chl is set to 1 mg/m3.
+	e_actinic : 'fastact'
+		Actinic light spectrum e.g. Spectra of the Actinic lights within the FastAct illuminating during Fluorescence Light Curves etc. Must defined for 'actinic' method.
+	depth : float, default=None
+		The depth of the measurement. Must be set if theoretically calculating e_insitu.
+	e_led : 'fire','fasttracka_ii', 'fastocean'
 		The excitation spectra of the instrument.
+	wl : '450nm', '530nm', 624nm', None
+		For FastOcean only. Select the excitation wavelength. Future PPU versions will provide option to mix LEDs.
 
 	Returns
 	-------
 
 	scf : float
-		The spectral correction factor.
+		The spectral correction factor to correct SigmaPSII or actinic background light depending on method.
 
 	Example
 	-------
 	>>> ppu.calculate_instrument_led_correction(aphy, wavelength, e_led='fire')
-	   
+
 	"""
 	aphy = array(aphy)
 	ap_lambda = array(ap_lambda)
@@ -199,38 +211,87 @@ def calculate_instrument_led_correction(aphy, ap_lambda, e_insitu=None, depth=No
 	idx400 = argmin(abs(ap_lambda - 400))
 	idx700 = argmin(abs(ap_lambda - 700))+1
 	aphy = array(aphy[idx400:idx700])
+	aphy = aphy / nanmax(aphy)
 
+	if method is None:
+		print('User must select spectral correction method for correcting sigma or correcting actinic light')
 
-	if e_insitu is None:
-		if depth is None:
-			print('User must define depth for calculating in situ light spectra')
-		else:
-			if constants is None:
-				df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
-			else:
-				df = read_csv(constants, index_col=0)
-			kd = df.a_W + df.a_gt + aphy
-			Ez = df.Ezero * exp(-kd * depth)
-			Erange = Ez.max() - Ez.min()
-			e_insitu = (Ez - Ez.min())/Erange
-
+	if constants is None:
+		df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
 	else:
-		e_insitu = e_insitu / max(e_insitu) 
+		df = read_csv(constants, index_col=0)
 
-	if e_led is None:
-		print('No instrument selected. Unable to calculate spectral correction factor.')
+	if method == 'sigma':
 
-	elif e_led == 'fire':
-		 e_led = df.fire.values
-		 e_led = e_led / nanmax(e_led)
-	elif e_led == 'fasttracka_ii':
-		 e_led = df.fasttracka_ii.values
-		 e_led = e_led / nanmax(e_led)
+		if chl is None:
+			print(r'Chlorophyll concentration set to 1 mg m$^-$$^3$')
+			chl = 1
+		else:
+			chl = chl
 
-	aphy = aphy / nanmax(aphy)	
+		if e_background == 'insitu':
 
-	# Perform SCF calculation
-	scf = (nansum(aphy * e_insitu) * nansum(e_led)) / (nansum(aphy * e_led) * nansum(e_insitu))
+			if e_insitu is None:
+				if depth is None:
+					print('User must define depth for calculating in situ light spectra')
+				else:
+					kd = df.a_W + df.bb_W + (df.chi * chl ** df.e)
+					Ez = df.Ezero * exp(-kd * depth)
+					e_background = Ez / max(Ez)
+
+			else:
+				e_background = e_insitu / max(e_insitu)
+
+		elif e_background == 'actinic':
+
+			if e_actinic == 'fastact':
+				e_actinic = df.fastact.values
+				e_background = e_actinic / max(e_actinic)
+			else:
+				e_background = e_actinic / max(e_actinic)
+
+		if e_led is None:
+			print('No instrument selected. Unable to calculate sigma spectral correction factor.')
+		elif e_led == 'fire':
+		 	e_led = df.fire.values
+		 	e_led = e_led / nanmax(e_led)
+		elif e_led == 'fasttracka_ii':
+		 	e_led = df.fasttracka_ii.values
+		 	e_led = e_led / nanmax(e_led)
+		elif e_led == 'fastocean':
+		 	if wl == None:
+		 		print('User must select single excitation wavelength for FastOcean')
+		 	elif wl == '450nm':
+		 		e_led = df.fastocean_450.values
+		 	elif wl == '530nm':
+		 		e_led = df.fastocean_530.values
+		 	elif wl == '624nm':
+		 		e_led = df.fastocean_624.values
+
+		# Perform SCF calculation for sigma
+		scf = (nansum(aphy * e_background) * nansum(e_led)) / (nansum(aphy * e_led) * nansum(e_background))
+
+	elif method == 'actinic':
+		if e_insitu is None:
+			if depth is None:
+				print('User must define depth for calculating in situ light spectra')
+			else:
+				kd = df.a_W + df.bb_W + (df.chi * chl ** df.e)
+				Ez = df.Ezero * exp(-kd * depth)
+				e_insitu = Ez / max(Ez)
+		else:
+			e_insitu = e_insitu / max(e_insitu)
+
+		if e_actinic == 'fastact':
+			e_actinic = df.fastact.values
+			e_actinic = e_actinic / max(e_actinic)
+		else:
+			e_actinic = e_actinic / max(e_actinic)
+
+		# Perform SCF calculation for the actinic light
+		scf = (nansum(aphy * e_actinic) * nansum(e_insitu)) / (nansum(aphy * e_insitu) * nansum(e_actinic))
+
 
 	return scf
+
 

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from ._equations import __fit_kolber_p__, __fit_kolber_nop__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_Webb_model__, __calculate_modified_Webb_model__
-from matplotlib.pyplot import subplots
+from matplotlib.pyplot import subplots, close
 from numpy import arange, array
 
-def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq=None):
+def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rmse=None):
 
 	"""
 	Parameters
@@ -22,8 +22,8 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 		The effective absorption cross-section value in Å\ :sup:`2`.
 	ro: float, default=None
 		The connectivity coefficient.
-	rsq: float, default=None
-		The r\ :sup:`2` value of the fit.
+	rmse: float, default=None
+		The RMSE value of the fit.
 
 	Returns
 	-------
@@ -33,13 +33,15 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 
 	Example
 	-------
-	>>> plot_saturation_data(fyield, pfd, fo=fo, fm=fm, sigma=sigma, ro=None, rsq=rsq)
+	>>> plot_saturation_data(fyield, pfd, fo=fo, fm=fm, sigma=sigma, ro=None, rmse=rmse)
 	"""
 
 	fyield = array(fyield)
 	pfd = array(pfd)
-	fvfm = (params[1] - params[0])/params[1]
+	fvfm = (fm - fo)/fm
 	x = arange(0,len(fyield),1)
+
+	close()
 
 	fig, ax = subplots(1, 1, figsize=[5,4], dpi=90)
 
@@ -49,11 +51,11 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 
 	if ro is None:
 		params = [fo, fm, sigma]
-		formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; r$^2$ = {:.2f}".format(fvfm, sigma, rsq)
+		formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; RMSE = {:.2f}".format(fvfm, sigma, rmse)
 		ax.plot(x, __fit_kolber_nop__(pfd, *params), color='k', label='{}'.format(formula))
 	else:
 		params = [fo, fm, sigma, ro]
-		formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; r$^2$ = {:.2f}".format(fvfm, sigma, rsq)
+		formula = r"F$_v$/F$_m$ = {:.2f}""\n""$\u03C3$$_{{PSII}}$ = {:.2f}; RMSE = {:.2f}".format(fvfm, sigma, rmse)
 		ax.plot(x, __fit_kolber_p__(pfd, *params), color='k', label='{}'.format(formula))
 
 	ax.legend()
@@ -61,7 +63,7 @@ def plot_saturation_data(fyield, pfd, fo=None, fm=None, sigma=None, ro=None, rsq
 
 	return ax
 
-def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=None, alpha=None, rsq=None):
+def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=None, alpha=None, rmse=None):
 	"""
 	Parameters
 	----------
@@ -78,8 +80,8 @@ def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=Non
 		The rate of reoxidation in μs.
 	alpha: float, default=None
 		The ratio of reoxidisation components.
-	rsq: float, default=None
-		The r\ :sup:`2` value of the fit.
+	rmse: float, default=None
+		The RMSE value of the fit.
 
 	Returns
 	-------
@@ -97,6 +99,8 @@ def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=Non
 
 	x = arange(0,len(fyield),1)+100
 
+	close()
+
 	fig, ax = subplots(1, 1, figsize=[5,4], dpi=90)
 
 	ax.plot(x, fyield, marker='o', lw=0, label='Raw Data', color='0.5')
@@ -106,13 +110,13 @@ def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=Non
 	if alpha is None:
 		params = [fo_relax, fm_relax, tau]
 	
-		formula = r"F$_o$$_{{Relax}}$ = {:.2f}; F$_m$$_{{Relax}}$ = {:.2f}""\n""$\U0001D70F$ = {:.2f}; r$^2$ = {:.2f}".format(fo_relax, fm_relax, tau, rsq)
+		formula = r"F$_o$$_{{Relax}}$ = {:.2f}; F$_m$$_{{Relax}}$ = {:.2f}""\n""$\U0001D70F$ = {:.2f}; RMSE = {:.2f}".format(fo_relax, fm_relax, tau, rmse)
 		ax.plot(x, __fit_single_relaxation__(seq_time, *params), color='k', label='{}'.format(formula))
 
 	else:
 		params = [fo_relax, fm_relax, alpha[0], tau[0], alpha[1], tau[1], alpha[2], tau[2]]
 
-		formula = r"F$_o$$_{{Relax}}$ = {:.2f}; F$_m$$_{{Relax}}$ = {:.2f}""\n""$\U0001D70F$$_1$ = {:.2f}; $\U0001D70F$$_2$ = {:.2f}""\n""$\U0001D70F$$_3$ = {:.2f}; r$^2$ = {:.2f}".format(fo_relax, fm_relax, tau[0], tau[1], tau[2], rsq)
+		formula = r"F$_o$$_{{Relax}}$ = {:.2f}; F$_m$$_{{Relax}}$ = {:.2f}""\n""$\U0001D70F$$_1$ = {:.2f}; $\U0001D70F$$_2$ = {:.2f}""\n""$\U0001D70F$$_3$ = {:.2f}; RMSE = {:.2f}".format(fo_relax, fm_relax, tau[0], tau[1], tau[2], rmse)
 		ax.plot(x, __fit_triple_relaxation__(seq_time, *params), color='k', label='{}'.format(formula))
 
 	ax.legend()
@@ -121,7 +125,7 @@ def plot_relaxation_data(fyield, seq_time, fo_relax=None, fm_relax=None, tau=Non
 	return ax
 
 
-def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, sigma=None, phi=False):
+def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rmse=None, sigma=None, phi=False):
 	
 	"""
 	Parameters
@@ -135,8 +139,8 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 		The maximum electron transport rate.
 	alpha : float, default=None
 		The light limited slope of electron transport.
-	rsq: float, default=None
-		The r\ :sup:`2` value of the fit.
+	rmse: float, default=None
+		The RMSE value of the fit.
 	sigma: float, default=None
 		The effective absorption-cross section.
 	phi: bool, default=False
@@ -156,11 +160,11 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 	x = array(par)
 	y = array(etr)
 	
-
+	close()
 	fig, ax = subplots(1, 1, figsize=[5,4], dpi=90)
 
 	ax.plot(x, y, marker='o', lw=0, label='Raw Data', color='0.5')
-	formula = r"ETR$_{{max}}$ = {:.2f}""\n""$\u03B1$$^{{ETR}}$ = {:.2f}""\n"" r$^2$ = {:.2f}".format(etrmax, alpha, rsq)
+	formula = r"ETR$_{{max}}$ = {:.2f}""\n""$\u03B1$$^{{ETR}}$ = {:.2f}""\n"" RMSE = {:.2f}".format(etrmax, alpha, rmse)
 	ax.set_xlabel('Actinic Light ($\u03BC$mol photons m$^{-2}$ s${-1}$)')
 	
 	if phi == False:
@@ -169,6 +173,8 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 		ax.set_ylabel('ETR (mol e$^{-1}$ mol RCII$^{-1}$ s$^{-1}$)')
 	
 	else:
+		if sigma is None:
+			print('UserError - no sigma data provided.')
 		sig = sigma*6.022e-3
 		params = [etrmax/sig, alpha/sig]
 		ax.plot(x, __calculate_modified_Webb_model__(x, *params), color='k', label='{}'.format(formula))
@@ -176,5 +182,6 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rsq=None, s
 		ax.set_ylabel('\u03D5')
 	
 	ax.legend()
+
 	
 	return ax
