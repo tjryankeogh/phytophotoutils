@@ -1,5 +1,10 @@
 Change Log
 ----------
+**v1.2.1**(2020-01-08)
+
+- bug fixes for fitting triple relaxation error codes
+- update to recommend bounds for tau1
+
 **v1.2**(2019-12-09)
 
 - Update to bias calculation.

@@ -5,7 +5,7 @@ from numpy import array, unique
 from pandas import Series, concat
 from tqdm import tqdm
 
-def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=0, single_decay=False, bounds=True, single_lims=[100,50000], tau1_lims=[800, 2000], tau2_lims=[800, 2000], tau3_lims=[2000, 50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=None, single_decay=False, bounds=True, single_lims=[100,50000], tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 	"""
 
 	Process the raw transient data and perform the Kolber et al. 1998 relaxation model.
