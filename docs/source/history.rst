@@ -2,6 +2,10 @@ Change Log
 ----------
 **v1.2.1**(2020-01-08)
 
+- bug fix for fixed ro calculation
+
+**v1.2.1**(2020-01-08)
+
 - bug fixes for fitting triple relaxation error codes
 - update to recommend bounds for tau1
 

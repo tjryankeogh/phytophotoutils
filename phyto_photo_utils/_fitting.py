@@ -27,7 +27,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 		fo = fyield[:3].mean()
 	
 	try:
-		y = fyield[76:]
+		y = fyield[-24:]
 		x = arange(1,25)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
@@ -50,7 +50,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 
 		bds = [-inf, inf]
 		if bounds:
-			bds = [fo-fo10, fm-fm10, sig_lims[0]],[fo+fo10, fm+fm10, sig_lims[1]]
+			bds = [fo-fo10, fm-fm10, sig_lims[0]], [fo+fo10, fm+fm10, sig_lims[1]]
 			if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]) | (bds[0][2] > bds[1][2]):
 				print('Lower bounds greater than upper bounds - fitting with no bounds.')
 				bds = [-inf, inf]
@@ -67,7 +67,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
-			sol = __fit_kolber_p__(pfd, *popt.x)
+			sol = __fit_kolber_p__(pfd, *popt.x, ro)
 			bias = __calculate_bias__(sol, fyield)
 			rmse = __calculate_rmse__(popt.fun, fyield)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
@@ -95,7 +95,7 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 				pass
 		except Exception:
 			print('Unable to calculate fit, skipping sequence.'),
-			fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfev = repeat(nan, 11)
+			fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev = repeat(nan, 11)
 			flag = -1
 			success = 'False'
 			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
@@ -120,7 +120,7 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 		fo = fyield[:3].mean()
 	
 	try:
-		y = fyield[76:]
+		y = fyield[-24:]
 		x = arange(0,24)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
@@ -217,7 +217,7 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 		fo = fyield[:3].mean()
 	
 	try:
-		y = fyield[76:]
+		y = fyield[-24:]
 		x = arange(0,24)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
