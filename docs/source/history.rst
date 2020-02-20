@@ -1,5 +1,11 @@
 Change Log
 ----------
+**v1.3**(2020-02-20)
+
+- Added functionality to load raw data files from Soliense LIFT-FRR
+- Added functionality to load raw data files from Chelsea FastAct2 laboratory systems
+- Bug fix to fit triple relaxation
+
 **v1.2.1**(2020-01-08)
 
 - bug fix for fixed ro calculation

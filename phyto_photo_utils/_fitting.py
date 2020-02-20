@@ -376,7 +376,7 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		pass
 
 
-def __fit_triple_decay__(seq_time, pfd, fyield, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	# Count number of flashlets excluding NaNs
 	nfl = count_nonzero(~isnan(fyield))

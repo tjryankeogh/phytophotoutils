@@ -51,7 +51,7 @@ setup(
 
     # Details
     url='https://gitlab.com/tjryankeogh/phytophotoutils',
-    download_url= 'https://gitlab.com/tjryankeogh/phytophotoutils/-/archive/v1.2.1/phytophotoutils-v1.2.1.tar.gz',
+    download_url= 'https://gitlab.com/tjryankeogh/phytophotoutils/-/archive/v1.3/phytophotoutils-v1.3.tar.gz',
     license='MIT License',
     description='Tools and utilities for active chlorophyll fluorescence data processing.',
     organisation='Council for Scientific and Industrial Research, Curtin University',

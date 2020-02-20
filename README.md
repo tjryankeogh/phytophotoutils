@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 1.2.2
+- Version: 1.3
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -57,6 +57,7 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- load_FIRe_files
 	- load_FASTTrackaI_files
 	- load_FastOcean_files
+	- load_LIFT_FRR_files
 - saturation
 	- fit_saturation
 - relaxation
@@ -69,7 +70,7 @@ NOTE: This package structure is defined by the `__init__.py` file
 - spectral_correction
 	- calculate_chl_specific_absorption
 	- calculate_instrument_led_correction
-- flc
+- etr
 	- calculate_etr
 - plot
 	- plot_saturation_data
@@ -111,6 +112,5 @@ TO DO
 - Add the option using different production models in FLC processing
 - Add methods to load in discrete FIRe files
 - Add additional load methods for newer FIRe instruments
-- Add additional load method for Soliense LIFT-FRR
 - Add additional load method for CTG LabSTAF
 
