@@ -6,7 +6,7 @@ from numpy import array, unique
 from tqdm import tqdm
 
 
-def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, fixed_ro=False, bounds=True, sig_lims =[100, 2200], ro_lims=[0.0, 1.0], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, fixed_ro=False, bounds=True, sig_lims =[100, 2200], ro_lims=[0.0, 1.0], datetime_unique=False, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	"""
 	Process the raw transient data and perform the Kolber et al. 1998 saturation model.
@@ -16,14 +16,14 @@ def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 	----------
 	pfd : np.array, dtype=float, shape=[n,] 
 		The photon flux density of the instrument in μmol photons m\ :sup:`2` s\ :sup:`-1`.
-	fyield : np.array, dtype=float, shape=[n,] 
+	flevel : np.array, dtype=float, shape=[n,] 
 		The fluorescence yield of the instrument.
 	seq : np.array, dtype=int, shape=[n,] 
 		The measurement number.
 	datetime : np.array, dtype=datetime64, shape=[n,]
 		The date & time of each measurement.
 	blank : np.array, dype=float, shape=[n,]
-		The blank value, must be the same length as fyield.
+		The blank value, must be the same length as flevel.
 	sat_len : int, default=100
 		The number of flashlets in saturation sequence.
 	skip : int, default=0
@@ -99,11 +99,11 @@ def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 
 	Example
 	-------
-	>>> sat = ppu.calculate_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, fixed_ro=True, sig_lims =[100,2200])
+	>>> sat = ppu.calculate_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, fixed_ro=True, sig_lims =[100,2200])
 	"""
 
 	pfd = array(pfd)
-	fyield = array(fyield)
+	flevel = array(flevel)
 	seq = array(seq)
 	dt = array(datetime)
 	
@@ -120,7 +120,7 @@ def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 	    
 		i = seq == s
 		x = pfd[i]
-		y = fyield[i]
+		y = flevel[i]
 		if no_ro:
 			sat = __fit_no_p_model__(x[skip:sat_len], y[skip:sat_len], **opts)
 		elif fixed_ro:
@@ -151,7 +151,9 @@ def fit_saturation(pfd, fyield, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 		# Calculate Fv/Fm after blank subtraction
 		fvfm = (res.fm - res.fo)/res.fm
 		res.insert(3, "fvfm", fvfm)
-		
-		res['datetime'] = unique(dt)
+		if datetime_unique:
+			res['datetime'] = unique(dt)
+		else:
+			res['datetime'] = dt[0]
 	
 	return res

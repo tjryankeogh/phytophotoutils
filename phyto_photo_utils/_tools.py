@@ -124,7 +124,7 @@ def correct_fire_instrument_bias(df, pos=1, sat_len=100):
     
     return df
 
-def calculate_blank_FastOcean(file_, seq_len=100):
+def calculate_blank_FastOcean(file_, seq_len=100, delimiter=','):
      
     """
     Calculates the blank by averaging the fluorescence yield for the saturation phase.
@@ -135,6 +135,8 @@ def calculate_blank_FastOcean(file_, seq_len=100):
         The path directory to the raw blank file in csv format.
     seq_len : int, default=100
         The length of the measurement sequence.
+    delimiter : str, default=','
+        Specify the delimiter to be used by Pandas.read_csv for loading the raw files.
     
     Returns
     -------
@@ -146,13 +148,13 @@ def calculate_blank_FastOcean(file_, seq_len=100):
     >>> ppu.calculate_blank_FastOcean(file_, seq_len=100)
     """
 
-    df = read_csv(file_, skiprows=26, nrows=2, header=None)
+    df = read_csv(file_, skiprows=26, nrows=2, header=None, delimiter=delimiter)
     df = df.iloc[:,2:].T
     df.columns = ['date', 'time']
     df['datetime'] = to_datetime(df.date.values+' '+df.time.values)
     df = df.drop(columns=['date','time'])
 
-    res = read_csv(file_, skiprows=43, nrows=seq_len, header=None)
+    res = read_csv(file_, skiprows=43, nrows=seq_len, header=None, delimiter=delimiter)
     res = res.iloc[:,2:]
     res = res.agg(['mean','std']).T
     res.columns = ['blank_mean', 'blank_stdev']

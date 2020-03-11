@@ -4,9 +4,10 @@ from pandas import read_csv, to_datetime, DataFrame, concat, Series
 from numpy import array, repeat, arange, squeeze, reshape, r_, nansum
 from os import chdir
 from csv import reader
+from datetime import timedelta
 
 def load_FIRe_files(file_, append=False, save_files=False, res_path=None, 
-                   seq_len=160, flen=1e-6, irrad=None):
+                   seq_len=160, flen=1e-6, irrad=None, continuous=False, light_step=False):
     """
 
     Process the raw data file (.000 format) and convert to a csv with standard formatting.
@@ -22,11 +23,13 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
     res_path : str, default=None           
         The path directory where to save files, only required if save_files = True.
     seq_len : int , default=160               
-        The number of flashlets in the protocol.
+        The number of flashlets in the protocol. Only required if continuous = True.
     flen : float, default=1e-6
-        The flashlet length in seconds.
+        The flashlet length in seconds. 
     irrad : int, default=None                 
-        The LED output in μE m\ :sup:`2` s\ :sup:`-1`.
+        The LED output in μE m\ :sup:`2` s\ :sup:`-1`. Only required if continuous = True.
+    continuous : bool, default=False
+        If True, will load files from the continuous format. If False, will load the discrete file format.
 
     Returns
     -------
@@ -53,65 +56,95 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
        
     """
 
-    format = '%m/%d/%Y%H:%M:%S.%f'
     
-    name = file_.split('/')[-1].split('.')[0]
-    data = read_csv(file_, header=None)
 
-    cur_pos = 0
-    temp_data = []
-    fl_num = []
-    final_data = []
-    seq_time = []
-    index = []
+    if continuous:
+        
+        name = file_.split('/')[-1].split('.')[0]
+        format = '%m/%d/%Y%H:%M:%S.%f'
+        data = read_csv(file_, header=None)
 
-    is_prev_alpha = False
-    while True:
-        row = data.values[cur_pos][0]
-        row_str = row.strip()
-        is_alpha = row_str[0].isalpha()
+        cur_pos = 0
+        temp_data = []
+        fl_num = []
+        final_data = []
+        seq_time = []
+        index = []
 
-        if not is_prev_alpha and is_alpha:
-            row_str = row_str[:-10]
-            row_str = row_str.replace(" ","")
-            dt_str = row_str[10:]
-            dt = to_datetime(dt_str, format=format)
+        is_prev_alpha = False
+        while True:
+            row = data.values[cur_pos][0]
+            row_str = row.strip()
+            is_alpha = row_str[0].isalpha()
 
-        if len(temp_data) > 0 and (not is_prev_alpha) and is_alpha:
-            temp_data = array(temp_data)
-            
-            fl_num.append(temp_data[:seq_len, 0])
-            seq_time.append(temp_data[:seq_len, 1])
-            final_data.append(temp_data[:seq_len, 2])
-            index.append(dt)
-                         
-            temp_data = []
+            if not is_prev_alpha and is_alpha:
+                row_str = row_str[:-10]
+                row_str = row_str.replace(" ","")
+                dt_str = row_str[10:]
+                dt = to_datetime(dt_str, format=format)
 
-        if not is_alpha:
-            temp_data.append(list(map(float, row_str.split())))
+            if len(temp_data) > 0 and (not is_prev_alpha) and is_alpha:
+                temp_data = array(temp_data)
+                
+                fl_num.append(temp_data[:seq_len, 0])
+                seq_time.append(temp_data[:seq_len, 1])
+                final_data.append(temp_data[:seq_len, 2])
+                index.append(dt)
+                             
+                temp_data = []
 
-        cur_pos += 1
-        is_prev_alpha = is_alpha
+            if not is_alpha:
+                temp_data.append(list(map(float, row_str.split())))
 
-        if cur_pos == len(data.values)-1:
-            break
-    
-    flashlet = array(fl_num)
-    flashlet = Series(squeeze(reshape(flashlet, (1, (flashlet.shape[0]*flashlet.shape[1])))))
-    time = array(seq_time)
-    time = Series(squeeze(reshape(time, (1, (time.shape[0]*time.shape[1])))))
-    data = array(final_data)
-    datetime = repeat(index, data.shape[1])
-    data = Series(squeeze(reshape(data, (1, (data.shape[0]*data.shape[1])))))
-    
-    df = DataFrame(data=[flashlet, data, datetime, time])
-    df = df.T
-    df.columns = ['flashlet_number', 'fyield', 'datetime', 'seq_time']
-    df['seq'] = repeat(arange(0,(int(df.shape[0] / seq_len)),1), seq_len)
-    sigscale = 1e-20
-    df['pfd'] = (irrad * 1e-6 * 6.02e23) * flen * sigscale
-    df['flevel'] = df.fyield.astype('float')
-    df['seq_time'] = df.seq_time.astype('int')
+            cur_pos += 1
+            is_prev_alpha = is_alpha
+
+            if cur_pos == len(data.values)-1:
+                break
+        
+        flashlet = array(fl_num)
+        flashlet = Series(squeeze(reshape(flashlet, (1, (flashlet.shape[0]*flashlet.shape[1])))))
+        time = array(seq_time)
+        time = Series(squeeze(reshape(time, (1, (time.shape[0]*time.shape[1])))))
+        data = array(final_data)
+        datetime = repeat(index, data.shape[1])
+        data = Series(squeeze(reshape(data, (1, (data.shape[0]*data.shape[1])))))
+        
+        df = DataFrame(data=[flashlet, data, datetime, time])
+        df = df.T
+        df.columns = ['flashlet_number', 'fyield', 'datetime', 'seq_time']
+        df['seq'] = repeat(arange(0,(int(df.shape[0] / seq_len)),1), seq_len)
+        sigscale = 1e-20
+        df['pfd'] = (irrad * 1e-6 * 6.02e23) * flen * sigscale
+        df['flevel'] = df.fyield.astype('float')
+        df['seq_time'] = df.seq_time.astype('int')
+
+    else:
+        
+        name = file_.split('/')[-1].split('.')[0]
+        name2 = file_.split('/')[-1].split('.')[1]
+        name = name+'_'+name2
+
+        df = read_csv(file_, nrows = 16)
+        dt = str(df.iloc[0,:].values).strip()[2:-2].split('  ')
+        date = dt[0].strip()
+        time = dt[-1].strip()
+        time = str(timedelta(seconds=int(time)))
+        datetime = date+' '+time
+        gain = int(str(df.iloc[2,:].values).strip()[2:-2].split(':')[1])
+
+        sat_len = int(str(df.iloc[5,:].values).split()[-1][:-2])
+        rel_len = int(str(df.iloc[6,:].values).split()[-1][:-2])
+        if light_step:
+            df = read_csv(file_, index_col=0, skiprows=24, header=None, delim_whitespace=True)
+        else:
+            df = read_csv(file_, index_col=0, skiprows=21, header=None, delim_whitespace=True)
+        df.columns = ['seq_time', 'ex', 'flevel']
+        df['pfd'] = (df.ex * 1e-6)
+        df['datetime'] = to_datetime(datetime)
+        df['seq'] = int(df.shape[0] / (sat_len + rel_len))
+        df['flashlet_number'] = arange(1, (sat_len + rel_len)+1, 1)
+        df = df.drop(columns = 'ex')
     
     df = df[['flashlet_number','flevel','datetime','seq','seq_time','pfd']]
 
@@ -268,7 +301,7 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
     return df
 
 def load_FastOcean_files(file_, append=False, save_files=False, led_separate=False, res_path=None, 
-                   seq_len=140, seq_reps=None, flen=1e-6, FastAct=True, Single_Acq=False):
+                   seq_len=125, seq_reps=None, flen=1e-6, delimiter=',', FastAct=True, Single_Acq=False):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
@@ -285,16 +318,18 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
         If True, the protocols will be separated dependent upon the LED sequence.
     res_path : dir               
         The path directory where to save files, only required if save_files = True.
-    seq_len : int, default=140                 
+    seq_len : int, default=125                 
         The number of flashlets in the protocol.
     seq_reps : int, default=None
         The number of sequences per acquisition or in FastAct2 multiple acquisition files the number of light steps.
     flen : float, default=1e-6
         The flashlet length in seconds.
+    delimiter : str, default=','
+        Specify the delimiter to be used by Pandas.read_csv for loading the raw files.
     FastAct : bool, default=True
         If True, will load data from FastAct1 laboratory system format. If False, will load data from FastAct2 laboratory system format.
     Single_Acq : bool, default=False
-        If True, will load a single acquisition data from the FastAct2 laboratory system.
+        If True, will load a single acquisition data from either the FastAct or FastAct2 laboratory system, dependent upon whether FastAct is True of False.
 
     Returns
     -------
@@ -320,7 +355,7 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     -------
     >>> fname = './data/raw/instrument/fire/FastOcean_example.csv'
     >>> output = './data/raw/ppu/fastocean/'
-    >>> df = ppu.load_FastOcean_files(fname, append=False, save_files=True, led_separate=False, res_path=output, seq_len=140, flen=1e-6)
+    >>> df = ppu.load_FastOcean_files(fname, append=False, save_files=True, led_separate=False, res_path=output, seq_len=125, flen=1e-6)
     >>> led_sequence == 1, LED 450 nm
     >>> led_sequence == 2, LED 450 nm + LED 530 nm
     >>> led_sequence == 3, LED 450 nm + LED 624 nm
@@ -333,54 +368,88 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     sigscale=1e-20 
 
     if FastAct:
-        md = read_csv(file_, skiprows=16, nrows=12, header=None)
-        md = md.T.iloc[2:,:]
-        md.columns = ['seq', 'led450', 'led530', 'led624', 'PMT', 'a', 'pitch', 'reps', 'int', 'b', 'date', 'time']
-        md = md.drop(['a','b'],axis=1).reset_index(drop=True)
-        md['seq'] = md.seq.str.replace('A','').astype('int')
-        pfd = md.iloc[:,1:4].astype(float).sum(axis=1)
-        nled = md.iloc[:,1:4].count(axis=1)
-        
-        #determining LED sequence for filtering results
-        led = md.iloc[:,1:4].astype(float)
-        led = led.isnull()
-        led_idx = []
-        for i in range(led.shape[0]):
-            if (led.iloc[i,1] == True) & (led.iloc[i,2] == True): # LED 1 only
+        if Single_Acq:
+            md = read_csv(file_, delimiter=delimiter, skiprows=11, nrows=6, usecols=[0,1], header=None)
+            datetime = to_datetime(str(md.iloc[4,1])+' '+str(md.iloc[5,1]))
+            led = md.iloc[0:3,1].astype(float)
+            led = led.isnull()
+            led_idx = []
+            if (led.iloc[0] == False) & (led.iloc[1] == True) & (led.iloc[2] == True):
                 led_idx.append(1)
-            elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False): # LED 1 & 2
+            elif (led.iloc[0] == False) & (led.iloc[1] == False) & (led.iloc[2] == True):
                 led_idx.append(2)
-            elif (led.iloc[i,0] == False) & (led.iloc[i,2] == False): # LED 1 & 3
+            elif (led.iloc[0] == False) & (led.iloc[2] == False) & (led.iloc[1] == True):
                 led_idx.append(3)
-            elif (led.iloc[i,1] == False) & (led.iloc[i,2] == False): # LED 2 & 3
-                led_idx.append(5)
-            elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False) & (led.iloc[i,2] == False): # ALL LEDs
+            elif (led.iloc[0] == False) & (led.iloc[1] == False) & (led.iloc[2] == False):
                 led_idx.append(4)
-            elif (led.iloc[i,1] == False): # LED 2 only
+            elif (led.iloc[1] == False) & (led.iloc[2] == False) & (led.iloc[0] == True):
+                led_idx.append(5)
+            elif (led.iloc[1] == False) & (led.iloc[0] == True) & (led.iloc[2] == True):
                 led_idx.append(6)
-            elif (led.iloc[i,2] == False): # LED 3 only
+            elif (led.iloc[2] == False) & (led.iloc[0] == True) & (led.iloc[1] == True):
                 led_idx.append(7)
-        
-        df = read_csv(file_, skiprows=43, nrows=seq_len, header=None)
-        seq_time = df.iloc[:,0]
-        flashlet_number = df.iloc[:,1]
-        df = df.iloc[:,2:]
-        
-        dfm = []
-        for i in range(df.shape[1]):
-            data = df.iloc[:,i]
-            dfm.append(data)
+            led1 = array(float(md.iloc[0,1]))
+            led2 = array(float(md.iloc[1,1]))
+            led3 = array(float(md.iloc[2,1]))
+            led = nansum([led1, led2, led3])
+            df = read_csv(file_, delimiter=delimiter, skiprows = 21, nrows=seq_len, header=None).drop(columns=[2,3])
+            flashlet_number = df.iloc[:,1]
+            seq_time = df.iloc[:,0]
+            seq_reps = df.iloc[:,2:].shape[1]
+            df = Series(reshape(df.iloc[:,2:(seq_reps+2)].values.T, [-1]))
+            datetime = repeat(Series(datetime), seq_len * seq_reps)
+            pfd = repeat(Series((led * 1e22) * flen * sigscale), seq_len * seq_reps)
+            seq_time = concat([Series(seq_time)] * seq_reps)
+            flashlet_number = repeat(Series(flashlet_number), seq_reps)
+            led_sequence = repeat(array(led_idx), seq_len * seq_reps)
+            seq = concat([Series(arange(1, seq_reps+1))] * seq_len).sort_index()
+            df = DataFrame([flashlet_number.values, df.values, datetime.values, seq.values, seq_time.values, pfd.values, led_sequence]).T
+            df.columns = ['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']
+        else:
+            md = read_csv(file_, skiprows=16, nrows=12, header=None, delimiter=delimiter)
+            md = md.T.iloc[2:,:]
+            md.columns = ['seq', 'led450', 'led530', 'led624', 'PMT', 'a', 'pitch', 'reps', 'int', 'b', 'date', 'time']
+            md = md.drop(['a','b'],axis=1).reset_index(drop=True)
+            md['seq'] = md.seq.str.replace('A','').astype('int')
+            pfd = md.iloc[:,1:4].astype(float).sum(axis=1)
+            nled = md.iloc[:,1:4].count(axis=1)
+            led = md.iloc[:,1:4].astype(float)
+            led = led.isnull()
+            led_idx = []
+            for i in range(led.shape[0]):
+                if (led.iloc[i,1] == True) & (led.iloc[i,2] == True): # LED 1 only
+                    led_idx.append(1)
+                elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False): # LED 1 & 2
+                    led_idx.append(2)
+                elif (led.iloc[i,0] == False) & (led.iloc[i,2] == False): # LED 1 & 3
+                    led_idx.append(3)
+                elif (led.iloc[i,1] == False) & (led.iloc[i,2] == False): # LED 2 & 3
+                    led_idx.append(5)
+                elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False) & (led.iloc[i,2] == False): # ALL LEDs
+                    led_idx.append(4)
+                elif (led.iloc[i,1] == False): # LED 2 only
+                    led_idx.append(6)
+                elif (led.iloc[i,2] == False): # LED 3 only
+                    led_idx.append(7)
+            
+            df = read_csv(file_, skiprows=43, nrows=seq_len, header=None, delimiter=delimiter)
+            seq_time = df.iloc[:,0]
+            flashlet_number = df.iloc[:,1]
+            df = df.iloc[:,2:]
+            dfm = []
+            for i in range(df.shape[1]):
+                data = df.iloc[:,i]
+                dfm.append(data)
 
-        df = DataFrame(concat(dfm, axis=0)).reset_index(drop=True)
-        df.columns = ['flevel']
-        df['pfd'] = repeat((pfd.values*1e22), seq_len) * flen * sigscale
-        df['seq'] = repeat(md.seq.values, seq_len)
-        df['seq_time'] = array(list(seq_time) * len(md.seq))
-        df['flashlet_number'] = array(list(flashlet_number) * len(md.seq))
-        df['datetime'] = to_datetime(repeat((md.date.values+' '+md.time.values), seq_len), dayfirst=True)
-        df['led_sequence'] = repeat(array(led_idx), seq_len)
-        
-        df = df[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+            df = DataFrame(concat(dfm, axis=0)).reset_index(drop=True)
+            df.columns = ['flevel']
+            df['pfd'] = repeat((pfd.values*1e22), seq_len) * flen * sigscale
+            df['seq'] = repeat(md.seq.values, seq_len)
+            df['seq_time'] = array(list(seq_time) * len(md.seq))
+            df['flashlet_number'] = array(list(flashlet_number) * len(md.seq))
+            df['datetime'] = to_datetime(repeat((md.date.values+' '+md.time.values), seq_len), dayfirst=True)
+            df['led_sequence'] = repeat(array(led_idx), seq_len)   
+            df = df[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
     
     else:
         if Single_Acq:
@@ -393,7 +462,6 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
             led1 = Series(repeat(((float(df.iloc[13,1]) * 1e22) * flen * sigscale), seq_len))
             led2 = Series(repeat(((float(df.iloc[14,1]) * 1e22) * flen * sigscale), seq_len))
             led3 = Series(repeat(((float(df.iloc[15,1]) * 1e22) * flen * sigscale), seq_len))
-
             df = read_csv(file_, skiprows=41, nrows=seq_len, header=None)
             seq_time = concat([df.iloc[:,1]]*4*seq_reps).reset_index(drop=True)
             df1 = Series(reshape(df.iloc[:,3:(seq_reps+3)].values.T, [-1]))
@@ -415,7 +483,6 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
             led1 = Series(repeat(((float(df.iloc[13,1]) * 1e22) * flen * sigscale), seq_len))
             led2 = Series(repeat(((float(df.iloc[14,1]) * 1e22) * flen * sigscale), seq_len))
             led3 = Series(repeat(((float(df.iloc[15,1]) * 1e22) * flen * sigscale), seq_len))
-
             df = read_csv(file_, skiprows=46, nrows=seq_len, header=None)
             seq_time = concat([df.iloc[:,0]] * (4 * seq_reps))
             df1 = Series(reshape(df.iloc[:,2:2+seq_reps].values.T, [-1]))
@@ -569,7 +636,7 @@ def load_LIFT_FRR_files(file_, append=False, save_files=False, res_path=None, se
         The photon flux density in μmol photons m\ :sup:`2` s\ :sup:`-1`.
 
     """
-
+    name = file_.split('/')[-1].split('.')[0]
     df = read_csv(file_, header=0)
     md = df[df['----'].str.contains("DateTime:")]
     date = md.iloc[:,1]

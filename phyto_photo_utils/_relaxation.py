@@ -5,7 +5,7 @@ from numpy import array, unique
 from pandas import Series, concat
 from tqdm import tqdm
 
-def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=None, single_decay=False, bounds=True, single_lims=[100,50000], tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def fit_relaxation(flevel, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=60, sat_flashlets=None, single_decay=False, bounds=True, single_lims=[100,50000], tau1_lims=[100, 800], tau2_lims=[800, 2000], tau3_lims=[2000, 50000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 	"""
 
 	Process the raw transient data and perform the Kolber et al. 1998 relaxation model.
@@ -14,14 +14,14 @@ def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 	----------
 	seq_time : np.array, dtype=float, shape=[n,] 
 		The sequence time of the flashlets in μs.
-	fyield : np.array, dtype=float, shape=[n,] 
+	flevel : np.array, dtype=float, shape=[n,] 
 		The fluorescence yield of the instrument.
 	seq : np.array, dtype=int, shape=[n,] 
 		The measurement number.
 	datetime : np.array, dtype=datetime64, shape=[n,]
 		The date & time of each measurement in the numpy datetime64 format.
 	blank : np.array, dtype=float, shape=[n,]
-		The blank value, must be the same length as fyield.
+		The blank value, must be the same length as flevel.
 	sat_len : int, default=100
 		The number of flashlets in the saturation sequence.
 	rel_len : int, default=60
@@ -116,12 +116,12 @@ def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 
 	Example
 	-------
-	>>> rel = ppu.calculate_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, single_decay=True, bounds=True, tau_lims=[100, 50000])
+	>>> rel = ppu.calculate_relaxation(flevel, seq_time, seq, datetime, blank=0, sat_len=100, rel_len=40, single_decay=True, bounds=True, tau_lims=[100, 50000])
 	"""
 
 		
 	seq_time = array(seq_time)
-	fyield = array(fyield)
+	flevel = array(flevel)
 	seq = array(seq)
 	dt = array(datetime)
 	if single_decay:
@@ -134,7 +134,7 @@ def fit_relaxation(fyield, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 
 		i = seq == s
 		x = seq_time[i]
-		y = fyield[i]
+		y = flevel[i]
 		x_min = min(x[sat_len:])
 		x = x[sat_len-sat_flashlets:sat_len+rel_len] - x_min
 		y = y[sat_len-sat_flashlets:sat_len+rel_len]

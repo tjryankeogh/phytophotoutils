@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 1.3
+- Version: 1.3.1
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -110,7 +110,5 @@ TO DO
 - Add in function to read FastTracka I binary files
 - Add deconvolution method for triple decay relaxation
 - Add the option using different production models in FLC processing
-- Add methods to load in discrete FIRe files
-- Add additional load methods for newer FIRe instruments
 - Add additional load method for CTG LabSTAF
 

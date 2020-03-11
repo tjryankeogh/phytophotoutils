@@ -8,31 +8,31 @@ warnings.filterwarnings("ignore", category=RuntimeWarning)
 from ._equations import __fit_kolber_nop__, __fit_kolber_p__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_residual_saturation_p__, __calculate_residual_saturation_nop__, __calculate_residual_saturation_fixedp__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_bias__, __calculate_rmse__, __calculate_fit_errors__
 	
 	
-def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_fixed_p_model__(pfd, flevel, ro, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 
 	# Count number of flashlets excluding NaNs
-	nfl = count_nonzero(~isnan(fyield))
-	m = ~isnan(fyield)
-	fyield = fyield[m]
+	nfl = count_nonzero(~isnan(flevel))
+	m = ~isnan(flevel)
+	flevel = flevel[m]
 	pfd = pfd[m]
 
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
 	try:
-		y = fyield[:8]
+		y = flevel[:8]
 		x = arange(1,9)[:,None]
 		fo_model = model.fit(x,y)
 		fo = fo_model.intercept_
 	except Exception:
-		fo = fyield[:3].mean()
+		fo = flevel[:3].mean()
 	
 	try:
-		y = fyield[-24:]
+		y = flevel[-24:]
 		x = arange(1,25)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
 	except Exception:
-		fm = fyield[-3:].mean()
+		fm = flevel[-3:].mean()
 	
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
@@ -61,15 +61,15 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
 		try:
-			popt = least_squares(__calculate_residual_saturation_fixedp__, x0, bounds=(bds), args=(pfd, fyield, ro), **opts)
+			popt = least_squares(__calculate_residual_saturation_fixedp__, x0, bounds=(bds), args=(pfd, flevel, ro), **opts)
 			fo = popt.x[0]
 			fm = popt.x[1]
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
 			sol = __fit_kolber_p__(pfd, *popt.x, ro)
-			bias = __calculate_bias__(sol, fyield)
-			rmse = __calculate_rmse__(popt.fun, fyield)			
+			bias = __calculate_bias__(sol, flevel)
+			rmse = __calculate_rmse__(popt.fun, flevel)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
 			fm_err = perr[1]
@@ -101,31 +101,31 @@ def __fit_fixed_p_model__(pfd, fyield, ro, bounds=False, sig_lims=None, method='
 			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 			pass
 
-def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_calc_p_model__(pfd, flevel, bounds=False, sig_lims=None, ro_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 
 	# Count number of flashlets excluding NaNs
-	nfl = count_nonzero(~isnan(fyield))
-	m = ~isnan(fyield)
-	fyield = fyield[m]
+	nfl = count_nonzero(~isnan(flevel))
+	m = ~isnan(flevel)
+	flevel = flevel[m]
 	pfd = pfd[m]
 	
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
 	try:
-		y = fyield[:8]
+		y = flevel[:8]
 		x = arange(0,8)[:,None]
 		fo_model = model.fit(x,y)
 		fo = fo_model.intercept_
 	except Exception:
-		fo = fyield[:3].mean()
+		fo = flevel[:3].mean()
 	
 	try:
-		y = fyield[-24:]
+		y = flevel[-24:]
 		x = arange(0,24)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
 	except Exception:
-		fm = fyield[-3:].mean()
+		fm = flevel[-3:].mean()
 
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
@@ -155,7 +155,7 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 			opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
 		try:
-			popt = least_squares(__calculate_residual_saturation_p__, x0, bounds=(bds), args=(pfd, fyield), **opts)
+			popt = least_squares(__calculate_residual_saturation_p__, x0, bounds=(bds), args=(pfd, flevel), **opts)
 			fo = popt.x[0]
 			fm = popt.x[1]
 			sigma = popt.x[2]
@@ -163,8 +163,8 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 
 			# Calculate curve fitting statistical metrics
 			sol = __fit_kolber_p__(pfd, *popt.x)
-			bias = __calculate_bias__(sol, fyield)
-			rmse = __calculate_rmse__(popt.fun, fyield)			
+			bias = __calculate_bias__(sol, flevel)
+			rmse = __calculate_rmse__(popt.fun, flevel)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
 			fm_err = perr[1]
@@ -198,31 +198,31 @@ def __fit_calc_p_model__(pfd, fyield, bounds=False, sig_lims=None, ro_lims=None,
 			return fo, fm, sigma, ro, bias, rmse, fo_err, fm_err, sigma_err, ro_err, nfl, nfev, flag, success
 			pass
 
-def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_no_p_model__(pfd, flevel, ro=None, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
 	
 	# Count number of flashlets excluding NaNs
-	nfl = count_nonzero(~isnan(fyield))
-	m = ~isnan(fyield)
-	fyield = fyield[m]
+	nfl = count_nonzero(~isnan(flevel))
+	m = ~isnan(flevel)
+	flevel = flevel[m]
 	pfd = pfd[m]
 
 	# Estimates of saturation parameters
 	model = linear_model.HuberRegressor()
 	try:
-		y = fyield[:8]
+		y = flevel[:8]
 		x = arange(0,8)[:,None]
 		fo_model = model.fit(x,y)
 		fo = fo_model.intercept_
 	except Exception:
-		fo = fyield[:3].mean()
+		fo = flevel[:3].mean()
 	
 	try:
-		y = fyield[-24:]
+		y = flevel[-24:]
 		x = arange(0,24)[:,None]
 		fm_model = model.fit(x,y)
 		fm = fm_model.intercept_
 	except Exception:
-		fm = fyield[-3:].mean()
+		fm = flevel[-3:].mean()
 
 	if (fo > fm) | (fo <= 0):
 		(print('Fo greater than Fm - skipping fit.'))
@@ -251,15 +251,15 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
 		try:
-			popt = least_squares(__calculate_residual_saturation_nop__, x0, bounds=(bds), args=(pfd, fyield), **opts)
+			popt = least_squares(__calculate_residual_saturation_nop__, x0, bounds=(bds), args=(pfd, flevel), **opts)
 			fo = popt.x[0] 
 			fm = popt.x[1]
 			sigma = popt.x[2]
 
 			# Calculate curve fitting statistical metrics
 			sol = __fit_kolber_nop__(pfd, *popt.x)
-			bias = __calculate_bias__(sol, fyield)
-			rmse = __calculate_rmse__(popt.fun, fyield)			
+			bias = __calculate_bias__(sol, flevel)
+			rmse = __calculate_rmse__(popt.fun, flevel)			
 			perr = __calculate_fit_errors__(popt.jac, popt.fun)
 			fo_err = perr[0]
 			fm_err = perr[1]
@@ -292,21 +292,21 @@ def __fit_no_p_model__(pfd, fyield, ro=None, bounds=False, sig_lims=None, method
 			return fo, fm, sigma, bias, rmse, fo_err, fm_err, sigma_err, nfl, nfev, flag, success
 			pass
 
-def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, single_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_single_decay__(seq_time, flevel, sat_flashlets=None, bounds=False, single_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
    
 	# Count number of flashlets excluding NaNs
-	nfl = count_nonzero(~isnan(fyield))
-	m = ~isnan(fyield)
-	fyield = fyield[m]
+	nfl = count_nonzero(~isnan(flevel))
+	m = ~isnan(flevel)
+	flevel = flevel[m]
 	seq_time = seq_time[m]
 
 	# Estimates of relaxation parameters
-	fo_relax = fyield[-3:].mean()
+	fo_relax = flevel[-3:].mean()
 	
 	if sat_flashlets is None:
-		fm_relax = fyield[:3].mean()
+		fm_relax = flevel[:3].mean()
 	else:
-		fm_relax = fyield[:3+sat_flashlets].mean()
+		fm_relax = flevel[:3+sat_flashlets].mean()
 
 	if (fo_relax > fm_relax):
 		(print('Fo_relax greater than Fm_relax - skipping fit.'))
@@ -334,15 +334,15 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
 	try: 	
-		popt = least_squares(__calculate_residual_single_relaxation__, x0, bounds=(bds), args=(seq_time, fyield), **opts)
+		popt = least_squares(__calculate_residual_single_relaxation__, x0, bounds=(bds), args=(seq_time, flevel), **opts)
 		fo_r =  popt.x[0]
 		fm_r = popt.x[1]
 		tau = popt.x[2]
 
 		# Calculate curve fitting statistical metrics
 		sol = __fit_single_relaxation__(seq_time, *popt.x)
-		bias = __calculate_bias__(sol, fyield)
-		rmse = __calculate_rmse__(popt.fun, fyield)			
+		bias = __calculate_bias__(sol, flevel)
+		rmse = __calculate_rmse__(popt.fun, flevel)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		fo_err = perr[0]
 		fm_err = perr[1]
@@ -376,21 +376,21 @@ def __fit_single_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, sin
 		pass
 
 
-def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def __fit_triple_decay__(seq_time, flevel, sat_flashlets=None, bounds=False, tau1_lims=None, tau2_lims=None, tau3_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	# Count number of flashlets excluding NaNs
-	nfl = count_nonzero(~isnan(fyield))
-	m = ~isnan(fyield)
-	fyield = fyield[m]
+	nfl = count_nonzero(~isnan(flevel))
+	m = ~isnan(flevel)
+	flevel = flevel[m]
 	seq_time = seq_time[m]
 
 	# Estimates of relaxation parameters
-	fo_relax = fyield[-3:].mean()
+	fo_relax = flevel[-3:].mean()
 	
 	if sat_flashlets is None:
-		fm_relax = fyield[:3].mean()
+		fm_relax = flevel[:3].mean()
 	else:
-		fm_relax = fyield[:3+sat_flashlets].mean()
+		fm_relax = flevel[:3+sat_flashlets].mean()
 
 	if (fo_relax > fm_relax):
 		(print('Fo_relax greater than Fm_relax - skipping fit.'))
@@ -423,7 +423,7 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
 	try: 	
-		popt = least_squares(__calculate_residual_triple_relaxation__, x0, bounds=(bds), args=(seq_time, fyield), **opts)
+		popt = least_squares(__calculate_residual_triple_relaxation__, x0, bounds=(bds), args=(seq_time, flevel), **opts)
 		fo_r =  popt.x[0]
 		fm_r = popt.x[1]
 		a1 = popt.x[2]
@@ -435,8 +435,8 @@ def __fit_triple_decay__(seq_time, fyield, sat_flashlets=None, bounds=False, tau
 
 		# Calculate curve fitting statistical metrics
 		sol = __fit_single_relaxation__(seq_time, *popt.x)
-		bias = __calculate_bias__(sol, fyield)
-		rmse = __calculate_rmse__(popt.fun, fyield)			
+		bias = __calculate_bias__(sol, flevel)
+		rmse = __calculate_rmse__(popt.fun, flevel)			
 		perr = __calculate_fit_errors__(popt.jac, popt.fun)
 		fo_err = perr[0]
 		fm_err = perr[1]
