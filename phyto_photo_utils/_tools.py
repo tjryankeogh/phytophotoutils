@@ -45,8 +45,8 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
     std = grp.std()
     c = grp.count()
     # Calculate upper and lower limits of each group, and repeat each value by its count
-    ulim = repeat((mean.fyield.values + std.fyield.values * multiplier), c.fyield.values)
-    llim = repeat((mean.fyield.values - std.fyield.values * multiplier), c.fyield.values)
+    ulim = repeat((mean.flevel.values + std.flevel.values * multiplier), c.flevel.values)
+    llim = repeat((mean.flevel.values - std.flevel.values * multiplier), c.flevel.values)
 
     # Get indexes of data used to create each group
     idx = []
@@ -61,16 +61,16 @@ def remove_outlier_from_time_average(df, time=4, multiplier=3):
     mask = mask.set_index('index').sort_index()
 
     # Create boolean array using mask DataFrame
-    m = (df.fyield.values > mask.ulim) | (df.fyield.values < mask.llim)
+    m = (df.flevel.values > mask.ulim) | (df.flevel.values < mask.llim)
     
     # Where condition is True, set values of fluorescence yield to NaN
-    df.loc[m.values,'fyield'] = nan
+    df.loc[m.values,'flevel'] = nan
 
     # Group data that is now corrected
     df = df.groupby([Grouper(key='datetime', freq=dt), 'flashlet_number']).mean().reset_index()
     
     # Return number of measurements that is used to create each average
-    df['nseq'] = c.fyield.values
+    df['nseq'] = c.flevel.values
     
     return df
 
@@ -101,7 +101,7 @@ def correct_fire_instrument_bias(df, pos=1, sat_len=100):
 
     """
 
-    fyield = array(df.fyield)
+    flevel = array(df.flevel)
     seq = array(df.seq)
     
     ycorr = []
@@ -110,17 +110,17 @@ def correct_fire_instrument_bias(df, pos=1, sat_len=100):
     for s in tqdm(unique(seq)):
 
         i = seq == s
-        y = fyield[i]
+        y = flevel[i]
         d = y[sat_len - pos] - y[sat_len]
         y[sat_len:] += d
         
         ycorr.append(y)
         
-    fyield_corr = array(ycorr)
-    fyield_corr = reshape(fyield_corr, (fyield_corr.shape[0] * fyield_corr.shape[1]))
+    flevel_corr = array(ycorr)
+    flevel_corr = reshape(flevel_corr, (flevel_corr.shape[0] * flevel_corr.shape[1]))
     
     # Replace fluorescence yield in DataFrame with bias corrected data 
-    df['fyield'] = fyield_corr
+    df['flevel'] = flevel_corr
     
     return df
 
@@ -198,9 +198,9 @@ def calculate_blank_FIRe(file_):
 
     # Read in the actual data and calculate the mean
     df = read_csv(file_, index_col=0, skiprows=20, header=None, delim_whitespace=True)
-    df.columns = ['time', 'ex', 'fyield']
-    blank = df.fyield[:sat_len].mean(axis=0)
-    stdev = df.fyield[:sat_len].std(axis=0)
+    df.columns = ['time', 'ex', 'flevel']
+    blank = df.flevel[:sat_len].mean(axis=0)
+    stdev = df.flevel[:sat_len].std(axis=0)
     data = array([dt, blank, stdev]).T
     res = DataFrame(data)
     res = res.T

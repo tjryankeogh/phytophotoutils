@@ -1,6 +1,10 @@
 Change Log
 ----------
-**v1.3.1(2020-03-05)
+**v1.3.2**(2020-03-26)
+- Bug fix to tools functions for change in name from fyield to flevel
+- Bug fix for spectral correction to sort wavelengths to always be ascending
+
+**v1.3.1**(2020-03-05)
 - Added functionality to load raw data files of Single Acquisitions from Chelsea FastAct1 laboratory system
 - Added functionality to calculate ETR by only using the last 3 measurements of each time step
 

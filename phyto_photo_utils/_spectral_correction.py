@@ -218,8 +218,10 @@ def calculate_instrument_led_correction(aphy, ap_lambda, method=None, chl=None, 
 
 	if constants is None:
 		df = read_csv('./data/output/spectral_correction_factors/spectral_correction_constants.csv', index_col=0)
+		df = df.sort_index()
 	else:
 		df = read_csv(constants, index_col=0)
+		df = df.sort_index()
 
 	if method == 'sigma':
 
