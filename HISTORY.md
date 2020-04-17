@@ -1,5 +1,9 @@
 Change Log
 ----------
+**v1.3.3**(2020-04-17)
+- Bug fix for handling single FIRe files
+- Loading FIRe files can now split single turnover and multiple turnover measurements
+
 **v1.3.2**(2020-03-26)
 - Bug fix to tools functions for change in name from fyield to flevel
 - Bug fix for spectral correction to sort wavelengths to always be ascending
@@ -14,11 +18,11 @@ Change Log
 - Bug fix to fit triple relaxation
 
 **v1.2.2**(2020-01-10)
-- bug fix for fixed ro calculation
+- Bug fix for fixed ro calculation
 
 **v1.2.1**(2020-01-08)
-- bug fixes for fitting triple relaxation error codes
-- update to recommend bounds for tau1
+- Bug fixes for fitting triple relaxation error codes
+- Update to recommend bounds for tau1
 
 **v1.2**(2019-12-09)
 - Update to bias calculation.

@@ -6,8 +6,8 @@ from os import chdir
 from csv import reader
 from datetime import timedelta
 
-def load_FIRe_files(file_, append=False, save_files=False, res_path=None, 
-                   seq_len=160, flen=1e-6, irrad=None, continuous=False, light_step=False):
+def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_len=160, 
+                    flen=1e-6, irrad=None, continuous=False, light_step=False, single_turnover=True):
     """
 
     Process the raw data file (.000 format) and convert to a csv with standard formatting.
@@ -30,6 +30,10 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
         The LED output in μE m\ :sup:`2` s\ :sup:`-1`. Only required if continuous = True.
     continuous : bool, default=False
         If True, will load files from the continuous format. If False, will load the discrete file format.
+    light_step: bool, default=False
+        If True, will load files from a discrete format FLC file. If False, will load the discrete file format with no light steps.
+    single_turnover: bool, default=True
+        If True, will load the saturation and relaxation from the single turnover measurement. If False, will load the multiple turnover measurement.
 
     Returns
     -------
@@ -135,16 +139,23 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None,
 
         sat_len = int(str(df.iloc[5,:].values).split()[-1][:-2])
         rel_len = int(str(df.iloc[6,:].values).split()[-1][:-2])
+        msat_len = int(str(df.iloc[9,:].values).split()[-1][:-2])
+        mrel_len = int(str(df.iloc[10,:].values).split()[-1][:-2])
         if light_step:
             df = read_csv(file_, index_col=0, skiprows=24, header=None, delim_whitespace=True)
         else:
             df = read_csv(file_, index_col=0, skiprows=21, header=None, delim_whitespace=True)
         df.columns = ['seq_time', 'ex', 'flevel']
-        df['pfd'] = (df.ex * 1e-6)
+        df['pfd'] = (df.ex * 1e-6).drop(columns = 'ex')
         df['datetime'] = to_datetime(datetime)
-        df['seq'] = int(df.shape[0] / (sat_len + rel_len))
-        df['flashlet_number'] = arange(1, (sat_len + rel_len)+1, 1)
-        df = df.drop(columns = 'ex')
+        if single_turnover:
+            df = df.iloc[:sat_len+rel_len,:]
+            df['seq'] = int(df.shape[0] / (sat_len + rel_len))
+            df['flashlet_number'] = arange(1, (sat_len + rel_len)+1, 1)
+        else: 
+            df = df.iloc[sat_len+rel_len:,:].reset_index(drop=True)
+            df['seq'] = int(df.shape[0] / (msat_len + mrel_len))
+            df['flashlet_number'] = arange(1, (msat_len + mrel_len)+1, 1)
     
     df = df[['flashlet_number','flevel','datetime','seq','seq_time','pfd']]
 
