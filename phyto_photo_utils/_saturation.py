@@ -6,7 +6,7 @@ from numpy import array, unique
 from tqdm import tqdm
 
 
-def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, fixed_ro=False, bounds=True, sig_lims =[100, 2200], ro_lims=[0.0, 1.0], datetime_unique=False, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=0.3, no_ro=False, calc_ro=True, fixed_ro=False, bounds=True, sig_lims =[100, 2200], ro_lims=[0.0, 1.0], datetime_unique=False, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
     
 	"""
 	Process the raw transient data and perform the Kolber et al. 1998 saturation model.
@@ -32,6 +32,8 @@ def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 		The fixed value of the connectivity coefficient. Not required if fixed_ro is False.
 	no_ro : bool, default=False
 		If True, this processes the raw transient data and performs the no connectivity saturation model.
+	calc_ro : bool, default=True
+		If True, this processes the raw transient data and performs the fit with the connectivity saturation model.
 	fixed_ro : bool, default=False
 		If True, this sets a user defined fixed value for ro (the connectivity factor) when fitting the saturation model.
 	bounds : bool, default=True
@@ -40,6 +42,8 @@ def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 	 	The lower and upper limit bounds for fitting sigmaPSII.
 	ro_lims: [float, float], default=[0.0, 0.1]
 		The lower and upper limit bounds for fitting the connectivity coefficient. Not required if no_ro and fixed_ro are False.
+	datatime_unique: bool, default=False
+		If True, will find the unique datetime values for each fit.
 	method : str, default='trf'
 		The algorithm to perform minimization. See ``scipy.optimize.least_squares`` documentation for more information on non-linear least squares fitting options.
 	loss : str, default='soft_l1'
@@ -125,7 +129,7 @@ def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 			sat = __fit_no_p_model__(x[skip:sat_len], y[skip:sat_len], **opts)
 		elif fixed_ro:
 			sat = __fit_fixed_p_model__(x[skip:sat_len], y[skip:sat_len], ro, **opts)
-		else:
+		elif calc_ro:
 			sat = __fit_calc_p_model__(x[skip:sat_len], y[skip:sat_len], **opts)
 
 		res.append(Series(sat))
@@ -141,7 +145,7 @@ def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 			res.columns = ['fo','fm','sigma','bias','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
 		if fixed_ro:
 			res.columns = ['fo','fm','sigma','ro','bias','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
-		else:
+		elif calc_ro:
 			res.columns = ['fo','fm','sigma','ro','bias','rmse','fo_err','fm_err','sigma_err','ro_err','nfl','niters','flag','success']
 	
 		# Subtract blank from Fo and Fm 

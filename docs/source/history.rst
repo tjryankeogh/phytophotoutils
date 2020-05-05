@@ -1,5 +1,8 @@
 Change Log
 ----------
+**v1.3.4**(2020-05-05)
+- Bug fix for fitting with no connectivity model.
+
 **v1.3.3**(2020-04-17)
 - Bug fix for handling single FIRe files
 - Loading FIRe files can now split single turnover and multiple turnover measurements
