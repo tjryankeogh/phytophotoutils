@@ -1,5 +1,8 @@
 Change Log
 ----------
+**v1.3.5**(2020-05-22)
+- Bug fix for ETR fitting when the number of measurements per light level is 1.
+
 **v1.3.4**(2020-05-05)
 - Bug fix for fitting with no connectivity model.
 

@@ -90,52 +90,69 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, 
 	fvfm = (fm - fo) / fm
 	sigma = array(sigma)
 	par = array(par)
-
-	lss = light_step_size - 1 # Python starts at 0
 	
-	if light_independent:
-		etr = fvfm / mean(fvfm[0:lss])
-	else:
-		if dark_sigma:
-			etr = (par * mean(sigma[0:lss]) * (fvfm / mean(fvfm[0:lss]))) * 6.022e-3
-	
+	if light_step_size == 1:
+		if light_independent:
+			etr = fvfm / fvfm[0]
 		else:
-			f_o = mean(fo[0:lss]) / (mean(fvfm[0:lss]) + (mean(fo[0:lss])/fm))
-			fqfv = (fm - fo) / (fm - f_o)
-			etr = par * sigma * fqfv * 6.022e-3
+			if dark_sigma:
+				etr = (par * mean(sigma[0]) * (fvfm / mean(fvfm[0]))) * 6.022e-3
+		
+			else:
+				f_o = mean(fo[0]) / (mean(fvfm[0]) + (mean(fo[0])/fm))
+				fqfv = (fm - fo) / (fm - f_o)
+				etr = par * sigma * fqfv * 6.022e-3
+		
+		df = DataFrame([par, etr])
+		df = df.T
+		df.columns = ['par', 'etr']
+	
+	else:	
+		lss = light_step_size - 1 # Python starts at 0
+		
+		if light_independent:
+			etr = fvfm / mean(fvfm[0:lss])
+		else:
+			if dark_sigma:
+				etr = (par * mean(sigma[0:lss]) * (fvfm / mean(fvfm[0:lss]))) * 6.022e-3
+		
+			else:
+				f_o = mean(fo[0:lss]) / (mean(fvfm[0:lss]) + (mean(fo[0:lss])/fm))
+				fqfv = (fm - fo) / (fm - f_o)
+				etr = par * sigma * fqfv * 6.022e-3
 
-	df = DataFrame([par, etr])
-	df = df.T
-	df.columns = ['par', 'etr']
-	# create means of each light step using last n measurements
-	if last_steps_average:
-		df = df.groupby('par').apply(lambda x: x.iloc[-3:].mean()).reset_index()
-	else:
-		# exclude outliers if more than mean ± (stdev * multiplier)
-		grp = df.groupby(by='par')
-		mn = grp.mean()
-		std = grp.std()
-		c = grp.count()
-		ulim = repeat((mn.etr.values + std.etr.values * outlier_multiplier), c.etr.values)
-		llim = repeat((mn.etr.values - std.etr.values * outlier_multiplier), c.etr.values)
-		idx = []
-		for i, items in enumerate(grp.indices.items()):
-			idx.append(items[-1])
+		df = DataFrame([par, etr])
+		df = df.T
+		df.columns = ['par', 'etr']
+		# create means of each light step using last n measurements
+		if last_steps_average:
+			df = df.groupby('par').apply(lambda x: x.iloc[-3:].mean()).reset_index()
+		else:
+			# exclude outliers if more than mean ± (stdev * multiplier)
+			grp = df.groupby(by='par')
+			mn = grp.mean()
+			std = grp.std()
+			c = grp.count()
+			ulim = repeat((mn.etr.values + std.etr.values * outlier_multiplier), c.etr.values)
+			llim = repeat((mn.etr.values - std.etr.values * outlier_multiplier), c.etr.values)
+			idx = []
+			for i, items in enumerate(grp.indices.items()):
+				idx.append(items[-1])
 
-		idx = concatenate(idx, axis=0)
+			idx = concatenate(idx, axis=0)
 
-		# Create pandas DataFrame of upper and lower using original indexes of data
-		mask = DataFrame([ulim, llim, idx]).T
-		mask.columns = ['ulim','llim','index']
-		mask = mask.set_index('index').sort_index()
+			# Create pandas DataFrame of upper and lower using original indexes of data
+			mask = DataFrame([ulim, llim, idx]).T
+			mask.columns = ['ulim','llim','index']
+			mask = mask.set_index('index').sort_index()
 
-		m = (df.etr.values > mask.ulim) | (df.etr.values < mask.llim)
+			m = (df.etr.values > mask.ulim) | (df.etr.values < mask.llim)
 
-		# Where condition is True, set values of value to NaN
-		df.loc[m.values,'etr'] = nan
+			# Where condition is True, set values of value to NaN
+			df.loc[m.values,'etr'] = nan
 
-		# Create means per light step
-		df = df.groupby('par').mean().reset_index()
+			# Create means per light step
+			df = df.groupby('par').mean().reset_index()
 
 	# Define data for fitting and estimates of ETRmax and alpha
 	P = array(df.etr)
