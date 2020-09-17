@@ -1,5 +1,15 @@
 Change Log
 ----------
+**v1.4.1**(2020-09-17)
+- F\ :sub:`o` and F\ :sub:`m` errors are now reported as percentages.
+- Model bias is now normalised.
+- Additional statistical output included in the form of normalised RMSE, where RMSE is normalised to the mean fluorescence level.
+
+**v1.4**(2020-07-01)
+- Added an option to ETR fitting to apply Serodio corrections for samples that have dark relaxation.
+- Added an option for the fit to return E\ :sub:`k` and manually calculate ETR\ :sup:`max`.
+- Added an option to fit ETR\ :sup:`max` using a beta model.
+
 **v1.3.5**(2020-05-22)
 - Bug fix for ETR fitting when the number of measurements per light level is 1.
 
