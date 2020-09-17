@@ -71,13 +71,15 @@ def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 	ro : np.array, dtype=float, shape=[n,]
 		The connectivity coefficient, ρ, only returned if no_ro and fixed_ro are False.
 	bias : np.array, dtype=float, shape=[n,]
-		The bias of fit.
+		The bias of fit in %.
 	rmse : np.array, dtype=float, shape=[n,]
 		The root mean squared error of the fit.
+	nrmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit normalised to the mean of the fluorescence level.
 	fo_err : np.array, dtype=float, shape=[n,]
-		The fit error of F\ :sub:`o`.
+		The fit error of F\ :sub:`o` in %.
 	fm_err : np.array, dtype=float, shape=[n,]
-		The fit error of F\ :sub:`m`.
+		The fit error of F\ :sub:`m` in %.
 	sigma_err : np.array, dtype=float, shape=[n,]
 		The fit error of σ\ :sub:`PSII`.
 	ro_err : np.array, dtype=float, shape=[n,]

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from ._equations import __calculate_residual_etr__, __calculate_residual_phi__, __calculate_Webb_model__, __calculate_modified_Webb_model__, __calculate_bias__, __calculate_fit_errors__, __calculate_rmse__
+from ._equations import __calculate_residual_etr__, __calculate_residual_phi__, __calculate_residual_beta__, __calculate_residual_mbeta__, __calculate_alpha_model__, __calculate_beta_model__, __calculate_modified_alpha_model__, __calculate_modified_beta_model__, __calculate_bias__, __calculate_fit_errors__, __calculate_rmse__
 from numpy import mean, array, isnan, inf, repeat, nan, concatenate
 from pandas import DataFrame
 from scipy.optimize import least_squares
 import warnings
 
-def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, light_step_size=None, last_steps_average=False, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, dark_sigma=False, etrmax_fitting=True, serodio_sigma=False, light_step_size=None, last_steps_average=False, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
       
 	"""
 	
@@ -22,10 +22,16 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, 
 		The effective absorption cross-section of PSII in Å\ :sup:`2`.
 	par : np.array, dtype=float, shape=[n,]
 		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`.
+	alpha_phase : bool, default=True
+		If True, will fit the data without photoinhibition. If False, will fit the data with the photoinhibition paramater β.
 	light_independent : bool, default=True
 		If True, will use the method outlined in Silsbe & Kromkamp 2012. 
 	dark_sigma : bool
 		If True, will use mean of σ\ :sub:`PSII` under 0 actinic light for calculation. If False, will use σ\ :sub:`PSII` and σ\ :sub:`PSII`' for calculation.
+	etrmax_fitting : bool
+		If True, will fit α\ :sup:`ETR` and ETR\ :sub:`max` and manually calculate E\ :sub:'k'. If False, will fit α\ :sup:`ETR` and E\ :sub:'k' and manually calculate ETR\ :sub:`max`.
+	serodio_sigma : bool
+		If True, will apply a correction a Serodio correction for samples that have dark relaxation.
 	light_step_size : int
 		The number of measurements for initial light step.
 	last_steps_average : bool, default=False,
@@ -60,20 +66,22 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, 
 		The light limited slope of electron transport.
 	ek : float
 		The photoacclimation of ETR.
-	rsq : np.array, dtype=float, shape=[n,]
+	rsq : float
 		The r\ :sup:`2` value.
-	bias : np.array, dtype=float, shape=[n,]
-		The bias of fit.
-	chi : np.array, dtype=float, shape=[n,]
-		The chi-squared goodness of fit.
-	rchi : np.array, dtype=float, shape=[n,]
-		The reduced chi-squared goodness of fit.
-	rmse : np.array, dtype=float, shape=[n,]
-		The root mean squared error of the fit.
+	alpha_bias : float
+		The bias of the alpha fit.
+	alpha_rmse : float
+		The root mean squared error of the alpha fit.
+	beta_bias : float
+		The bias of the alpha fit. If alpha_phase is True, value returned is NaN.
+	beta_rmse : float
+		The root mean squared error of the alpha fit. If alpha_phase is True, value returned is NaN.
 	etrmax_err : float
-		The fit error of ETR\ :sup:`max`.
+		The fit error of ETR\ :sup:`max`. If etrmax_fitting is False, value returned is NaN.
 	alpha_err : float
 		The fit error of α\ :sub:`ETR`.
+	ek_err : float
+		The fit error of E\ :sub:`k`. If etrmax_fitting is True, value returned is NaN.
 	data : [np.array, np.array]
 		Optional, the final data used for the fitting procedure.
 
@@ -91,6 +99,40 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, 
 	sigma = array(sigma)
 	par = array(par)
 	
+	if serodio_sigma:
+		df = DataFrame([par, fo, fm, sigma])
+		df = df.T
+		df.columns = ['par', 'fo', 'fm', 'sigma']
+		# create means of each light step using last n measurements
+		if last_steps_average:
+			df = df.groupby('par').apply(lambda x: x.iloc[-3:].mean()).reset_index()
+		else:
+			# exclude outliers if more than mean ± (stdev * multiplier)
+			grp = df.groupby(by='par')
+			mn = grp.mean()
+			std = grp.std()
+			c = grp.count()
+			ulim = repeat((mn.fm.values + std.fm.values * outlier_multiplier), c.fm.values)
+			llim = repeat((mn.fm.values - std.fm.values * outlier_multiplier), c.fm.values)
+			idx = []
+			for i, items in enumerate(grp.indices.items()):
+				idx.append(items[-1])
+
+			idx = concatenate(idx, axis=0)
+
+			# Create pandas DataFrame of upper and lower using original indexes of data
+			mask = DataFrame([ulim, llim, idx]).T
+			mask.columns = ['ulim','llim','index']
+			mask = mask.set_index('index').sort_index()
+
+			m = (df.fm.values > mask.ulim) | (df.fm.values < mask.llim)
+
+			# Where condition is True, set values of value to NaN
+			df.loc[m.values,'etr'] = nan
+
+			# Create means per light step
+			df = df.groupby('par').mean().reset_index()
+
 	if light_step_size == 1:
 		if light_independent:
 			etr = fvfm / fvfm[0]
@@ -111,7 +153,25 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, 
 		lss = light_step_size - 1 # Python starts at 0
 		
 		if light_independent:
-			etr = fvfm / mean(fvfm[0:lss])
+			if serodio_sigma:
+				dff = DataFrame([par, fo, fm, sigma])
+				dff = dff.T
+				dff.columns = ['par', 'fo', 'fm', 'sigma']
+				if last_steps_average:
+					dff = dff.groupby('par').apply(lambda x: x.iloc[-3:].mean()).reset_index(drop=True)
+				else:
+					dff = dff.groupby('par').mean().reset_index()
+				
+				idx = dff.fm.idxmax() + 1
+				sigma_max = dff.sigma.iloc[:idx].max()
+				fo[:dff.fo.idxmax()] = dff.fo.max()
+				fm[:dff.fm.idxmax()] = dff.fm.max()
+				fvfm = (fm - fo) / fm
+				etr = fvfm / mean(fvfm[0:lss])
+
+			else:
+				fvfm = (fm - fo) / fm 
+				etr = fvfm / mean(fvfm[0:lss])
 		else:
 			if dark_sigma:
 				etr = (par * mean(sigma[0:lss]) * (fvfm / mean(fvfm[0:lss]))) * 6.022e-3
@@ -182,40 +242,131 @@ def calculate_etr(fo, fm, sigma, par, light_independent=True, dark_sigma=False, 
 	else:
 		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
-	try:
-		if light_independent:
-			popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
+	#try:
+	if light_independent:
+		popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
+		if alpha_phase:
+			if etrmax_fitting:				
+				if serodio_sigma:
+					etr_max = popt.x[0] * sigma_max * 6.022e-3
+					alpha = popt.x[1] * sigma_max * 6.022e-3
+					ek = etr_max / alpha
+
+				else:
+					sigma_etr = mean(sigma[0:lss])
+					etr_max = popt.x[0] * sigma_etr * 6.022e-3
+					alpha = popt.x[1] * sigma_etr * 6.022e-3
+					ek = etr_max / alpha
+
+			else:
+				
+				if serodio_sigma:
+					sigma = sigma_max
+					ek = popt.x[0] 
+					alpha = popt.x[1] * sigma_max * 6.022e-3
+					etr_max = ek * alpha
+				else:
+					sigma_etr = mean(sigma[0:lss])
+					ek = popt.x[0] 
+					alpha = popt.x[1] * sigma_etr * 6.022e-3
+					etr_max = ek * alpha
+
 		else:
+			eB = popt.x[0]
+			a = popt.x[1]
+			#m = E > ekb
+			E2 = E#[m]
+			P2 = P#[m]
+			popt_beta = least_squares(__calculate_residual_mbeta__, p0, args=(E2, P2, a, eB), **opts)
+			print(popt_beta.x[0])
+			
+			if serodio_sigma:
+				sigma = sigma_max
+				ek = popt.x[0]
+				alpha = popt.x[1] * sigma * 6.022e-3
+				etr_max = popt_beta.x[0] * sigma * 6.022e-3
+
+			else:
+				sigma = mean(sigma[0:lss])
+				ek = popt.x[0]
+				alpha = popt.x[1] * sigma * 6.022e-3
+				etr_max = popt_beta.x[0] * sigma * 6.022e-3
+
+	else:
+		if alpha_phase:
 			popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
 
-		if light_independent:
-			etr_max = popt.x[0]
-			alpha = popt.x[1]
-			sigma = mean(sigma[0:lss])
-			etr_max *= sigma * 6.022e-3
-			alpha *= sigma * 6.022e-3
-		else:
-			etr_max = popt.x[0]
-			alpha = popt.x[1]
+			if etrmax_fitting:
+				etr_max = popt.x[0]
+				alpha = popt.x[1]
+				ek = etr_max / alpha
+			else:
+				ek = popt.x[0]
+				alpha = popt.x[1]
+				etr_max = ek * alpha
 
-		ek = etr_max / alpha
-		
-		if light_independent:
-			sol = __calculate_modified_Webb_model__(E, *popt.x)
 		else:
-			sol = __calculate_Webb_model__(E, *popt.x)
-
-		bias = __calculate_bias__(sol, P)
-		rmse = __calculate_rmse__(popt.fun, P)				
-		perr = __calculate_fit_errors__(popt.jac, popt.fun)
-		etr_max_err = perr[0]
-		alpha_err = perr[1]
+			popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
+			eB = popt.x[0]
+			a = popt.x[1]
+			#m = E > ekb
+			E2 = E#[m]
+			P2 = P#[m]
+			popt_beta = least_squares(__calculate_residual_beta__, p0, args=(E2, P2, a, eB), **opts)
+			
+			ek = popt.x[0]
+			alpha = popt.x[1]
+			etr_max = popt_beta.x[0]
 	
-	except Exception:
-		print(('Unable to calculate fit, skipping sequence'))
-		etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err = repeat(nan, 7)
+
+	if alpha_phase:
+		if light_independent:
+			sol = __calculate_modified_alpha_model__(E, *popt.x)
+		else:
+			sol = __calculate_alpha_model__(E, *popt.x)
+		
+		alpha_bias = __calculate_bias__(sol, P)
+		alpha_rmse = __calculate_rmse__(popt.fun, P)				
+		alpha_perr = __calculate_fit_errors__(popt.jac, popt.fun)
+
+		beta_bias = nan
+		beta_rmse = nan
+	
+	else:
+		if light_independent:
+			sol = __calculate_modified_alpha_model__(E, *popt.x)
+			solb = __calculate_modified_beta_model__(E2, *popt_beta.x, a, eB)
+		else:
+			sol = __calculate_alpha_model__(E, *popt.x)
+			solb = __calculate_beta_model__(E2, *popt_beta.x, a, eB)
+		
+		alpha_bias = __calculate_bias__(sol, P)
+		alpha_rmse = __calculate_rmse__(popt.fun, P)				
+		alpha_perr = __calculate_fit_errors__(popt.jac, popt.fun)
+
+		beta_bias = __calculate_bias__(solb, P2)
+		beta_rmse = __calculate_rmse__(popt_beta.fun, P2)				
+		beta_perr = __calculate_fit_errors__(popt_beta.jac, popt_beta.fun)
+	
+	if etrmax_fitting:
+		etr_max_err = alpha_perr[0]
+		alpha_err = alpha_perr[1]
+		ek_err = nan
+	else:
+		if alpha_phase:
+			ek_err = alpha_perr[0]
+			alpha_err = alpha_perr[1]
+			etr_max_err = nan
+		else:
+			ek_err = alpha_perr[0]
+			alpha_err = alpha_perr[1]
+			etr_max_err = beta_perr[0]
+	
+	#except Exception:
+	#	print(('Unable to calculate fit, skipping sequence'))
+	#	etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err = repeat(nan, 7)
 	
 	if return_data:
-		return etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err, [E,P]
+		return etr_max, alpha, ek, alpha_bias, alpha_rmse, beta_bias, beta_rmse, etr_max_err, alpha_err, ek_err, [E,P]
 	else:
-		return etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err
+		return etr_max, alpha, ek, alpha_bias, alpha_rmse, beta_bias, beta_rmse, etr_max_err, alpha_err, ek_err

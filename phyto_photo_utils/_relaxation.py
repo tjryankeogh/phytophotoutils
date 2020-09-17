@@ -74,13 +74,15 @@ def fit_relaxation(flevel, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 	tau3 : np.array, dtype=float, shape=[n,]
 		The rate of PQ reoxidation in μs, only returned if single_decay is False.
 	bias : np.array, dtype=float, shape=[n,]
-		The bias of fit.
+		The bias of fit in %.
 	rmse : np.array, dtype=float, shape=[n,]
 		The root mean squared error of the fit.
+	nrmse : np.array, dtype=float, shape=[n,]
+		The root mean squared error of the fit normalised to the mean of the fluorescence level.
 	fo_err : np.array, dtype=float, shape=[n,]
-		The fit error of Fo_relax.
+		The fit error of Fo_relax in %.
 	fm_err : np.array, dtype=float, shape=[n,]
-		The fit error of Fm_relax.
+		The fit error of Fm_relax in %.
 	tau_err : np.array, dtype=float, shape=[n,]
 		The fit error of τ, only returned if single_decay is True.
 	alpha1_err : np.array, dtype=float, shape=[n,]

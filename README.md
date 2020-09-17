@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 1.3.5
+- Version: 1.4.1
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -85,12 +85,17 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- __calculate_residual_single_relaxation__
 	- __fit_triple_relaxation__
 	- __calculate_residual_triple_relaxation__
-	- __calculate_Webb_model__
+	- __calculate_alpha_model__
 	- __calculate_residual_etr__
-	- __calculate_modified_Webb_model__
+	- __calculate_modified_alpha_model__
 	- __calculate_residual_phi__
+	- __calculate_beta_model__
+	- __calculate_residual_beta__
+	- __calculate_modified_beta_model__
+	- __calculate_residual_mbeta__
 	- __calculate_bias__
 	- __calculate_rmse__
+	- __calculate_nrmse__
 	- __calculate_fit_errors__
 - fitting
 	- __fit_fixed_p_model__
@@ -109,6 +114,4 @@ TO DO
 -----
 - Add in function to read FastTracka I binary files
 - Add deconvolution method for triple decay relaxation
-- Add the option using different production models in FLC processing
 - Add additional load method for CTG LabSTAF
-

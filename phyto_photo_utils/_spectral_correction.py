@@ -186,7 +186,7 @@ def calculate_instrument_led_correction(aphy, ap_lambda, method=None, chl=None, 
 	chl : dtype=float
 		Chlorophyll concentration for estimation of Kbio for theoretical in situ light field. If None is passed then chl is set to 1 mg/m3.
 	e_actinic : 'fastact'
-		Actinic light spectrum e.g. Spectra of the Actinic lights within the FastAct illuminating during Fluorescence Light Curves etc. Must defined for 'actinic' method.
+		Actinic light spectrum e.g. Spectra of the Actinic lights within the FastAct illuminating during Fluorescence Light Curves etc. Must be defined for 'actinic' method.
 	depth : float, default=None
 		The depth of the measurement. Must be set if theoretically calculating e_insitu.
 	e_led : 'fire','fasttracka_ii', 'fastocean'

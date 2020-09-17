@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ._equations import __fit_kolber_p__, __fit_kolber_nop__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_Webb_model__, __calculate_modified_Webb_model__
+from ._equations import __fit_kolber_p__, __fit_kolber_nop__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_alpha_model__, __calculate_modified_alpha_model__
 from matplotlib.pyplot import subplots, close
 from numpy import arange, array
 
@@ -169,7 +169,7 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rmse=None, 
 	
 	if phi == False:
 		params = [etrmax, alpha]
-		ax.plot(x, __calculate_Webb_model__(x, *params), color='k', label='{}'.format(formula))
+		ax.plot(x, __calculate_alpha_model__(x, *params), color='k', label='{}'.format(formula))
 		ax.set_ylabel('ETR (mol e$^{-1}$ mol RCII$^{-1}$ s$^{-1}$)')
 	
 	else:
@@ -177,7 +177,7 @@ def plot_fluorescence_light_curve(par, etr, etrmax=None, alpha=None, rmse=None, 
 			print('UserError - no sigma data provided.')
 		sig = sigma*6.022e-3
 		params = [etrmax/sig, alpha/sig]
-		ax.plot(x, __calculate_modified_Webb_model__(x, *params), color='k', label='{}'.format(formula))
+		ax.plot(x, __calculate_modified_alpha_model__(x, *params), color='k', label='{}'.format(formula))
 		ax.set_xscale('log')
 		ax.set_ylabel('\u03D5')
 	
