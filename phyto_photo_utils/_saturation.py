@@ -144,11 +144,11 @@ def fit_saturation(pfd, flevel, seq, datetime, blank=0, sat_len=100, skip=0, ro=
 	
 	else: 
 		if no_ro:
-			res.columns = ['fo','fm','sigma','bias','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
+			res.columns = ['fo', 'fm', 'sigma', 'bias', 'rmse', 'nrmse', 'fo_err', 'fm_err', 'sigma_err', 'nfl', 'niters', 'flag', 'success']
 		if fixed_ro:
-			res.columns = ['fo','fm','sigma','ro','bias','rmse','fo_err','fm_err','sigma_err','nfl','niters','flag','success']
+			res.columns = ['fo', 'fm', 'sigma', 'ro', 'bias', 'rmse', 'nrmse', 'fo_err', 'fm_err', 'sigma_err', 'nfl', 'niters', 'flag', 'success']
 		elif calc_ro:
-			res.columns = ['fo','fm','sigma','ro','bias','rmse','fo_err','fm_err','sigma_err','ro_err','nfl','niters','flag','success']
+			res.columns = ['fo', 'fm', 'sigma', 'ro', 'bias', 'rmse', 'nrmse', 'fo_err', 'fm_err', 'sigma_err', 'ro_err', 'nfl', 'niters', 'flag', 'success']
 	
 		# Subtract blank from Fo and Fm 
 		res['fo'] -= blank

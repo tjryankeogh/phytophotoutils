@@ -1,5 +1,8 @@
 Change Log
 ----------
+**v1.4.2**(2020-09-28)
+- Bug fix for columns to include normalised RMSE
+
 **v1.4.1**(2020-09-17)
 - F\ :sub:`o` and F\ :sub:`m` errors are now reported as percentages.
 - Model bias is now normalised.

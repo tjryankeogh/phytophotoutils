@@ -115,3 +115,4 @@ TO DO
 - Add in function to read FastTracka I binary files
 - Add deconvolution method for triple decay relaxation
 - Add additional load method for CTG LabSTAF
+- Add function to fit saturation and relaxation together

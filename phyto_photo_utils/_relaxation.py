@@ -154,9 +154,9 @@ def fit_relaxation(flevel, seq_time, seq, datetime, blank=0, sat_len=100, rel_le
 	
 	else:
 		if single_decay: 
-			res.columns = ['fo_r','fm_r','tau','bias','rmse','fo_err','fm_err','tau_err','nfl','niters','flag','success']
+			res.columns = ['fo_r', 'fm_r', 'tau', 'bias', 'rmse', 'nrmse', 'fo_err', 'fm_err', 'tau_err', 'nfl', 'niters', 'flag', 'success']
 		else:
-			res.columns = ['fo_r','fm_r','alpha1','tau1','alpha2','tau2','alpha3','tau3','bias','rsme','for_err','fmr_err','alpha1_err','tau1_err','alpha2_err','tau2_err','alpha3_err','tau3_err','nfl','niters','flag','success']
+			res.columns = ['fo_r', 'fm_r', 'alpha1', 'tau1', 'alpha2','tau2', 'alpha3', 'tau3', 'bias', 'rsme', 'nrmse', 'for_err', 'fmr_err', 'alpha1_err', 'tau1_err', 'alpha2_err', 'tau2_err', 'alpha3_err', 'tau3_err', 'nfl', 'niters', 'flag', 'success']
 		res['datetime'] = unique(dt)
 
 	return res
