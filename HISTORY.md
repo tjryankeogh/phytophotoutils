@@ -1,5 +1,9 @@
 Change Log
 ----------
+**v1.4.3**(2020-10-07)
+- Bug fix to absorption calculations
+- Error reporting for ETR calculations
+
 **v1.4.2**(2020-09-28)
 - Bug fix for columns to include normalised RMSE
 

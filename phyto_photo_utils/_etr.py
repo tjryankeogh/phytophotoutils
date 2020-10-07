@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from ._equations import __calculate_residual_etr__, __calculate_residual_phi__, __calculate_residual_beta__, __calculate_residual_mbeta__, __calculate_alpha_model__, __calculate_beta_model__, __calculate_modified_alpha_model__, __calculate_modified_beta_model__, __calculate_bias__, __calculate_fit_errors__, __calculate_rmse__
+from ._equations import __calculate_residual_etr__, __calculate_residual_phi__, __calculate_residual_beta__, __calculate_residual_mbeta__, __calculate_alpha_model__, __calculate_beta_model__, __calculate_modified_alpha_model__, __calculate_modified_beta_model__, __calculate_bias__, __calculate_fit_errors__, __calculate_rmse__, __calculate_nrmse__
 from numpy import mean, array, isnan, inf, repeat, nan, concatenate
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from scipy.optimize import least_squares
 import warnings
 
@@ -60,35 +60,63 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 	Returns
 	-------
 	
+	Results are returned as pd.Series with the following parameters.
+
 	etr_max : float
 		The maximum electron transport rate.
 	alpha : float
 		The light limited slope of electron transport.
 	ek : float
 		The photoacclimation of ETR.
-	rsq : float
-		The r\ :sup:`2` value.
 	alpha_bias : float
 		The bias of the alpha fit.
 	alpha_rmse : float
 		The root mean squared error of the alpha fit.
+	alpha_nrmse : float
+		The normalised root mean squared error of the alpha fit.
 	beta_bias : float
 		The bias of the alpha fit. If alpha_phase is True, value returned is NaN.
 	beta_rmse : float
 		The root mean squared error of the alpha fit. If alpha_phase is True, value returned is NaN.
+	beta_nrmse : float
+		The normalised root mean squared error of the alpha fit. If alpha_phase is True, value returned is NaN.
 	etrmax_err : float
 		The fit error of ETR\ :sup:`max`. If etrmax_fitting is False, value returned is NaN.
 	alpha_err : float
 		The fit error of α\ :sub:`ETR`.
 	ek_err : float
 		The fit error of E\ :sub:`k`. If etrmax_fitting is True, value returned is NaN.
+	alpha_nfev : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the alpha phase fitting routine.
+	alpha_flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE.
+		-1 : the ETR data is empty.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	alpha_success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE)
+	beta_nfev : np.array, dype=int, shape=[n,]
+		The number of functional evaluations done on the beta phase fitting routine. If alpha_phase is True, value returned is NaN.
+	beta_flag : np.array, dtype=int, shape=[n,]
+		The code associated with the fitting routine success, positive values = SUCCESS, negative values = FAILURE. If alpha_phase is True, value returned is NaN.
+		-1 : the ETR data is empty.
+		0 : the maximum number of function evaluations is exceeded.
+		1 : gtol termination condition is satisfied.
+		2 : ftol termination condition is satisfied.
+		3 : xtol termination condition is satisfied.
+		4 : Both ftol and xtol termination conditions are satisfied.
+	beta_success : np.array, dtype=bool, shape=[n,]
+		A boolean array reporting whether fit was successful (TRUE) or if not successful (FALSE). If alpha_phase is True, value returned is NaN.
 	data : [np.array, np.array]
 		Optional, the final data used for the fitting procedure.
 
 
 	Example
 	-------
-	>>> etr_max, alpha, ek, rsq, bias, chi, etr_max_err, alpha_err = ppu.calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, return_data=False)
+	>>> res = ppu.calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, return_data=False)
 	"""
 
 	warnings.simplefilter(action = "ignore", category = RuntimeWarning)
@@ -228,7 +256,7 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 	
 	E = E[~mask]
 	P = P[~mask]
-	
+
 	if bounds:
 		bds = [etrmax_lims[0], alpha_lims[0]],[etrmax_lims[1], alpha_lims[1]]
 		if (bds[0][0] > bds[1][0]) | (bds[0][1] > bds[1][1]):
@@ -242,131 +270,169 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 	else:
 		opts = {'method':method, 'loss':loss, 'f_scale':f_scale, 'max_nfev':max_nfev, 'xtol':xtol} 
 
-	#try:
-	if light_independent:
-		popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
-		if alpha_phase:
-			if etrmax_fitting:				
-				if serodio_sigma:
-					etr_max = popt.x[0] * sigma_max * 6.022e-3
-					alpha = popt.x[1] * sigma_max * 6.022e-3
-					ek = etr_max / alpha
+	try:
+		if light_independent:
+			popt = least_squares(__calculate_residual_phi__, p0, args=(E, P), bounds=(bds), **opts)
+			if alpha_phase:
+				if etrmax_fitting:				
+					if serodio_sigma:
+						etr_max = popt.x[0] * sigma_max * 6.022e-3
+						alpha = popt.x[1] * sigma_max * 6.022e-3
+						ek = etr_max / alpha
+
+					else:
+						sigma_etr = mean(sigma[0:lss])
+						etr_max = popt.x[0] * sigma_etr * 6.022e-3
+						alpha = popt.x[1] * sigma_etr * 6.022e-3
+						ek = etr_max / alpha
 
 				else:
-					sigma_etr = mean(sigma[0:lss])
-					etr_max = popt.x[0] * sigma_etr * 6.022e-3
-					alpha = popt.x[1] * sigma_etr * 6.022e-3
-					ek = etr_max / alpha
+					
+					if serodio_sigma:
+						sigma = sigma_max
+						ek = popt.x[0] 
+						alpha = popt.x[1] * sigma_max * 6.022e-3
+						etr_max = ek * alpha
+					else:
+						sigma_etr = mean(sigma[0:lss])
+						ek = popt.x[0] 
+						alpha = popt.x[1] * sigma_etr * 6.022e-3
+						etr_max = ek * alpha
 
 			else:
+				eB = popt.x[0]
+				a = popt.x[1]
+				#m = E > ekb
+				E2 = E#[m]
+				P2 = P#[m]
+				popt_beta = least_squares(__calculate_residual_mbeta__, p0, args=(E2, P2, a, eB), **opts)
 				
 				if serodio_sigma:
 					sigma = sigma_max
-					ek = popt.x[0] 
-					alpha = popt.x[1] * sigma_max * 6.022e-3
-					etr_max = ek * alpha
+					ek = popt.x[0]
+					alpha = popt.x[1] * sigma * 6.022e-3
+					etr_max = popt_beta.x[0] * sigma * 6.022e-3
+
 				else:
-					sigma_etr = mean(sigma[0:lss])
-					ek = popt.x[0] 
-					alpha = popt.x[1] * sigma_etr * 6.022e-3
+					sigma = mean(sigma[0:lss])
+					ek = popt.x[0]
+					alpha = popt.x[1] * sigma * 6.022e-3
+					etr_max = popt_beta.x[0] * sigma * 6.022e-3
+
+		else:
+			if alpha_phase:
+				popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
+
+				if etrmax_fitting:
+					etr_max = popt.x[0]
+					alpha = popt.x[1]
+					ek = etr_max / alpha
+				else:
+					ek = popt.x[0]
+					alpha = popt.x[1]
 					etr_max = ek * alpha
 
-		else:
-			eB = popt.x[0]
-			a = popt.x[1]
-			#m = E > ekb
-			E2 = E#[m]
-			P2 = P#[m]
-			popt_beta = least_squares(__calculate_residual_mbeta__, p0, args=(E2, P2, a, eB), **opts)
-			print(popt_beta.x[0])
-			
-			if serodio_sigma:
-				sigma = sigma_max
-				ek = popt.x[0]
-				alpha = popt.x[1] * sigma * 6.022e-3
-				etr_max = popt_beta.x[0] * sigma * 6.022e-3
-
 			else:
-				sigma = mean(sigma[0:lss])
-				ek = popt.x[0]
-				alpha = popt.x[1] * sigma * 6.022e-3
-				etr_max = popt_beta.x[0] * sigma * 6.022e-3
+				popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
+				eB = popt.x[0]
+				a = popt.x[1]
 
-	else:
-		if alpha_phase:
-			popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
-
-			if etrmax_fitting:
-				etr_max = popt.x[0]
-				alpha = popt.x[1]
-				ek = etr_max / alpha
-			else:
+				E2 = E
+				P2 = P
+				popt_beta = least_squares(__calculate_residual_beta__, p0, args=(E2, P2, a, eB), **opts)
+				
 				ek = popt.x[0]
 				alpha = popt.x[1]
-				etr_max = ek * alpha
-
-		else:
-			popt = least_squares(__calculate_residual_etr__, p0, args=(E, P), bounds=(bds), **opts)
-			eB = popt.x[0]
-			a = popt.x[1]
-			#m = E > ekb
-			E2 = E#[m]
-			P2 = P#[m]
-			popt_beta = least_squares(__calculate_residual_beta__, p0, args=(E2, P2, a, eB), **opts)
-			
-			ek = popt.x[0]
-			alpha = popt.x[1]
-			etr_max = popt_beta.x[0]
-	
-
-	if alpha_phase:
-		if light_independent:
-			sol = __calculate_modified_alpha_model__(E, *popt.x)
-		else:
-			sol = __calculate_alpha_model__(E, *popt.x)
+				etr_max = popt_beta.x[0]
 		
-		alpha_bias = __calculate_bias__(sol, P)
-		alpha_rmse = __calculate_rmse__(popt.fun, P)				
-		alpha_perr = __calculate_fit_errors__(popt.jac, popt.fun)
 
-		beta_bias = nan
-		beta_rmse = nan
-	
-	else:
-		if light_independent:
-			sol = __calculate_modified_alpha_model__(E, *popt.x)
-			solb = __calculate_modified_beta_model__(E2, *popt_beta.x, a, eB)
-		else:
-			sol = __calculate_alpha_model__(E, *popt.x)
-			solb = __calculate_beta_model__(E2, *popt_beta.x, a, eB)
-		
-		alpha_bias = __calculate_bias__(sol, P)
-		alpha_rmse = __calculate_rmse__(popt.fun, P)				
-		alpha_perr = __calculate_fit_errors__(popt.jac, popt.fun)
-
-		beta_bias = __calculate_bias__(solb, P2)
-		beta_rmse = __calculate_rmse__(popt_beta.fun, P2)				
-		beta_perr = __calculate_fit_errors__(popt_beta.jac, popt_beta.fun)
-	
-	if etrmax_fitting:
-		etr_max_err = alpha_perr[0]
-		alpha_err = alpha_perr[1]
-		ek_err = nan
-	else:
 		if alpha_phase:
-			ek_err = alpha_perr[0]
-			alpha_err = alpha_perr[1]
-			etr_max_err = nan
+			if light_independent:
+				sol = __calculate_modified_alpha_model__(E, *popt.x)
+			else:
+				sol = __calculate_alpha_model__(E, *popt.x)
+			
+			alpha_bias = __calculate_bias__(sol, P)
+			alpha_rmse = __calculate_rmse__(popt.fun, P)
+			alpha_nrmse = __calculate_nrmse__(popt.fun, P)				
+			alpha_perr = __calculate_fit_errors__(popt.jac, popt.fun)
+
+			beta_bias = nan
+			beta_rmse = nan
+			beta_nrmse = nan
+			beta_nfev = nan
+			beta_flag = nan
+			beta_success = nan
+
+			if max_nfev is None:
+				alpha_nfev = popt.nfev
+			else:
+				alpha_nfev = max_nfev
+			
+			alpha_flag = popt.status
+			alpha_success = popt.success
+		
 		else:
-			ek_err = alpha_perr[0]
+			if light_independent:
+				sol = __calculate_modified_alpha_model__(E, *popt.x)
+				solb = __calculate_modified_beta_model__(E2, *popt_beta.x, a, eB)
+			else:
+				sol = __calculate_alpha_model__(E, *popt.x)
+				solb = __calculate_beta_model__(E2, *popt_beta.x, a, eB)
+			
+			alpha_bias = __calculate_bias__(sol, P)
+			alpha_rmse = __calculate_rmse__(popt.fun, P)
+			alpha_nrmse = __calculate_nrmse__(popt.fun, P)					
+			alpha_perr = __calculate_fit_errors__(popt.jac, popt.fun)
+
+			beta_bias = __calculate_bias__(solb, P2)
+			beta_rmse = __calculate_rmse__(popt_beta.fun, P2)	
+			beta_nrmse = __calculate_nrmse__(popt_beta.fun, P2)			
+			beta_perr = __calculate_fit_errors__(popt_beta.jac, popt_beta.fun)
+
+			if max_nfev is None:
+				alpha_nfev = popt.nfev
+				beta_nfev = popt_beta.nfev
+			else:
+				alpha_nfev = max_nfev
+				beta_nfev = max_nfev
+			
+			alpha_flag = popt.status
+			alpha_success = popt.success
+
+
+			beta_flag = popt_beta.status
+			beta_success = popt_beta.success
+		
+		if etrmax_fitting:
+			etr_max_err = alpha_perr[0]
 			alpha_err = alpha_perr[1]
-			etr_max_err = beta_perr[0]
+			ek_err = nan
+		else:
+			if alpha_phase:
+				ek_err = alpha_perr[0]
+				alpha_err = alpha_perr[1]
+				etr_max_err = nan
+			else:
+				ek_err = alpha_perr[0]
+				alpha_err = alpha_perr[1]
+				etr_max_err = beta_perr[0]
 	
-	#except Exception:
-	#	print(('Unable to calculate fit, skipping sequence'))
-	#	etr_max, alpha, ek, bias, rmse, etr_max_err, alpha_err = repeat(nan, 7)
+	except Exception:
+		print(('Unable to calculate fit, skipping sequence'))
+		alpha_flag = -1
+		alpha_success = 'False'
+		beta_flag = -1
+		beta_success = 'False'
+		etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, ek_err, alpha_nfev, beta_nfev = repeat(nan, 14)
 	
 	if return_data:
-		return etr_max, alpha, ek, alpha_bias, alpha_rmse, beta_bias, beta_rmse, etr_max_err, alpha_err, ek_err, [E,P]
+		
+		results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, ek_err, alpha_nfev, alpha_flag, alpha_success, beta_nfev, beta_flag, beta_success])
+		data = [E,P]
+		return results, [E,P]
+	
 	else:
-		return etr_max, alpha, ek, alpha_bias, alpha_rmse, beta_bias, beta_rmse, etr_max_err, alpha_err, ek_err
+		
+		results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, ek_err, alpha_nfev, alpha_flag, alpha_success, beta_nfev, beta_flag, beta_success])
+		return results

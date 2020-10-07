@@ -30,11 +30,11 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 		The pathlength amplification coefficient 2 (see Stramski et al. 2015). For transmittance mode, 1.2804, for transmittance-reflectance mode, 1.2287, and for integrating sphere mode, 1.0867.
 	diam : float			
 		The diameter of filtrate in mm.
-	bricaud_slope: bool, default=True
+	bricaud_slope : bool, default=True
 	 	If True, will theoretically calculate detrital slope (see Bricaud & Stramski 1990). If False, will subtract depigmented absorption from total absorption.
-	phycobilin: bool, default=False
+	phycobilin : bool, default=False
 		If True, will account for high absorption in the green wavelengths (580 - 600 nm) by phycobilin proteins when performing the bricaud_slope detrital correction.
-	norm_750: bool, default=False
+	norm_750 : bool, default=False
 		If True, will normalise the data to the value at 750 nm.
 
 
@@ -54,6 +54,10 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 	ap_lambda = array(ap_lambda)
 
 	aptot -= blank # subtract blank from data
+
+	# correcting negative values after blank subtraction to 0
+	m = aptot < 0
+	aptot[m] = 0
 
 	# Convert from absorbance to absorption
 	diam = pi * ((diam / 2000)**2) 
@@ -111,6 +115,7 @@ def calculate_chl_specific_absorption(aptot, blank, ap_lambda, depig=None, chl=N
 				L2 = exp(-widx * S) - 0.92 * exp(-widx * S)
 			else:
 				L2 = exp(-580 * S) - 0.92 * exp(-692 * S)
+			
 			L = L1/L2
 
 			while (S < 0.03):
@@ -168,7 +173,7 @@ def calculate_instrument_led_correction(aphy, ap_lambda, method=None, chl=None, 
 
 	Calculate the spectral correction factor
 	TO DO: Create method to convert all arrays to same length and resolution
-	TO DO: Add in functionality to calculate mixed excitation wavelength spectra for FastOcean when using 1+ wavelength
+	TO DO: Add in functionality to calculate mixed excitation wavelength spectra for FastOcean when using more than wavelength
 
 	Parameters
 	----------
@@ -193,6 +198,9 @@ def calculate_instrument_led_correction(aphy, ap_lambda, method=None, chl=None, 
 		The excitation spectra of the instrument.
 	wl : '450nm', '530nm', 624nm', None
 		For FastOcean only. Select the excitation wavelength. Future PPU versions will provide option to mix LEDs.
+	constants : file, default=None
+		The spectra of the light source used for the measurement. If None is provided, will read in default values stored within PPU.
+
 
 	Returns
 	-------
