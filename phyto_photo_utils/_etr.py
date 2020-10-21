@@ -69,17 +69,17 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 	ek : float
 		The photoacclimation of ETR.
 	alpha_bias : float
-		The bias of the alpha fit.
+		The bias of the alpha fit. If alpha_phase is False, value is not returned.
 	alpha_rmse : float
-		The root mean squared error of the alpha fit.
+		The root mean squared error of the alpha fit. If alpha_phase is False, value is not returned.
 	alpha_nrmse : float
-		The normalised root mean squared error of the alpha fit.
+		The normalised root mean squared error of the alpha fit. If alpha_phase is False, value is not returned.
 	beta_bias : float
-		The bias of the alpha fit. If alpha_phase is True, value returned is NaN.
+		The bias of the alpha fit. If alpha_phase is True, value is not returned.
 	beta_rmse : float
-		The root mean squared error of the alpha fit. If alpha_phase is True, value returned is NaN.
+		The root mean squared error of the alpha fit. If alpha_phase is True, value is not returned.
 	beta_nrmse : float
-		The normalised root mean squared error of the alpha fit. If alpha_phase is True, value returned is NaN.
+		The normalised root mean squared error of the alpha fit. If alpha_phase is True, value is not returned.
 	etrmax_err : float
 		The fit error of ETR\ :sup:`max`. If etrmax_fitting is False, value returned is NaN.
 	alpha_err : float
@@ -420,19 +420,50 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 	
 	except Exception:
 		print(('Unable to calculate fit, skipping sequence'))
-		alpha_flag = -1
-		alpha_success = 'False'
-		beta_flag = -1
-		beta_success = 'False'
-		etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, ek_err, alpha_nfev, beta_nfev = repeat(nan, 14)
+		if alpha_phase:
+			alpha_flag = -1
+			alpha_success = 'False'
+			
+			if etrmax_fitting:
+				etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, etr_max_err, alpha_err, alpha_nfev = repeat(nan, 9)
+			else:
+				etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, alpha_err, ek_err, alpha_nfev = repeat(nan, 9)
+		else:
+			beta_flag = -1
+			beta_success = 'False'
+
+			if etrmax_fitting:
+				etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, beta_nfev = repeat(nan, 9)
+			else:
+				etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, alpha_err, ek_err, beta_nfev = repeat(nan, 9)
 	
 	if return_data:
-		
-		results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, ek_err, alpha_nfev, alpha_flag, alpha_success, beta_nfev, beta_flag, beta_success])
-		data = [E,P]
-		return results, [E,P]
-	
+		if alpha_phase:	
+			if etrmax_fitting:
+				results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, etr_max_err, alpha_err, alpha_nfev, alpha_flag, alpha_success])
+			else:
+				results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, alpha_err, ek_err, alpha_nfev, alpha_flag, alpha_success])
+			data = [E,P]
+			return results, [E,P]
+		else:
+			if etrmax_fitting:
+				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, beta_nfev, beta_flag, beta_success])
+			else:
+				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, alpha_err, ek_err, beta_nfev, beta_flag, beta_success])
+			data = [E,P]
+			return results, [E,P]
+			
 	else:
-		
-		results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, ek_err, alpha_nfev, alpha_flag, alpha_success, beta_nfev, beta_flag, beta_success])
-		return results
+		if alpha_phase:	
+			if etrmax_fitting:
+				results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, etr_max_err, alpha_err, alpha_nfev, alpha_flag, alpha_success])
+			else:
+				results = Series([etr_max, alpha, ek, alpha_bias, alpha_rmse, alpha_nrmse, alpha_err, ek_err, alpha_nfev, alpha_flag, alpha_success])
+			return results
+
+		else:
+			if etrmax_fitting:
+				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, etr_max_err, alpha_err, beta_nfev, beta_flag, beta_success])
+			else:
+				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, alpha_err, ek_err, beta_nfev, beta_flag, beta_success])
+			return results

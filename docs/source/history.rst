@@ -1,5 +1,8 @@
 Change Log
 ----------
+**v1.4.4**(2020-10-21)
+- Error reporting for ETR calculations cleaned up to reduce redundancy
+
 **v1.4.3**(2020-10-07)
 - Bug fix to absorption calculations
 - Error reporting for ETR calculations
