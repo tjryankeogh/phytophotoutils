@@ -1,9 +1,9 @@
 .. PhytoPhotoUtils documentation master file, created by
-   sphinx-quickstart on Mon May 20 13:30:10 2019.
+   sphinx-quickstart on Wed Apr  7 23:22:53 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Phytoplankton Photophysiology Utilities
+Welcome to PhytoPhotoUtils's documentation!
 ===========================================
 
 .. toctree::
@@ -33,3 +33,10 @@ Phytoplankton Photophysiology Utilities
    citing
    history
    contributing
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

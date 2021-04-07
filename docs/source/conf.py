@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-#
 # Configuration file for the Sphinx documentation builder.
 #
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
-# http://www.sphinx-doc.org/en/master/config
+# This file only contains a selection of the most common options. For a full
+# list see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Path setup --------------------------------------------------------------
 
@@ -12,18 +10,16 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import sys
 import os
-
-sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../..'))
+import sys
+#import sphinx_rtd_theme
+#sys.path.insert(0, os.path.abspath('../../phyto_photo_utils/'))
 sys.path.insert(0, os.path.realpath('../..'))
-sys.path.insert(0, os.path.realpath('.pandas'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'PhytoPhotoUtils'
-copyright = '2019, Thomas Ryan-Keogh, Charlotte Robinson,'
+copyright = '2019, Thomas Ryan-Keogh, Charlotte Robinson'
 author = 'Thomas Ryan-Keogh, Charlotte Robinson'
 
 # The short X.Y version
@@ -34,14 +30,10 @@ release = '01-10-2019'
 
 # -- General configuration ---------------------------------------------------
 
-# If your documentation needs a minimal Sphinx version, state it here.
-#
-# needs_sphinx = '1.0'
-
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx.ext.autodoc', 'recommonmark']
+extensions = ['sphinx.ext.coverage', 'sphinx.ext.napoleon', 'sphinx.ext.autodoc']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -99,59 +91,3 @@ html_static_path = ['_static']
 #
 # html_sidebars = {}
 
-
-# -- Options for HTMLHelp output ---------------------------------------------
-
-# Output file base name for HTML help builder.
-htmlhelp_basename = 'PhytoPhotoUtilsdoc'
-
-
-# -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (master_doc, 'PhytoPhotoUtils.tex', 'PhytoPhotoUtils Documentation',
-     'Thomas Ryan-Keogh', 'manual'),
-]
-
-
-# -- Options for manual page output ------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, 'phytophotoutils', 'PhytoPhotoUtils Documentation',
-     [author], 1)
-]
-
-
-# -- Options for Texinfo output ----------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (master_doc, 'PhytoPhotoUtils', 'PhytoPhotoUtils Documentation',
-     author, 'PhytoPhotoUtils', 'One line description of project.',
-     'Miscellaneous'),
-]
