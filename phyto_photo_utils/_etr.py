@@ -468,13 +468,7 @@ def calculate_amplitude_etr(fo, fm, sigma, par, alpha_phase=True, light_independ
 				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, alpha_err, ek_err, beta_nfev, beta_flag, beta_success])
 			return results
 
-#def calculate_kinetic_etr(fo, fm, par, tau, light_step_size=None):
-#
-#
-#	return results
-
-
-
+			
 def calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size=None):
     """
 	
@@ -539,7 +533,8 @@ def calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size
         df = df.groupby('par').mean()
         
         npq = df.f_o/df.f_v
-        
+      
+
     return npq
 
 
