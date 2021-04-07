@@ -468,8 +468,8 @@ def calculate_amplitude_etr(fo, fm, sigma, par, alpha_phase=True, light_independ
 				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, alpha_err, ek_err, beta_nfev, beta_flag, beta_success])
 			return results
 
-			
-def calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size=None):
+
+#def calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size=None):
     """
 	
 	Calculate non-photochemical quenching from the processed transient data using either the Stern-Volner or Normalised Stern-Volner derivations.
@@ -503,38 +503,35 @@ def calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size
 
 	"""
 
-    df = DataFrame([fo, fm, par])
-    df = df.T
-    df.columns = ['fo', 'fm', 'par']
-    lss = light_step_size
+#    df = DataFrame([fo, fm, par])
+#    df = df.T
+#    df.columns = ['fo', 'fm', 'par']
+#    lss = light_step_size
     
-    if stern_volner:
+#   if stern_volner:
         
-        df = df.groupby('par').mean()
+#        df = df.groupby('par').mean()
         
-        if serodio:
-            idx = df.fm.idxmax() + 1
-            df.fo[:df.fo.idxmax()] = df.fo.max()
-            df.fm[:df.fm.idxmax()] = df.fm.max()
+#        if serodio:
+#            idx = df.fm.idxmax() + 1
+#            df.fo[:df.fo.idxmax()] = df.fo.max()
+#            df.fm[:df.fm.idxmax()] = df.fm.max()
         
-        npq = (df.fm.max() - df.fm) /  df.fm
+#        npq = (df.fm.max() - df.fm) /  df.fm
         
-    else:
+#    else:
         
-        if serodio:
-            idx = df.fm.idxmax() + 1
-            df.fo[:df.fo.idxmax()] = df.fo.max()
-            df.fm[:df.fm.idxmax()] = df.fm.max()
+#        if serodio:
+#            idx = df.fm.idxmax() + 1
+#            df.fo[:df.fo.idxmax()] = df.fo.max()
+#            df.fm[:df.fm.idxmax()] = df.fm.max()
             
-        df['fvfm'] = (df.fm - df.fo)/df.fm
-        df['f_o'] = df.fo[0:lss].mean()/((df.fvfm[0:lss].mean() + (df.fo[0:lss].mean()/df.fm)))
-        df['f_v'] = df.fm - df.f_o
+#        df['fvfm'] = (df.fm - df.fo)/df.fm
+#        df['f_o'] = df.fo[0:lss].mean()/((df.fvfm[0:lss].mean() + (df.fo[0:lss].mean()/df.fm)))
+#        df['f_v'] = df.fm - df.f_o
         
-        df = df.groupby('par').mean()
+#        df = df.groupby('par').mean()
         
-        npq = df.f_o/df.f_v
-      
+#        npq = df.f_o/df.f_v
 
-    return npq
-
-
+#    return npq
