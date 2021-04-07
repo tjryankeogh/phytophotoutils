@@ -312,7 +312,7 @@ def load_FASTTrackaI_files(file_, append=False, save_files=False, res_path=None,
     return df
 
 def load_FastOcean_files(file_, append=False, save_files=False, led_separate=False, res_path=None, 
-                   seq_len=125, seq_reps=None, flen=1e-6, delimiter=',', FastAct=True, Single_Acq=False):
+                   seq_len=125, seq_reps=None, flen=1e-6, delimiter=',', FastAct1=True, Single_Acq=False):
     """
 
     Process the raw data file and convert to a csv with standard formatting.
@@ -320,7 +320,7 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     Parameters
     ----------
     file_ : dir
-        The path directory to the .csv data file from the FastOcean with either the FastAct1 or FastAct2 laboratory system.
+        The path directory to the .csv data file from the FastOcean with either the FastAct11 or FastAct12 laboratory system.
     append : bool, default=False
         If True, multiple files will be concatenated together. Not applicable if Single_Acq = True.
     save_files : bool, default=False
@@ -337,10 +337,10 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
         The flashlet length in seconds.
     delimiter : str, default=','
         Specify the delimiter to be used by Pandas.read_csv for loading the raw files.
-    FastAct : bool, default=True
+    FastAct1 : bool, default=True
         If True, will load data from FastAct1 laboratory system format. If False, will load data from FastAct2 laboratory system format.
     Single_Acq : bool, default=False
-        If True, will load a single acquisition data from either the FastAct or FastAct2 laboratory system, dependent upon whether FastAct is True of False.
+        If True, will load a single acquisition data from either the FastAct1 or FastAct2 laboratory system, dependent upon whether FastAct1 is True of False.
 
     Returns
     -------
@@ -370,7 +370,7 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     >>> led_sequence == 1, LED 450 nm
     >>> led_sequence == 2, LED 450 nm + LED 530 nm
     >>> led_sequence == 3, LED 450 nm + LED 624 nm
-    >>> led_sequence == 4, LED 530 nm + LED 624 nm + LED 624 nm
+    >>> led_sequence == 4, LED 450 nm + LED 530 nm + LED 624 nm
     >>> led_sequence == 5, LED 530 nm + LED 624 nm 
     >>> led_sequence == 6, LED 530 nm
     >>> led_sequence == 7, LED 624 nm
@@ -378,7 +378,7 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
     name = file_.split('/')[-1].split('.')[0]
     sigscale=1e-20 
 
-    if FastAct:
+    if FastAct1:
         if Single_Acq:
             md = read_csv(file_, delimiter=delimiter, skiprows=11, nrows=6, usecols=[0,1], header=None)
             datetime = to_datetime(str(md.iloc[4,1])+' '+str(md.iloc[5,1]))
@@ -430,17 +430,17 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
             for i in range(led.shape[0]):
                 if (led.iloc[i,1] == True) & (led.iloc[i,2] == True): # LED 1 only
                     led_idx.append(1)
-                elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False): # LED 1 & 2
+                elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False) & (led.iloc[i,2] == True): # LED 1 & 2
                     led_idx.append(2)
-                elif (led.iloc[i,0] == False) & (led.iloc[i,2] == False): # LED 1 & 3
+                elif (led.iloc[i,0] == False) & (led.iloc[i,2] == False) & (led.iloc[i,1] == True): # LED 1 & 3
                     led_idx.append(3)
-                elif (led.iloc[i,1] == False) & (led.iloc[i,2] == False): # LED 2 & 3
+                elif (led.iloc[i,1] == False) & (led.iloc[i,2] == False) & (led.iloc[i,0] == True): # LED 2 & 3
                     led_idx.append(5)
                 elif (led.iloc[i,0] == False) & (led.iloc[i,1] == False) & (led.iloc[i,2] == False): # ALL LEDs
                     led_idx.append(4)
-                elif (led.iloc[i,1] == False): # LED 2 only
+                elif (led.iloc[i,1] == False) & (led.iloc[i,0] == True) & (led.iloc[i,2] == True): # LED 2 only
                     led_idx.append(6)
-                elif (led.iloc[i,2] == False): # LED 3 only
+                elif (led.iloc[i,2] == False) & (led.iloc[i,0] == True) & (led.iloc[i,1] == True): # LED 3 only
                     led_idx.append(7)
             
             df = read_csv(file_, skiprows=43, nrows=seq_len, header=None, delimiter=delimiter)
@@ -538,8 +538,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L1.csv')
 
                 i = df.led_sequence == 2
@@ -549,8 +552,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L12.csv')
 
                 i = df.led_sequence == 3
@@ -560,8 +566,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L13.csv')
 
                 i = df.led_sequence == 4
@@ -571,8 +580,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L123.csv')
 
                 i = df.led_sequence == 5
@@ -582,8 +594,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L23.csv')
 
                 i = df.led_sequence == 6
@@ -593,8 +608,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L2.csv')
 
                 i = df.led_sequence == 7
@@ -604,8 +622,11 @@ def load_FastOcean_files(file_, append=False, save_files=False, led_separate=Fal
                         dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
                         dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     else:
-                        dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
-                        dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        if FastAct1:
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
+                        else:
+                            dfi.loc[:,'seq'] = Series(repeat(arange(1, seq_reps+1, 1), seq_len)).values.astype(int)
+                            dfi = dfi[['flashlet_number','flevel','datetime','seq','seq_time','pfd','led_sequence']]
                     dfi.to_csv(res_path+str(name)+'_L3.csv')
     
     return df

@@ -76,10 +76,6 @@ def __calculate_modified_beta_model__(E, P, B, a, Ek):
 def __calculate_residual_mbeta__(p, E, P, a, Ek):
 	return P - __calculate_modified_beta_model__(E, *p, a, Ek)
 
-#def __calculate_bias__(sol, flevel):
-#	m = (isnan(sol)) | (isnan(flevel)) | (sol <= 0) | (flevel <= 0)
-#	return 10 ** ((nansum(log10(sol[~m]) - log10(flevel[~m])) / len(flevel[~m])))
-
 def __calculate_bias__(sol, flevel):
 	m = (isnan(sol)) | (isnan(flevel)) | (sol <= 0) | (flevel <= 0)
 	return 10 ** ((nansum(log10(sol[~m]) - log10(flevel[~m])) / mean(log10(flevel[~m]))))
@@ -87,12 +83,22 @@ def __calculate_bias__(sol, flevel):
 def __calculate_rmse__(res, flevel):
 	return sqrt(mean_squared_error(flevel, res+flevel))	
 
-#def __calculate_range_nrmse__(res, flevel):
-#	return sqrt((mean_squared_error(flevel, res+flevel)) / (max(flevel) - min(flevel)))	
-
 def __calculate_nrmse__(res, flevel):
 	return sqrt((mean_squared_error(flevel, res+flevel)) / (mean(flevel)))
 
 def __calculate_fit_errors__(jac, res):
 	pcov = linalg.inv(jac.T.dot(jac)) * mean(res**2)
 	return sqrt(diag(pcov))
+
+#def __calculate_bias__(sol, flevel):
+#	m = (isnan(sol)) | (isnan(flevel)) | (sol <= 0) | (flevel <= 0)
+#	return 10 ** ((nansum(log10(sol[~m]) - log10(flevel[~m])) / len(flevel[~m])))
+
+#def __calculate_range_nrmse__(res, flevel):
+#	return sqrt((mean_squared_error(flevel, res+flevel)) / (max(flevel) - min(flevel)))	
+
+#def __calculate__chisquared__(res):
+#	return sum(res**2)
+
+#def __calculate_reduced_chisquared__(chi, flevel, nvars):
+#	return chi/(len(flevel) - nvars)

@@ -160,6 +160,7 @@ def calculate_blank_FastOcean(file_, seq_len=100, delimiter=','):
     res.columns = ['blank_mean', 'blank_stdev']
     res = DataFrame(res)
     res['datetime'] = df.datetime
+    #res = res.reset_index(drop=True)
 
     return res
 

@@ -7,7 +7,7 @@ For more information see the documentation and demo file, below is a short examp
 
 EXAMPLE USAGE
 -------------
-This package is meant to be used in an interactive environment - ideally Jupyter Notebook
+This package is meant to be used in an interactive environment - ideally JuPyTer Notebook
 
 ```python
 import phyto_photo_utils as ppu
@@ -112,7 +112,10 @@ ACKNOWLEDGEMENTS
 
 TO DO
 -----
+- Add SNR_raw calculation to load function. Fv / stdev of last n flashlets.
+- Add a_PSII calculation. PFD (umol quanta m-2 s-1) * sigmaPSII (m-2 PSII-1).
 - Add in function to read FastTracka I binary files
 - Add deconvolution method for triple decay relaxation
 - Add additional load method for CTG LabSTAF
 - Add function to fit saturation and relaxation together
+- Check fit definitions match SOP terminology.

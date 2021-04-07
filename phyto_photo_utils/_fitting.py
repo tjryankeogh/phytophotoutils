@@ -5,7 +5,7 @@ from scipy.optimize import least_squares
 from sklearn import linear_model
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
-from ._equations import __fit_kolber_nop__, __fit_kolber_p__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_residual_saturation_p__, __calculate_residual_saturation_nop__, __calculate_residual_saturation_fixedp__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_bias__, __calculate_rmse__, __calculate_fit_errors__
+from ._equations import __fit_kolber_nop__, __fit_kolber_p__, __fit_single_relaxation__, __fit_triple_relaxation__, __calculate_residual_saturation_p__, __calculate_residual_saturation_nop__, __calculate_residual_saturation_fixedp__, __calculate_residual_single_relaxation__, __calculate_residual_triple_relaxation__, __calculate_bias__, __calculate_rmse__, __calculate_nrmse__, __calculate_fit_errors__
 	
 	
 def __fit_fixed_p_model__(pfd, flevel, ro, bounds=False, sig_lims=None, method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):

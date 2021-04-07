@@ -1,5 +1,8 @@
 Change Log
 ----------
+**v1.4.5**(2021-01-23)
+- Bug fix for separating files when loading FastOcean FastAct1 data
+
 **v1.4.4**(2020-10-21)
 - Error reporting for ETR calculations cleaned up to reduce redundancy
 

@@ -20,7 +20,7 @@ Phytoplankton Photophysiology Utilities
    saturation
    relaxation
    tools
-   flc
+   etr
    spectral
    plot
 

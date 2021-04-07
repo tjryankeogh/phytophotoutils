@@ -6,7 +6,7 @@ Reference
 ---------
 If you would like to cite or reference Phytoplankton Photophysiology Utilities, please use:
 
-Source: phyto_photo_utils https://gitlab.com/socco/BuoyancyGliderUtils retrieved on 30 May 2019.
+Source: phyto_photo_utils https://gitlab.com/tryankeogh/phytophotoutils retrieved on 30 May 2019.
 
 
 

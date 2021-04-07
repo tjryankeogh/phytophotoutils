@@ -6,7 +6,7 @@ from pandas import DataFrame, Series
 from scipy.optimize import least_squares
 import warnings
 
-def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, dark_sigma=False, etrmax_fitting=True, serodio_sigma=False, light_step_size=None, last_steps_average=False, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
+def calculate_amplitude_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, dark_sigma=False, etrmax_fitting=True, serodio_sigma=False, light_step_size=None, last_steps_average=False, outlier_multiplier=3, return_data=False, bounds=True, alpha_lims=[0,4], etrmax_lims=[0,2000], method='trf', loss='soft_l1', f_scale=0.1, max_nfev=None, xtol=1e-9):
       
 	"""
 	
@@ -31,7 +31,7 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 	etrmax_fitting : bool
 		If True, will fit α\ :sup:`ETR` and ETR\ :sub:`max` and manually calculate E\ :sub:'k'. If False, will fit α\ :sup:`ETR` and E\ :sub:'k' and manually calculate ETR\ :sub:`max`.
 	serodio_sigma : bool
-		If True, will apply a correction a Serodio correction for samples that have dark relaxation.
+		If True, will apply a Serodio correction for samples that have dark relaxation.
 	light_step_size : int
 		The number of measurements for initial light step.
 	last_steps_average : bool, default=False,
@@ -116,7 +116,7 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 
 	Example
 	-------
-	>>> res = ppu.calculate_e_dependent_etr(fo, fm, fvfm, sigma, par, return_data=False)
+	>>> res = ppu.calculate_etr(fo, fm, sigma, par, return_data=False)
 	"""
 
 	warnings.simplefilter(action = "ignore", category = RuntimeWarning)
@@ -467,3 +467,79 @@ def calculate_etr(fo, fm, sigma, par, alpha_phase=True, light_independent=True, 
 			else:
 				results = Series([etr_max, alpha, ek, beta_bias, beta_rmse, beta_nrmse, alpha_err, ek_err, beta_nfev, beta_flag, beta_success])
 			return results
+
+#def calculate_kinetic_etr(fo, fm, par, tau, light_step_size=None):
+#
+#
+#	return results
+
+
+
+def calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size=None):
+    """
+	
+	Calculate non-photochemical quenching from the processed transient data using either the Stern-Volner or Normalised Stern-Volner derivations.
+
+	Parameters
+	----------
+	fo : np.array, dtype=float, shape=[n,]
+		The minimum fluorescence level.
+	fm : np.array, dtype=float, shape=[n,] 
+		The maximum fluorescence level.
+	par : np.array, dtype=float, shape=[n,]
+		The actinic light levels in μE m\ :sup:`2` s\ :sup:`-1`.
+	stern_volner : bool
+		If True, will calculate NPQ using the Stern-Volner derivation. If False will calculate NPQ using the Normalised Stern-Volner derivation.
+    serodio : bool
+		If True, will apply a Serodio correction for samples that have dark relaxation.
+	light_step_size : int
+		The number of measurements for initial light step.
+    
+    Returns
+	-------
+	
+	Results are returned as pd.Series with the following parameters.
+
+	npq : float
+		The non-photochemical quenching values for each light level of PAR.
+	
+	Example
+	-------
+	>>> npq = ppu.calculate_npq(fo, fm, par, stern_volner=True, serodio=False, light_step_size=10)
+
+	"""
+
+    df = DataFrame([fo, fm, par])
+    df = df.T
+    df.columns = ['fo', 'fm', 'par']
+    lss = light_step_size
+    
+    if stern_volner:
+        
+        df = df.groupby('par').mean()
+        
+        if serodio:
+            idx = df.fm.idxmax() + 1
+            df.fo[:df.fo.idxmax()] = df.fo.max()
+            df.fm[:df.fm.idxmax()] = df.fm.max()
+        
+        npq = (df.fm.max() - df.fm) /  df.fm
+        
+    else:
+        
+        if serodio:
+            idx = df.fm.idxmax() + 1
+            df.fo[:df.fo.idxmax()] = df.fo.max()
+            df.fm[:df.fm.idxmax()] = df.fm.max()
+            
+        df['fvfm'] = (df.fm - df.fo)/df.fm
+        df['f_o'] = df.fo[0:lss].mean()/((df.fvfm[0:lss].mean() + (df.fo[0:lss].mean()/df.fm)))
+        df['f_v'] = df.fm - df.f_o
+        
+        df = df.groupby('par').mean()
+        
+        npq = df.f_o/df.f_v
+        
+    return npq
+
+
