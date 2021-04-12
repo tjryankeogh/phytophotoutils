@@ -1,5 +1,9 @@
 Change Log
 ----------
+**v1.4.6**(2021-04-12)
+- Bias metric no longer log transformed.
+- FIRe loading function includes gain correction and calculations for σ\ :sub:`PSII` in absolute units.
+
 **v1.4.5**(2021-01-23)
 - Bug fix for separating files when loading FastOcean FastAct1 data
 

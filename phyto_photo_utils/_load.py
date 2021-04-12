@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
 from pandas import read_csv, to_datetime, DataFrame, concat, Series
-from numpy import array, repeat, arange, squeeze, reshape, r_, nansum
+from numpy import array, repeat, arange, squeeze, reshape, r_, nansum, exp
 from os import chdir
 from csv import reader
 from datetime import timedelta
 
-def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_len=160, 
+def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_len=160, gain_value=None, 
                     flen=1e-6, irrad=None, continuous=False, light_step=False, single_turnover=True):
     """
 
@@ -24,6 +24,8 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_le
         The path directory where to save files, only required if save_files = True.
     seq_len : int , default=160               
         The number of flashlets in the protocol. Only required if continuous = True.
+    gain : int, default=None
+        The gain value set when performing measurements. Only required if continous = True. Discrete Gain values are recorded in raw data files.
     flen : float, default=1e-6
         The flashlet length in seconds. 
     irrad : int, default=None                 
@@ -123,6 +125,8 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_le
         df['flevel'] = df.fyield.astype('float')
         df['seq_time'] = df.seq_time.astype('int')
 
+        gain = gain_value
+
     else:
         
         name = file_.split('/')[-1].split('.')[0]
@@ -146,7 +150,9 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_le
         else:
             df = read_csv(file_, index_col=0, skiprows=21, header=None, delim_whitespace=True)
         df.columns = ['seq_time', 'ex', 'flevel']
-        df['pfd'] = (df.ex * 1e-6).drop(columns = 'ex')
+        sigscale = 1e-20
+        df['pfd'] = (irrad * 1e-6 * 6.02e23) * flen * sigscale
+        df = df.drop(columns = 'ex')
         df['datetime'] = to_datetime(datetime)
         if single_turnover:
             df = df.iloc[:sat_len+rel_len,:]
@@ -158,6 +164,10 @@ def load_FIRe_files(file_, append=False, save_files=False, res_path=None, seq_le
             df['flashlet_number'] = arange(1, (msat_len + mrel_len)+1, 1)
     
     df = df[['flashlet_number','flevel','datetime','seq','seq_time','pfd']]
+
+    gain_factor = exp(0.0022*gain-0.4445)*3.6/3.05
+
+    df['flevel'] = df.flevel / gain_factor
 
     list_ = []
 

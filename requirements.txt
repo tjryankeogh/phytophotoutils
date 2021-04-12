@@ -1,0 +1,7 @@
+matplotlib
+tqdm
+scipy
+sklearn
+numpy
+pandas
+datetime

@@ -78,7 +78,7 @@ def __calculate_residual_mbeta__(p, E, P, a, Ek):
 
 def __calculate_bias__(sol, flevel):
 	m = (isnan(sol)) | (isnan(flevel)) | (sol <= 0) | (flevel <= 0)
-	return 10 ** ((nansum(log10(sol[~m]) - log10(flevel[~m])) / mean(log10(flevel[~m]))))
+	return 10 ** ((nansum((sol[~m]) - (flevel[~m])) / mean((flevel[~m]))))
 
 def __calculate_rmse__(res, flevel):
 	return sqrt(mean_squared_error(flevel, res+flevel))	

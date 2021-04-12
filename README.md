@@ -38,7 +38,7 @@ ABOUT
 -----
 This work was funded by the CSIR. This research was partially supported by the Australian Government through the Australian Research Council's Discovery Projects funding scheme (DP160103387).
 
-- Version: 1.4.4
+- Version: 1.4.6
 - Author:  Thomas Ryan-Keogh, Charlotte Robinson
 - Email:   tjryankeogh@gmail.com
 - Date:    2018-12-06
@@ -71,7 +71,7 @@ NOTE: This package structure is defined by the `__init__.py` file
 	- calculate_chl_specific_absorption
 	- calculate_instrument_led_correction
 - etr
-	- calculate_etr
+	- calculate_amplitude_etr
 - plot
 	- plot_saturation_data
 	- plot_relaxation_data
